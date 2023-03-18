@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import exampleUser
+from .models import Resident, Transaction, Drug_test, Rent_change, House, Bed, Shopping_trip, Supply_request, House_manager, Manager_meeting, Attendee, Absentee, Site_visit, Manager_issue, Check_in, House_meeting
 
 # Create your views here.
 

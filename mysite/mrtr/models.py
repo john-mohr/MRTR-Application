@@ -197,4 +197,3 @@ class House_meeting(models.Model):
 class Absentee(models.Model):
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
     meeting = models.ForeignKey('House_meeting', on_delete=models.PROTECT),
-
