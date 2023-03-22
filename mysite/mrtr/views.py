@@ -6,7 +6,7 @@ from .models import Resident, Transaction, Drug_test, Rent_change, House, Bed, S
 
 def home(request):
     
-    return render(request, '.html')
+    return render(request, 'mrtr/index.html')
 
 def locations(request):
     
