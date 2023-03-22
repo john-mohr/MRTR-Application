@@ -95,7 +95,7 @@ class House(models.Model):
 class Bed(models.Model):
     name = models.CharField(max_length=5),
     house = models.ForeignKey('House', on_delete=models.PROTECT)
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT, null=True)
 
 
 class Shopping_trip(models.Model):
