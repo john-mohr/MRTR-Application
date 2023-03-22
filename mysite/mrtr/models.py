@@ -11,11 +11,11 @@ class Resident(models.Model):
     discharge_date = models.DateField(null=True),
     door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True),
     rent = models.IntegerField(validators=[MaxValueValidator(1000)]),
-    balance = models.DecimalField(max_digits=8, decimal_places=2),
+    # balance = models.DecimalField(max_digits=8, decimal_places=2),
     referral_info = models.TextField(null=True),
     notes = models.TextField(null=True),
     house = models.ForeignKey('House', on_delete=models.PROTECT)
-    bed = models.ForeignKey('Bed', on_delete=models.PROTECT)
+    # bed = models.ForeignKey('Bed', on_delete=models.PROTECT)
 
 
 class Transaction(models.Model):
@@ -95,16 +95,17 @@ class House(models.Model):
 class Bed(models.Model):
     name = models.CharField(max_length=5),
     house = models.ForeignKey('House', on_delete=models.PROTECT)
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
 
 
 class Shopping_trip(models.Model):
-    date = models.DateField(),
+    date = models.DateTimeField(),  # automatic
     amount = models.DecimalField(max_digits=6, decimal_places=2),
     notes = models.TextField(null=True)
 
 
 class Supply_request(models.Model):
-    date = models.DateField(),
+    date = models.DateTimeField(),  # automatic
     PRODUCT_CHOICES = [
         ('ppt', 'Paper towels'),
         ('tpp', 'Toilet paper'),
@@ -136,8 +137,9 @@ class Supply_request(models.Model):
     other = models.CharField(max_length=50, null=True)
     quantity = models.IntegerField(validators=[MaxValueValidator(10)]),
     notes = models.TextField(null=True)
+    fulfilled = models.BooleanField(),  # automatic
     house = models.ForeignKey('House', on_delete=models.PROTECT),
-    trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT),
+    trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT),  # might be unnecessary
 
 
 class House_manager(models.Model):
@@ -171,7 +173,7 @@ class Manager_issue(models.Model):
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=True)
     expected_completion = models.DateField(),
-    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT),
+    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT),  # automatic
 
 
 class Check_in(models.Model):
@@ -196,4 +198,4 @@ class House_meeting(models.Model):
 
 class Absentee(models.Model):
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
-    meeting = models.ForeignKey('House_meeting', on_delete=models.PROTECT),
+    meeting = models.ForeignKey('House_meeting', on_delete=models.PROTECT),  # automatic
