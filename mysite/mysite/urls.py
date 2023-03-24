@@ -27,6 +27,7 @@ urlpatterns = [
     path('our-locations', views.locations),
     path('contact', views.contact),
     path('payment-options', views.payment),
+    path('portal', views.portal),
 ]
 
 urlpatterns += [

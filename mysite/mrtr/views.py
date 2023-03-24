@@ -43,3 +43,6 @@ def payment(request):
 def contact(request):
     
     return render(request, '.html')
+
+def portal(request):
+    return render(request, 'mrtr/administrative.html')
