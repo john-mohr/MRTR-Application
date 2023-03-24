@@ -3,24 +3,22 @@ from django.core.validators import MaxValueValidator
 
 
 class Resident(models.Model):
-    first_name = models.CharField(max_length=50),
-    last_name = models.CharField(max_length=50),
-    phone = models.IntegerField(validators=[MaxValueValidator(9999999999)], null=True),
-    email = models.EmailField(max_length=62, null=True),
-    admit_date = models.DateField(),
-    discharge_date = models.DateField(null=True),
-    door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True),
-    rent = models.IntegerField(validators=[MaxValueValidator(1000)]),
-    # balance = models.DecimalField(max_digits=8, decimal_places=2),
-    referral_info = models.TextField(null=True),
-    notes = models.TextField(null=True),
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    phone = models.IntegerField(validators=[MaxValueValidator(9999999999)], null=True)
+    email = models.EmailField(max_length=62, null=True)
+    admit_date = models.DateField()
+    discharge_date = models.DateField(null=True)
+    door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True)
+    rent = models.IntegerField(validators=[MaxValueValidator(1000)])
+    referral_info = models.TextField(null=True)
+    notes = models.TextField(null=True)
     house = models.ForeignKey('House', on_delete=models.PROTECT)
-    # bed = models.ForeignKey('Bed', on_delete=models.PROTECT)
 
 
 class Transaction(models.Model):
-    date = models.DateField(),
-    amount = models.DecimalField(max_digits=8, decimal_places=2),
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
     TYPE_CHOICES = [
         # Auto apply
         ('rnt', 'Rent charge'),
@@ -60,7 +58,7 @@ class Transaction(models.Model):
 
 
 class Drug_test(models.Model):
-    date = models.DateField(),
+    date = models.DateField()
     RESULT_CHOICES = [
         ('neg', 'Negative'),
         ('pos', 'Positive'),
@@ -69,44 +67,45 @@ class Drug_test(models.Model):
         ('oth', 'Other (specify)')
     ]
     result = models.CharField(max_length=3, choices=RESULT_CHOICES)
-    amphetamines = models.BooleanField(),
-    barbiturates = models.BooleanField(),
-    benzodiazepines = models.BooleanField(),
-    cocaine = models.BooleanField(),
-    marijuana = models.BooleanField(),
-    opiates = models.BooleanField(),
-    phencyclidine = models.BooleanField(),
-    other = models.CharField(max_length=50, null=True),
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
+    amphetamines = models.BooleanField()
+    barbiturates = models.BooleanField()
+    benzodiazepines = models.BooleanField()
+    cocaine = models.BooleanField()
+    marijuana = models.BooleanField()
+    opiates = models.BooleanField()
+    phencyclidine = models.BooleanField()
+    other = models.CharField(max_length=50, null=True)
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
 
 
 class Rent_change(models.Model):
-    date = models.DateField(),
-    old = models.IntegerField(validators=[MaxValueValidator(1000)]),
-    new = models.IntegerField(validators=[MaxValueValidator(1000)]),
-    notes = models.TextField(null=True),
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
+    date = models.DateField()
+    old = models.IntegerField(validators=[MaxValueValidator(1000)])
+    new = models.IntegerField(validators=[MaxValueValidator(1000)])
+    notes = models.TextField(null=True)
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
 
 
+# TODO add house manager field
 class House(models.Model):
-    name = models.CharField(max_length=25),
-    manager = models.ForeignKey('Resident', on_delete=models.PROTECT),
+    name = models.CharField(max_length=25)
+    # manager = models.ForeignKey('Resident', on_delete=models.PROTECT)
 
 
 class Bed(models.Model):
-    name = models.CharField(max_length=5),
+    name = models.CharField(max_length=5)
     house = models.ForeignKey('House', on_delete=models.PROTECT)
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT, null=True)
 
 
 class Shopping_trip(models.Model):
-    date = models.DateTimeField(),  # automatic
-    amount = models.DecimalField(max_digits=6, decimal_places=2),
+    date = models.DateTimeField()  # automatic
+    amount = models.DecimalField(max_digits=6, decimal_places=2)
     notes = models.TextField(null=True)
 
 
 class Supply_request(models.Model):
-    date = models.DateTimeField(),  # automatic
+    date = models.DateTimeField()  # automatic
     PRODUCT_CHOICES = [
         ('ppt', 'Paper towels'),
         ('tpp', 'Toilet paper'),
@@ -136,34 +135,41 @@ class Supply_request(models.Model):
     ]
     product = models.CharField(max_length=3, choices=PRODUCT_CHOICES, null=True)
     other = models.CharField(max_length=50, null=True)
-    quantity = models.IntegerField(validators=[MaxValueValidator(10)]),
+    quantity = models.IntegerField(validators=[MaxValueValidator(10)])
     notes = models.TextField(null=True)
-    fulfilled = models.BooleanField(),  # automatic
-    house = models.ForeignKey('House', on_delete=models.PROTECT),
-    trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT),  # might be unnecessary
+    fulfilled = models.BooleanField()  # automatic
+    house = models.ForeignKey('House', on_delete=models.PROTECT)
+    trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT)  # might be unnecessary
 
 
+# TODO remove
 class House_manager(models.Model):  # might be unnecessary
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
-    house = models.ForeignKey('House', on_delete=models.PROTECT),
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
+    house = models.ForeignKey('House', on_delete=models.PROTECT)
 
 
 class Manager_meeting(models.Model):
-    date = models.DateField(),
+    date = models.DateField()
     location = models.CharField(max_length=50)
     minutes_discussed = models.BooleanField()
 
 
 class Attendee(models.Model):
-    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT),
-    manager = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
+    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT)
+
+    # TODO change ref
+    manager = models.ForeignKey('House_manager', on_delete=models.PROTECT)
+    # manager = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
 
 
 class Site_visit(models.Model):
-    date = models.DateField(),
-    issues = models.TextField(null=True),
-    conductor = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
-    house = models.ForeignKey('House', on_delete=models.PROTECT),
+    date = models.DateField()
+    issues = models.TextField(null=True)
+
+    # TODO change ref
+    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT)
+    # conductor = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
+    house = models.ForeignKey('House', on_delete=models.PROTECT)
 
 
 class Manager_issue(models.Model):
@@ -173,30 +179,36 @@ class Manager_issue(models.Model):
         ('o', 'Ongoing')
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=True)
-    expected_completion = models.DateField(),
-    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT),  # automatic
+    expected_completion = models.DateField()
+    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT)  # automatic
 
 
 class Check_in(models.Model):
-    date = models.DateField(),
+    date = models.DateField()
     METHOD_CHOICES = [
         ('ip', 'In person'),
         ('pc', 'Phone call'),
         ('tx', 'Text')
     ]
     method = models.CharField(max_length=2, choices=METHOD_CHOICES)
-    notes = models.TextField(null=True),
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
-    conductor = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
+    notes = models.TextField(null=True)
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
+
+    # TODO change ref
+    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT)
+    # conductor = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
 
 
 class House_meeting(models.Model):
-    date = models.DateField(),
+    date = models.DateField()
     issues = models.TextField(null=True),
-    house = models.ForeignKey('House', on_delete=models.PROTECT),
-    conductor = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
+    house = models.ForeignKey('House', on_delete=models.PROTECT)
+
+    # TODO change ref
+    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT)
+    # conductor = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
 
 
 class Absentee(models.Model):
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
-    meeting = models.ForeignKey('House_meeting', on_delete=models.PROTECT),  # automatic
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
+    meeting = models.ForeignKey('House_meeting', on_delete=models.PROTECT)  # automatic

@@ -52,40 +52,10 @@
             <div class="tabs-content w-tab-content">
                 <div data-w-tab="Tab 1" class="tab-pane-tab-1 w-tab-pane">
                     <div class="form-block-3 w-form">
-                        <form id="email-form" name="email-form" data-name="Email Form" method="post">
-                            <label for="First-Name">First Name</label>
-                            <input type="text" class="w-input" maxlength="256" name="First-Name" data-name="First Name" placeholder="First Name" id="First-Name" required=""/>
-                            <label for="Last-Name">Last Name</label>
-                            <input type="text" class="w-input" maxlength="256" name="Last-Name" data-name="Last Name" placeholder="Last Name" id="Last-Name" required=""/>
-                            <label for="Phone-Number">Phone Number</label>
-                            <input type="tel" class="w-input" maxlength="256" name="Phone-Number" data-name="Phone Number" placeholder="No spaces or Dashes. Ex. 8013456789 (Not Required)" id="Phone-Number"/>
-                            <label for="Email">Email</label>
-                            <input type="email" class="w-input" maxlength="256" name="Email" data-name="Email" placeholder="Email (Not Required)" id="Email"/>
-                            <label for="Door-code">Door Code</label>
-                            <input type="number" class="w-input" maxlength="256" name="Door-code" data-name="Door code" placeholder="Door Code (Not Required)" id="Door-code" required=""/>
-                            <label for="rent-roomtype">Room Type</label>
-                            <select id="rent-roomtype" name="rent-roomtype" data-name="rent/roomtype" required="" class="w-select">
-                                <option value="">Please select room type...</option>
-                                <option value="First">Private room ($900)</option>
-                                <option value="Second">Private walkthrough ($800)</option>
-                                <option value="Third">Shared room ($700)</option>
-                            </select>
-                            <label for="field-2">House</label>
-                            <select id="field-2" name="field-2" data-name="Field 2" required="" class="w-select">
-                                <option value="">Please select house...</option>
-                                <option value="First">647 E Redondo Ave</option>
-                                <option value="Second">278 E Kensington Ave</option>
-                                <option value="Third">277 E 1700 S</option>
-                                <option value="4">1614 S 500 E</option>
-                                <option value="5">620 American Beauty</option>
-                                <option value="6">129 D Street</option>
-                            </select>
-                            <label for="Referral-Notes">Referral Info</label>
-                            <input type="text" class="w-input" maxlength="256" name="Referral-Notes" data-name="Referral Notes" placeholder="Referral Notes (Not Required)" id="Referral-Notes"/>
-                            <label for="field-4">Additional Notes</label>
-                            <textarea id="field-4" name="field-4" maxlength="5000" data-name="Field 4" placeholder="Additonal Notes (not required)" class="w-input"></textarea>
-                            <label>Intake Form</label>
-                            <input type="submit" value="Submit" data-wait="Please wait..." class="submit-button w-button"/>
+                        <form action="" method="post">
+                            {%  csrf_token %}
+                            {{ form }}
+                            <input type="submit" name="new_resident">
                         </form>
                         <div class="success-message w-form-done">
                             <div class="text-block-3">Successfully Submitted New Resident</div>
