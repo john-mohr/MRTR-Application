@@ -1,9 +1,10 @@
 from dateutil.utils import today
 from django.shortcuts import render, redirect
-from .forms import ContactForm, NewResidentForm, DrugTestForm
+from .forms import *
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
-from .models import Resident, Transaction, Drug_test, Rent_change, House, Bed, Shopping_trip, Supply_request, House_manager, Manager_meeting, Attendee, Absentee, Site_visit, Manager_issue, Check_in, House_meeting
+from datetime import datetime
+from .models import *
 
 # Create your views here.
 
@@ -46,21 +47,21 @@ def contact(request):
     return render(request, '.html')
 
 
-# TODO enter info into database correctly (using Django method)
-# TODO build if/else train to find the correct form
+# TODO build if/else train to find the correct form (not sure if this will work, might have to create new URLs)
 def portal(request):
-    form1 = NewResidentForm()
-    context = {'form': form1}
-    # if request.method == 'POST':
-    #     print(request.POST)
-    #     new_entry = Resident(first_name=request.POST.get('First-Name'),
-    #                          last_name=request.POST.get('Last-Name'),
-    #                          admit_date=today(),
-    #                          rent=700,
-    #                          house=House.objects.get(id=1),
-    #                          email=request.POST.get('Email'),
-    #                          door_code=request.POST.get('Door-code'),
-    #                          )
-    #     new_entry.save()
+    form = NewResidentForm()
+    context = {'form': form}
+
+    if request.method == 'POST':
+        # print(request.POST)
+        new_res = NewResidentForm(request.POST)
+        if new_res.is_valid():
+            # print('valid')
+            new_res.instance.submission_date = datetime.now()
+            new_res.save()
+            print(type(new_res))
+            # TODO add beginning balance transactions
+
     return render(request, 'mrtr/administrative.html', context)
+
 

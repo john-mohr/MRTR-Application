@@ -5,15 +5,17 @@ from django.core.validators import MaxValueValidator
 class Resident(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    phone = models.IntegerField(validators=[MaxValueValidator(9999999999)], null=True)
+    phone = models.BigIntegerField(validators=[MaxValueValidator(9999999999)], null=True)
     email = models.EmailField(max_length=62, null=True)
     admit_date = models.DateField()
-    discharge_date = models.DateField(null=True)
-    door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True)
     rent = models.IntegerField(validators=[MaxValueValidator(1000)])
+    door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True)
+    bed = models.OneToOneField('Bed', on_delete=models.PROTECT)
     referral_info = models.TextField(null=True)
     notes = models.TextField(null=True)
-    house = models.ForeignKey('House', on_delete=models.PROTECT)
+    discharge_date = models.DateField(null=True)
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Transaction(models.Model):
@@ -55,6 +57,8 @@ class Transaction(models.Model):
     method = models.CharField(max_length=3, choices=METHOD_CHOICES, null=True)
     notes = models.TextField(null=True)
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Drug_test(models.Model):
@@ -76,6 +80,8 @@ class Drug_test(models.Model):
     phencyclidine = models.BooleanField()
     other = models.CharField(max_length=50, null=True)
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Rent_change(models.Model):
@@ -84,18 +90,18 @@ class Rent_change(models.Model):
     new = models.IntegerField(validators=[MaxValueValidator(1000)])
     notes = models.TextField(null=True)
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
-# TODO add house manager field
 class House(models.Model):
     name = models.CharField(max_length=25)
-    # manager = models.ForeignKey('Resident', on_delete=models.PROTECT)
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id', null=True)
 
 
 class Bed(models.Model):
-    name = models.CharField(max_length=5)
+    name = models.CharField(max_length=7)
     house = models.ForeignKey('House', on_delete=models.PROTECT)
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT, null=True)
 
 
 class Shopping_trip(models.Model):
@@ -142,34 +148,26 @@ class Supply_request(models.Model):
     trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT)  # might be unnecessary
 
 
-# TODO remove
-class House_manager(models.Model):  # might be unnecessary
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
-    house = models.ForeignKey('House', on_delete=models.PROTECT)
-
-
 class Manager_meeting(models.Model):
     date = models.DateField()
     location = models.CharField(max_length=50)
     minutes_discussed = models.BooleanField()
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Attendee(models.Model):
     meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT)
-
-    # TODO change ref
-    manager = models.ForeignKey('House_manager', on_delete=models.PROTECT)
-    # manager = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id')  # maybe add limit_to() argument
 
 
 class Site_visit(models.Model):
     date = models.DateField()
     issues = models.TextField(null=True)
-
-    # TODO change ref
-    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT)
-    # conductor = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id')  # maybe add limit_to() argument
     house = models.ForeignKey('House', on_delete=models.PROTECT)
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Manager_issue(models.Model):
@@ -181,6 +179,8 @@ class Manager_issue(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=True)
     expected_completion = models.DateField()
     meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT)  # automatic
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Check_in(models.Model):
@@ -193,20 +193,18 @@ class Check_in(models.Model):
     method = models.CharField(max_length=2, choices=METHOD_CHOICES)
     notes = models.TextField(null=True)
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
-
-    # TODO change ref
-    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT)
-    # conductor = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id', related_name='manager')  # maybe add limit_to() argument
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class House_meeting(models.Model):
     date = models.DateField()
     issues = models.TextField(null=True),
     house = models.ForeignKey('House', on_delete=models.PROTECT)
-
-    # TODO change ref
-    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT)
-    # conductor = models.ForeignKey('Resident', on_delete=models.PROTECT)  # maybe add limit_to() argument
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id')  # maybe add limit_to() argument
+    submission_date = models.DateTimeField()  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Absentee(models.Model):

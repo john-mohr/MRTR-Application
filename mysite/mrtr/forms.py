@@ -1,7 +1,6 @@
 from django import forms
-from django.forms import ModelForm
-from .models import Resident, Transaction, Drug_test, Rent_change, House, Bed, Shopping_trip, Supply_request, House_manager, Manager_meeting, Attendee, Absentee, Site_visit, Manager_issue, Check_in, House_meeting
-
+from .models import *
+from django.core.validators import MaxValueValidator
 
 from django.contrib.auth.forms import UserCreationForm
  
@@ -17,24 +16,41 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 
 
-class HouseModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, house):
-        label = f"{house.name}"
+class BedModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, bed):
+        label = f"{bed.name}"
         return label
 
 
-class NewResidentForm(ModelForm):
+class NewResidentForm(forms.ModelForm):
+
+    phone = forms.IntegerField(validators=[MaxValueValidator(9999999999)], required=False)
+    email = forms.EmailField(max_length=62, required=False)
+    door_code = forms.IntegerField(validators=[MaxValueValidator(9999)], required=False)
+    referral_info = forms.CharField(required=False)
+    notes = forms.CharField(widget=forms.Textarea, required=False)
+    occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
+    bed = BedModelChoiceField(queryset=Bed.objects.exclude(id__in=occupied_beds))
+
     class Meta:
         model = Resident
-        fields = ['first_name', 'last_name', 'admit_date', 'rent', 'house']
-        field_classes = {
-            'house': HouseModelChoiceField,
-        }
+        fields = ['first_name',
+                  'last_name',
+                  'phone',
+                  'email',
+                  'admit_date',
+                  'bed',
+                  'rent',
+                  'door_code',
+                  'referral_info',
+                  'notes',
+                  ]
         widgets = {
-            'admit_date': DateInput()
+            'admit_date': DateInput(),
         }
 
-class DrugTestForm(ModelForm):
+
+class DrugTestForm(forms.ModelForm):
     class Meta:
         model = Drug_test
         fields = ['date', 'result', 'amphetamines', 'resident']

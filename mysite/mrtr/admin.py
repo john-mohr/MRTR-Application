@@ -1,5 +1,5 @@
 from django.contrib import admin
-from mrtr.models import Resident, Transaction, Drug_test, Rent_change, House, Bed, Shopping_trip, Supply_request, House_manager, Manager_meeting, Attendee, Absentee, Site_visit, Manager_issue, Check_in, House_meeting
+from .models import *
 # Register your models here.
 
 admin.site.register(Resident)
@@ -10,7 +10,6 @@ admin.site.register(House)
 admin.site.register(Bed)
 admin.site.register(Shopping_trip)
 admin.site.register(Supply_request)
-admin.site.register(House_manager)
 admin.site.register(Manager_meeting)
 admin.site.register(Attendee)
 admin.site.register(Site_visit)
