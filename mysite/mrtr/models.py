@@ -89,7 +89,8 @@ class Rent_change(models.Model):
 
 
 class House(models.Model):
-    name = models.CharField(max_length=25)
+    name = models.CharField(max_length=25),
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT),
 
 
 class Bed(models.Model):
@@ -142,7 +143,7 @@ class Supply_request(models.Model):
     trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT),  # might be unnecessary
 
 
-class House_manager(models.Model):
+class House_manager(models.Model):  # might be unnecessary
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
     house = models.ForeignKey('House', on_delete=models.PROTECT),
 
@@ -155,13 +156,13 @@ class Manager_meeting(models.Model):
 
 class Attendee(models.Model):
     meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT),
-    manager = models.ForeignKey('House_manager', on_delete=models.PROTECT),
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
 
 
 class Site_visit(models.Model):
     date = models.DateField(),
     issues = models.TextField(null=True),
-    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT),
+    conductor = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
     house = models.ForeignKey('House', on_delete=models.PROTECT),
 
 
@@ -186,14 +187,14 @@ class Check_in(models.Model):
     method = models.CharField(max_length=2, choices=METHOD_CHOICES)
     notes = models.TextField(null=True),
     resident = models.ForeignKey('Resident', on_delete=models.PROTECT),
-    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT),
+    conductor = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
 
 
 class House_meeting(models.Model):
     date = models.DateField(),
     issues = models.TextField(null=True),
     house = models.ForeignKey('House', on_delete=models.PROTECT),
-    conductor = models.ForeignKey('House_manager', on_delete=models.PROTECT),
+    conductor = models.ForeignKey('Resident', on_delete=models.PROTECT),  # maybe add limit_to() argument
 
 
 class Absentee(models.Model):
