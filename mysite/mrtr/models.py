@@ -3,24 +3,26 @@ from django.core.validators import MaxValueValidator
 
 
 class Resident(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=50, null=True)
+    last_name = models.CharField(max_length=50, null=True)
     phone = models.BigIntegerField(validators=[MaxValueValidator(9999999999)], null=True)
     email = models.EmailField(max_length=62, null=True)
-    admit_date = models.DateField()
-    rent = models.IntegerField(validators=[MaxValueValidator(1000)])
+    admit_date = models.DateField(blank=True, null=True)
+    rent = models.IntegerField(validators=[MaxValueValidator(1000)], blank=True, null=True)
     door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True)
-    bed = models.OneToOneField('Bed', on_delete=models.PROTECT)
+    bed = models.OneToOneField('Bed', on_delete=models.PROTECT, blank=True, null=True)
     referral_info = models.TextField(null=True)
     notes = models.TextField(null=True)
     discharge_date = models.DateField(null=True)
-    submission_date = models.DateTimeField()  # automatic
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Transaction(models.Model):
-    date = models.DateField()
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    date = models.DateField(blank=True, null=True)
+    amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     TYPE_CHOICES = [
         # Auto apply
         ('rnt', 'Rent charge'),
@@ -56,13 +58,13 @@ class Transaction(models.Model):
     ]
     method = models.CharField(max_length=3, choices=METHOD_CHOICES, null=True)
     notes = models.TextField(null=True)
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
-    submission_date = models.DateTimeField()  # automatic
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT, blank=True, null=True)
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Drug_test(models.Model):
-    date = models.DateField()
+    date = models.DateField(blank=True, null=True)
     RESULT_CHOICES = [
         ('neg', 'Negative'),
         ('pos', 'Positive'),
@@ -71,26 +73,26 @@ class Drug_test(models.Model):
         ('oth', 'Other (specify)')
     ]
     result = models.CharField(max_length=3, choices=RESULT_CHOICES)
-    amphetamines = models.BooleanField()
-    barbiturates = models.BooleanField()
-    benzodiazepines = models.BooleanField()
-    cocaine = models.BooleanField()
-    marijuana = models.BooleanField()
-    opiates = models.BooleanField()
-    phencyclidine = models.BooleanField()
+    amphetamines = models.BooleanField(blank=True, null=True)
+    barbiturates = models.BooleanField(blank=True, null=True)
+    benzodiazepines = models.BooleanField(blank=True, null=True)
+    cocaine = models.BooleanField(blank=True, null=True)
+    marijuana = models.BooleanField(blank=True, null=True)
+    opiates = models.BooleanField(blank=True, null=True)
+    phencyclidine = models.BooleanField(blank=True, null=True)
     other = models.CharField(max_length=50, null=True)
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
-    submission_date = models.DateTimeField()  # automatic
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT, blank=True, null=True)
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Rent_change(models.Model):
-    date = models.DateField()
-    old = models.IntegerField(validators=[MaxValueValidator(1000)])
-    new = models.IntegerField(validators=[MaxValueValidator(1000)])
+    date = models.DateField(blank=True, null=True)
+    old = models.IntegerField(validators=[MaxValueValidator(1000)], blank=True, null=True)
+    new = models.IntegerField(validators=[MaxValueValidator(1000)], blank=True, null=True)
     notes = models.TextField(null=True)
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
-    submission_date = models.DateTimeField()  # automatic
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT, blank=True, null=True)
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
@@ -100,18 +102,18 @@ class House(models.Model):
 
 
 class Bed(models.Model):
-    name = models.CharField(max_length=7)
+    name = models.CharField(max_length=7, blank=True, null=True)
     house = models.ForeignKey('House', on_delete=models.PROTECT)
 
 
 class Shopping_trip(models.Model):
-    date = models.DateTimeField()  # automatic
-    amount = models.DecimalField(max_digits=6, decimal_places=2)
+    date = models.DateTimeField( blank=True, null=True)  # automatic
+    amount = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
     notes = models.TextField(null=True)
 
 
 class Supply_request(models.Model):
-    date = models.DateTimeField()  # automatic
+    date = models.DateTimeField(blank=True, null=True)  # automatic
     PRODUCT_CHOICES = [
         ('ppt', 'Paper towels'),
         ('tpp', 'Toilet paper'),
@@ -141,32 +143,32 @@ class Supply_request(models.Model):
     ]
     product = models.CharField(max_length=3, choices=PRODUCT_CHOICES, null=True)
     other = models.CharField(max_length=50, null=True)
-    quantity = models.IntegerField(validators=[MaxValueValidator(10)])
+    quantity = models.IntegerField(validators=[MaxValueValidator(10)], blank=True, null=True)
     notes = models.TextField(null=True)
-    fulfilled = models.BooleanField()  # automatic
-    house = models.ForeignKey('House', on_delete=models.PROTECT)
-    trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT)  # might be unnecessary
+    fulfilled = models.BooleanField(blank=True, null=True)  # automatic
+    house = models.ForeignKey('House', on_delete=models.PROTECT, blank=True, null=True)
+    trip = models.ForeignKey('Shopping_trip', on_delete=models.PROTECT, blank=True, null=True)  # might be unnecessary
 
 
 class Manager_meeting(models.Model):
-    date = models.DateField()
+    date = models.DateField( blank=True, null=True)
     location = models.CharField(max_length=50)
     minutes_discussed = models.BooleanField()
-    submission_date = models.DateTimeField()  # automatic
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Attendee(models.Model):
-    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT)
-    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id')  # maybe add limit_to() argument
+    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT, blank=True, null=True)
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
 
 
 class Site_visit(models.Model):
-    date = models.DateField()
+    date = models.DateField(blank=True, null=True)
     issues = models.TextField(null=True)
-    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id')  # maybe add limit_to() argument
-    house = models.ForeignKey('House', on_delete=models.PROTECT)
-    submission_date = models.DateTimeField()  # automatic
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
+    house = models.ForeignKey('House', on_delete=models.PROTECT, blank=True, null=True)
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
@@ -177,14 +179,14 @@ class Manager_issue(models.Model):
         ('o', 'Ongoing')
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=True)
-    expected_completion = models.DateField()
-    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT)  # automatic
-    submission_date = models.DateTimeField()  # automatic
+    expected_completion = models.DateField(blank=True, null=True)
+    meeting = models.ForeignKey('Manager_meeting', on_delete=models.PROTECT, blank=True, null=True)  # automatic
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Check_in(models.Model):
-    date = models.DateField()
+    date = models.DateField(blank=True, null=True)
     METHOD_CHOICES = [
         ('ip', 'In person'),
         ('pc', 'Phone call'),
@@ -192,21 +194,21 @@ class Check_in(models.Model):
     ]
     method = models.CharField(max_length=2, choices=METHOD_CHOICES)
     notes = models.TextField(null=True)
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
-    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id', related_name='manager')  # maybe add limit_to() argument
-    submission_date = models.DateTimeField()  # automatic
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT, blank=True, null=True)
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id', related_name='manager', blank=True, null=True)  # maybe add limit_to() argument
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
 class House_meeting(models.Model):
-    date = models.DateField()
+    date = models.DateField( blank=True, null=True)
     issues = models.TextField(null=True),
-    house = models.ForeignKey('House', on_delete=models.PROTECT)
-    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id')  # maybe add limit_to() argument
-    submission_date = models.DateTimeField()  # automatic
+    house = models.ForeignKey('House', on_delete=models.PROTECT, blank=True, null=True)
+    manager = models.ForeignKey('Resident', on_delete=models.PROTECT, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
+    submission_date = models.DateTimeField(blank=True, null=True)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
 
 class Absentee(models.Model):
-    resident = models.ForeignKey('Resident', on_delete=models.PROTECT)
-    meeting = models.ForeignKey('House_meeting', on_delete=models.PROTECT)  # automatic
+    resident = models.ForeignKey('Resident', on_delete=models.PROTECT, blank=True, null=True)
+    meeting = models.ForeignKey('House_meeting', on_delete=models.PROTECT, blank=True, null=True)  # automatic

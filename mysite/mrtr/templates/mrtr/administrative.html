@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load crispy_forms_tags %}
 <html>
     <head>
         <meta charset="utf-8"/>
@@ -54,7 +55,7 @@
                     <div class="form-block-3 w-form">
                         <form action="" method="post">
                             {%  csrf_token %}
-                            {{ form }}
+                            {{ form | crispy}}
                             <input type="submit" name="new_resident">
                         </form>
                         <div class="success-message w-form-done">

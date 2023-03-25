@@ -30,7 +30,7 @@ class NewResidentForm(forms.ModelForm):
     referral_info = forms.CharField(required=False)
     notes = forms.CharField(widget=forms.Textarea, required=False)
     occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
-    bed = BedModelChoiceField(queryset=Bed.objects.exclude(id__in=occupied_beds))
+    #bed = BedModelChoiceField(queryset=Bed.objects.exclude(id__in=occupied_beds))
 
     class Meta:
         model = Resident

@@ -8,6 +8,19 @@ from .models import *
 
 # Create your views here.
 
+from functools import wraps
+
+def groups_only(*groups):
+    def inner(view_func):
+        @wraps(view_func)
+        def wrapper_func(request, *args, **kwargs):
+            if request.user.groups.filter(name__in=groups).exists() or request.user.is_superuser:
+                return view_func(request, *args, **kwargs)
+            else:
+                return redirect('/accounts/logout')
+        return wrapper_func
+    return inner
+
 def home(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
@@ -48,6 +61,7 @@ def contact(request):
 
 
 # TODO build if/else train to find the correct form (not sure if this will work, might have to create new URLs)
+@groups_only('House Manager')
 def portal(request):
     form = NewResidentForm()
     context = {'form': form}
@@ -63,5 +77,9 @@ def portal(request):
             # TODO add beginning balance transactions
 
     return render(request, 'mrtr/administrative.html', context)
+
+
+
+
 
 
