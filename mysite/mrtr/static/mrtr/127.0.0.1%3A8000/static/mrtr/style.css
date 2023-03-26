@@ -577,7 +577,7 @@
     border-radius: 15px;
     background-color: #dae3ee;
     width: 300px;
-    height: 300px;
+    height: 350px;
     text-align: center;
     margin: 15px;
 
@@ -586,22 +586,25 @@
     align-items: center;
  
    }
-   .card-icon{
+   .icon{
+    z-index: 2;
     position: relative;
-    float: left;
+    display: table;
+    padding: 8px;
    }
    .card-title{
     position: relative;
-    font-size: 20px;
-    top: 70px;
-    text-align: left;
-    left: -70px;
+    width: min-content;
+    height: 50px;
+    border: 3px solid #73AD21;
    }
    .card-detail{
+    z-index: 2;
     position: relative;
+    margin: 0;
     font-size: 14px;
-    text-align: left;
-    top: 80px;
+    line-height: 1.7;
+    color: var(--text-color);
    }
    
    @media screen and (max-width: 991px) {
