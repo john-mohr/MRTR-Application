@@ -24,19 +24,19 @@
                             <a href="/"><img src="{% static 'resources\mrtr-logo-3_1.png' %}" loading="lazy" width="215" height="84" alt="" class="mrtr-logo-3_1-1"/></a>
                         </div>
                         <nav role="navigation" class="navbar-menu w-nav-menu">
-                            <a href="#" class="navbar-link w-nav-link">
+                            <a href="/our-locations" class="navbar-link w-nav-link">
                                 <div class="text">Our Locations</div>
                             </a>
-                            <a href="#" class="navbar-link-2 w-nav-link">
+                            <a href="/sobriety-support" class="navbar-link-2 w-nav-link">
                                 <div class="text">Sobriety Support</div>
                             </a>
-                            <a href="#" class="navbar-link-2 w-nav-link">
+                            <a href="/payment-options" class="navbar-link-2 w-nav-link">
                                 <div class="text">Payment Options</div>
                             </a>
-                            <a href="#" class="navbar-link-2 w-nav-link">
+                            <a href="/contact" class="navbar-link-2 w-nav-link">
                                 <div class="text">Contact Us</div>
                             </a>
-                            <a href="#" class="navbar-link-2 w-nav-link">
+                            <a href="/about-us" class="navbar-link-2 w-nav-link">
                                 <div class="text">About Us</div>
                             </a>
                             {% if user.is_authenticated %}
@@ -69,10 +69,9 @@
                             <div class="content-2">
                                 <div class="text-3">SERVICES</div>
                                 <div class="footer-links">
-                                    <div class="link">Sobriety</div>
-                                    <div class="link">Support</div>
-                                    <div class="link">Rooms for Rent</div>
-                                    <div class="link">Payment Options</div>
+                                    <a href="/sobriety-support" class="link">Sobriety Support</a>
+                                    <a href="/our-locations" class="link">Rooms for Rent</a>
+                                    <a href="/payment-options" class="link">Payment Options</a>
                                 </div>
                             </div>
                         </div>
@@ -80,8 +79,8 @@
                             <div class="content-2">
                                 <div class="text-3">ABOUT US</div>
                                 <div class="footer-links">
-                                    <div class="link">About Us</div>
-                                    <div class="link">Contact Us</div>
+                                    <a href="/about-us" class="link">About Us</a>
+                                    <a href="/contact" class="link">Contact Us</a>
                                 </div>
                             </div>
                         </div>

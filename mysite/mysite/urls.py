@@ -25,6 +25,7 @@ urlpatterns = [
     path('home', views.home),
     path('about-us', views.about),
     path('our-locations', views.locations),
+    path('sobriety-support', views.sobriety_support),
     path('contact', views.contact),
     path('payment-options', views.payment),
     path('portal', views.portal),

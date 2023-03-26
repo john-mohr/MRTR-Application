@@ -45,19 +45,41 @@ def home(request):
 
 def locations(request):
 
-    return render(request, '.html')
+    return render(request, 'mrtr/ourlocations.html')
+
+def sobriety_support(request):
+
+    return render(request, 'mrtr/sobriety_support.html')
 
 def about(request):
 
-    return render(request, '.html')
+    return render(request, 'mrtr/about_us.html')
 
 def payment(request):
 
-    return render(request, '.html')
+    return render(request, 'mrtr/payment_options.html')
 
 def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            subject = "Website Inquiry"
+            body = {
+                'first_name': form.cleaned_data['first_name'],
+                'last_name': form.cleaned_data['last_name'],
+                'email': form.cleaned_data['email'],
+                'message': form.cleaned_data['message'],
+            }
+            message = "\n".join(body.values())
 
-    return render(request, '.html')
+            try:
+                send_mail(subject, message, 'deanpham1200@gmail.com', ['deanpham1200@gmail.com'])
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
+            return redirect('/')
+
+    form = ContactForm()
+    return render(request, 'mrtr/contact_us.html', {'form': form})
 
 
 # TODO build if/else train to find the correct form (not sure if this will work, might have to create new URLs)
