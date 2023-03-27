@@ -586,6 +586,13 @@
     align-items: center;
  
    }
+   .display-hero{
+    background-color: #dae3ee;
+    width: 550px;
+    height: 420px;
+    text-align: left;
+    margin: 50px;
+   }
    .card-icon{
     position: relative;
     float: left;
@@ -603,7 +610,6 @@
     text-align: left;
     top: 80px;
    }
-   
    @media screen and (max-width: 991px) {
      .navbar-logo-left {
        padding-right: 0;
