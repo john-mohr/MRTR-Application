@@ -1,10 +1,14 @@
-from dateutil.utils import today
-from django.shortcuts import render, redirect
 from .forms import *
+from .models import *
+from .utils import prorate
+from django.shortcuts import render, redirect
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
-from datetime import datetime
-from .models import *
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+# from datetime import datetime
+# from dateutil.utils import today
+
 
 # Create your views here.
 
@@ -82,26 +86,168 @@ def contact(request):
     return render(request, 'mrtr/contact_us.html', {'form': form})
 
 
-# TODO build if/else train to find the correct form (not sure if this will work, might have to create new URLs)
-@groups_only('House Manager')
-def portal(request):
-    form = NewResidentForm()
-    context = {'form': form}
+# Admin forms
 
+# New Resident
+# TODO Figure out how to handle multiple forms (not sure if this will work, might have to create new URLs)
+# @groups_only('House Manager')
+def new_res(request):
+    form = ResidentForm()
     if request.method == 'POST':
-        # print(request.POST)
-        new_res = NewResidentForm(request.POST)
-        if new_res.is_valid():
-            # print('valid')
-            new_res.instance.submission_date = datetime.now()
-            new_res.save()
-            print(type(new_res))
-            # TODO add beginning balance transactions
+        sub = ResidentForm(request.POST)
+        if sub.is_valid():
+            sub.save()
 
-    return render(request, 'mrtr/administrative.html', context)
+            # Add beginning balance transactions
+            intake = Transaction(date=sub.instance.admit_date,
+                                 amount=75,
+                                 type='fee',
+                                 resident=sub.instance,
+                                 notes='Intake Fee',
+                                 submission_date=sub.instance.submission_date
+                                 )
+            intake.save()
+            first_mo = Transaction(date=sub.instance.admit_date,
+                                   amount=prorate(sub.instance.rent, sub.instance.admit_date),
+                                   type='rnt',
+                                   resident=sub.instance,
+                                   notes=sub.instance.admit_date.strftime('%B') + ' (partial)',
+                                   submission_date=sub.instance.submission_date
+                                   )
+            first_mo.save()
+            second_mo = Transaction(date=sub.instance.admit_date,
+                                    amount=sub.instance.rent,
+                                    type='rnt',
+                                    resident=sub.instance,
+                                    notes=(sub.instance.admit_date + relativedelta(months=1)).strftime('%B'),
+                                    submission_date=sub.instance.submission_date
+                                    )
+            second_mo.save()
+    return render(request, 'mrtr/form_test.html', {'form': form})
+    # return render(request, 'mrtr/administrative.html', context)
 
 
+# TODO Figure out better way to select residents from a list/search
+def select_res(request):
+    form = SelectResForm()
+    if request.method == 'POST':
+        sub = SelectResForm(request.POST)
+        if sub.is_valid():
+            return redirect('/edit_res/' + str(request.POST['resident']))
+    return render(request, 'mrtr/form_test.html', {'form': form})
 
 
+# Edit resident
+# TODO Handle resident balance when admit date is changed
+def edit_res(request, id):
+    resident = Resident.objects.get(id=id)
+    form = ResidentForm(instance=resident)
+    if request.method == 'POST':
+        sub = ResidentForm(request.POST, instance=resident)
+        if sub.is_valid():
+            sub.save()
+            resident.last_update = timezone.now()
+            resident.save()
+            return render(request, 'mrtr/form_test.html', {'form': form})
+        else:
+            form = ResidentForm(instance=resident)
+    return render(request, 'mrtr/form_test.html', {'form': form})
 
 
+# New transaction
+# TODO Figure out how to make method field appear conditional on if type == 'pmt' (possible workaround - separate form for payments)
+def new_trans(request):
+    form = NewTransactionForm()
+    if request.method == 'POST':
+        sub = NewTransactionForm(request.POST)
+        if sub.is_valid():
+
+            # Make transaction amount negative for transactions that decrease a resident's balance
+            decrease = ['pmt', 'bon', 'wrk', 'sos']
+            if sub.instance.type in decrease:
+                sub.instance.amount *= -1
+            sub.save()
+    return render(request, 'mrtr/form_test.html', {'form': form})
+
+
+# Rent change
+def change_rent(request):
+    form = RentChangeForm()
+    if request.method == 'POST':
+        sub = RentChangeForm(request.POST)
+        if sub.is_valid():
+            res_to_edit = sub.cleaned_data['resident']
+
+            # Create adjustment transaction for new rent amount
+            adj_trans = Transaction(date=sub.cleaned_data['effective_date'],
+                                    amount=prorate(sub.cleaned_data['new_rent'] - res_to_edit.rent,
+                                                   sub.cleaned_data['effective_date']),
+                                    type='nra',
+                                    resident=res_to_edit,
+                                    notes='Change: $' +
+                                          str(res_to_edit.rent) + ' > $' + str(sub.cleaned_data['new_rent']) +
+                                          '; Reason: ' + str(sub.cleaned_data['reason'])
+                                    )
+            adj_trans.save()
+            res_to_edit.rent = sub.cleaned_data['new_rent']
+            res_to_edit.last_update = timezone.now()
+            res_to_edit.save()
+    return render(request, 'mrtr/form_test.html', {'form': form})
+
+
+# Change House Manager
+# TODO Handle multiple house managers for one house (replace House.manager with a relationship table)
+def change_hm(request):
+    form = ChangeHMForm()
+    if request.method == 'POST':
+        sub = ChangeHMForm(request.POST)
+        if sub.is_valid():
+            house_to_edit = sub.cleaned_data['house']
+            old_hm = house_to_edit.manager
+            new_hm = sub.cleaned_data['new_manager']
+            current_datetime = timezone.now()
+            current_date = current_datetime.date()
+
+            # Remove old house manager's rent discount
+            if old_hm is not None:
+                rm_discount = Transaction(date=current_date,
+                                          amount=prorate((old_hm.rent * 2) - old_hm.rent, current_date),
+                                          type='nra',
+                                          resident=old_hm,
+                                          notes='Change: $' + str(old_hm.rent) + ' > $' + str(old_hm.rent * 2) +
+                                                '; Reason: removed house manager discount'
+                                          )
+                rm_discount.save()
+                old_hm.rent = old_hm.rent * 2
+                old_hm.save()
+
+            # Give new house manager the rent discount
+            add_discount = Transaction(date=current_date,
+                                       amount=prorate((new_hm.rent / 2) - new_hm.rent, current_date),
+                                       type='nra',
+                                       resident=new_hm,
+                                       notes='Change: $' + str(new_hm.rent) + ' > $' + str(new_hm.rent / 2) +
+                                             '; Reason: house manager discount'
+                                       )
+            add_discount.save()
+            new_hm.rent = new_hm.rent / 2
+            new_hm.save()
+
+            # Assign new house manager
+            house_to_edit.manager = new_hm
+            house_to_edit.last_update = current_datetime
+            house_to_edit.save()
+    return render(request, 'mrtr/form_test.html', {'form': form})
+
+
+# House manager forms
+
+# New Drug Test
+# TODO Make drug field checkboxes inline with their label; Make other field appear conditional on if result == 'oth'
+def new_dtest(request):
+    form = DrugTestForm()
+    if request.method == 'POST':
+        sub = DrugTestForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+    return render(request, 'mrtr/form_test.html', {'form': form})
