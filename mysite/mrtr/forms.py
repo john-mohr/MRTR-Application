@@ -2,7 +2,7 @@ from django import forms
 from .models import *
 from django.core.validators import MaxValueValidator
 from django.contrib.auth.forms import UserCreationForm
- 
+
 
 class ContactForm(forms.Form):
     email = forms.EmailField()
@@ -29,18 +29,26 @@ class ResidentForm(forms.ModelForm):
     notes = forms.CharField(widget=forms.Textarea, required=False)
     occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
     bed = BedField(queryset=Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)))
+    effective_date = forms.DateField(widget=DateInput(), initial=timezone.now)  # for edit_res only
 
     # Allows selection of resident's current bed and removes rent field for editing
     def __init__(self, *args, **kwargs):
         super(ResidentForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:
-            edit_beds = self.occupied_beds.exclude(pk=kwargs.pop('instance').pk)
-            self.fields['bed'] = BedField(queryset=Bed.objects.exclude(id__in=edit_beds.values_list('bed_id', flat=True)))
-            del self.fields['rent']
+        if 'instance' in kwargs:  # edit and readmit
+            res = kwargs.pop('instance')
+            if res.discharge_date is None:  # edit
+                edit_beds = self.occupied_beds.exclude(pk=res.pk)
+                self.fields['bed'].queryset = Bed.objects.exclude(id__in=edit_beds.values_list('bed_id', flat=True))
+            else:  # readmit
+                self.fields['admit_date'].label = 'Readmission date'
+                del self.fields['effective_date']
+        else:  # new
+            del self.fields['effective_date']
 
     class Meta:
         model = Resident
-        fields = ['first_name',
+        fields = ['effective_date',  # for edit_res only
+                  'first_name',
                   'last_name',
                   'phone',
                   'email',
@@ -56,41 +64,9 @@ class ResidentForm(forms.ModelForm):
         }
 
 
-TYPE_CHOICES = [
-
-    # # Auto apply
-    # ('rnt', 'Rent charge'),
-    # ('rfd', 'Refund'),
-    # ('inc', 'Sober incentive'),
-    # ('nra', 'New rent amount adjustment'),
-
-    # Decrease balance
-    ('pmt', 'Rent payment'),
-    # ('bon', 'Bonus'),
-    # ('wrk', 'Work/reimbursement'),
-    # ('sos', "Sober support (won't pay back)"),
-
-    # Increase balance
-    ('fee', 'Fee'),
-    # ('lon', 'Loan (will pay back)'),
-
-    # Other
-    # ('fix', 'Balance fix'),
-    ('oth', 'Other adjustment (specify)')
-    ]
-
-METHOD_CHOICES = [
-    ('ach', 'ACH'),
-    ('csh', 'Cash'),
-    ('cap', 'Cash App'),
-    ('chk', 'Check'),
-    ('mod', 'Money order'),
-    ('ppl', 'PayPal'),
-    ('vnm', 'Venmo'),
-    ('zel', 'Zelle'),
-    ('oth', 'Other (specify)'),
-    ('', '')
-    ]
+class DischargeResForm(forms.Form):
+    date = forms.DateField(widget=DateInput(), initial=timezone.now)
+    reason = forms.CharField(widget=forms.Textarea, required=False)
 
 
 class ResidentField(forms.ModelChoiceField):
@@ -103,15 +79,49 @@ class SelectResForm(forms.Form):
     resident = ResidentField(queryset=Resident.objects.all())
 
 
-class NewTransactionForm(forms.ModelForm):
+class SelectPastResForm(forms.Form):
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=False))
+
+
+class TransactionForm(forms.ModelForm):
+    TYPE_CHOICES = [
+        # # Auto apply
+        # ('rnt', 'Rent charge'),
+        # ('rfd', 'Refund'),
+        # ('inc', 'Sober incentive'),
+        # ('nra', 'New rent amount adjustment'),
+
+        # Decrease balance
+        ('pmt', 'Rent payment'),
+        # ('bon', 'Bonus'),
+        # ('wrk', 'Work/reimbursement'),
+        # ('sos', "Sober support (won't pay back)"),
+
+        # Increase balance
+        ('fee', 'Fee'),
+        # ('lon', 'Loan (will pay back)'),
+
+        # Other
+        # ('fix', 'Balance fix'),
+        ('oth', 'Other adjustment (specify)')
+    ]
+    METHOD_CHOICES = [
+        ('ach', 'ACH'),
+        ('csh', 'Cash'),
+        ('cap', 'Cash App'),
+        ('chk', 'Check'),
+        ('mod', 'Money order'),
+        ('ppl', 'PayPal'),
+        ('vnm', 'Venmo'),
+        ('zel', 'Zelle'),
+        ('oth', 'Other (specify)'),
+        ('', '')
+    ]
+
     resident = ResidentField(queryset=Resident.objects.all())
     type = forms.ChoiceField(choices=TYPE_CHOICES)
     method = forms.ChoiceField(choices=METHOD_CHOICES, required=False)
     notes = forms.CharField(widget=forms.Textarea, required=False)
-
-    # def get_form_class(self):
-    #     if self.object.type == 'pmt':
-    #         return NewPaymentForm
 
     class Meta:
         model = Transaction
@@ -127,6 +137,10 @@ class NewTransactionForm(forms.ModelForm):
         }
 
 
+class SelectTransForm(forms.Form):
+    transaction = forms.ModelChoiceField(queryset=Transaction.objects.all())
+
+
 # class NewPaymentForm(forms.ModelForm):
 #
 #     type = forms.ChoiceField(choices=TYPE_CHOICES)
@@ -136,7 +150,7 @@ class NewTransactionForm(forms.ModelForm):
 #
 #     def get_form_class(self):
 #         if self.object.type != 'pmt':
-#             return NewTransactionForm
+#             return TransactionForm
 #
 #     class Meta:
 #         model = Transaction
@@ -153,7 +167,7 @@ class NewTransactionForm(forms.ModelForm):
 
 
 class DrugTestForm(forms.ModelForm):
-    resident = ResidentField(queryset=Resident.objects.all())
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
     other = forms.CharField(required=False)
 
     class Meta:
@@ -180,18 +194,11 @@ class HouseField(forms.ModelChoiceField):
         return label
 
 
-# May want to restrict new_manager field to residents who reside in the house
 class ChangeHMForm(forms.Form):
     house = HouseField(queryset=House.objects.all())
     current_HMs = House.objects.all().filter(manager_id__isnull=False).distinct()
+    # TODO Filter residents who reside in house
     new_manager = ResidentField(queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)))
-
-class RentChangeForm(forms.Form):
-    resident = ResidentField(queryset=Resident.objects.all())
-    effective_date = forms.DateField(widget=DateInput(), initial=timezone.now)
-    new_rent = forms.IntegerField(validators=[MaxValueValidator(1000)])
-    reason = forms.CharField(widget=forms.Textarea)
-
 
 # class ManagerMeetingForm:
 #     x = ''

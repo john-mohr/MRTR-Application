@@ -30,14 +30,24 @@ urlpatterns = [
     path('payment-options', views.payment),
     # path('portal', views.portal),
 
-    # Temporary (?) paths until we figure out how to handle multiple forms on one page
+    # Resident
     path('new_res', views.new_res),
     path('select_res', views.select_res),
     path('edit_res/<int:id>', views.edit_res),
+    path('discharge_res/<int:id>', views.discharge_res),
+    path('readmit_res', views.select_past_res),
+    path('readmit_res/<int:id>', views.readmit_res),
+    path('show_res', views.show_res),
+
+    # Transactions
     path('new_trans', views.new_trans),
-    path('change_rent', views.change_rent),
+    path('select_trans', views.select_trans),
+    path('edit_trans/<int:id>', views.edit_trans),
+
+    # Other
     path('change_hm', views.change_hm),
-    path('new_dtest', views.new_dtest),
+    # path('new_dtest', views.new_dtest),
+
 ]
 
 urlpatterns += [

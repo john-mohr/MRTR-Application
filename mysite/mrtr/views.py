@@ -6,8 +6,6 @@ from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
-# from datetime import datetime
-# from dateutil.utils import today
 
 
 # Create your views here.
@@ -89,7 +87,6 @@ def contact(request):
 # Admin forms
 
 # New Resident
-# TODO Figure out how to handle multiple forms (not sure if this will work, might have to create new URLs)
 # @groups_only('House Manager')
 def new_res(request):
     form = ResidentForm()
@@ -123,7 +120,7 @@ def new_res(request):
                                     submission_date=sub.instance.submission_date
                                     )
             second_mo.save()
-    return render(request, 'mrtr/form_test.html', {'form': form})
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
     # return render(request, 'mrtr/administrative.html', context)
 
 
@@ -133,33 +130,102 @@ def select_res(request):
     if request.method == 'POST':
         sub = SelectResForm(request.POST)
         if sub.is_valid():
-            return redirect('/edit_res/' + str(request.POST['resident']))
-    return render(request, 'mrtr/form_test.html', {'form': form})
+            if 'edit' in request.POST:
+                return redirect('/edit_res/' + str(request.POST['resident']))
+            elif 'discharge' in request.POST:
+                return redirect('/discharge_res/' + str(request.POST['resident']))
+            elif 'delete' in request.POST:
+                res_to_delete = Resident.objects.get(id=request.POST['resident'])
+                res_to_delete.delete()
+    return render(request, 'mrtr/temp_selects.html', {'form': form})
 
 
 # Edit resident
 # TODO Handle resident balance when admit date is changed
 def edit_res(request, id):
     resident = Resident.objects.get(id=id)
+    old_rent = resident.rent
     form = ResidentForm(instance=resident)
     if request.method == 'POST':
         sub = ResidentForm(request.POST, instance=resident)
         if sub.is_valid():
+            new_rent = int(request.POST['rent'])
+            if old_rent != new_rent:
+                adj_trans = Transaction(date=sub.cleaned_data['effective_date'],
+                                        amount=prorate(new_rent - old_rent, sub.cleaned_data['effective_date']),
+                                        type='nra',
+                                        resident=resident,
+                                        notes='$' + str(old_rent) + ' > $' + str(new_rent) + ' (manual edit)'
+                                        )
+                adj_trans.save()
             sub.save()
             resident.last_update = timezone.now()
             resident.save()
-            return render(request, 'mrtr/form_test.html', {'form': form})
+            return render(request, 'mrtr/temp_forms.html', {'form': form})
         else:
             form = ResidentForm(instance=resident)
-    return render(request, 'mrtr/form_test.html', {'form': form})
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
+
+
+# Discharge resident
+def discharge_res(request, id):
+    resident = Resident.objects.get(id=id)
+    form = DischargeResForm()
+    if request.method == 'POST':
+        sub = DischargeResForm(request.POST)
+        if sub.is_valid():
+            resident.discharge_date = sub.cleaned_data['date']
+            resident.bed = None
+            resident.last_update = timezone.now()
+            if len(sub.cleaned_data['reason']) > 0:
+                resident.notes = str(resident.notes) + '\nReason Discharged (' + str(sub.cleaned_data['date']) + '): ' + sub.cleaned_data['reason']
+            # TODO Figure out if TC wants an option to refund rent
+            resident.save()
+            return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
+
+
+def select_past_res(request):
+    form = SelectPastResForm()
+    if request.method == 'POST':
+        sub = SelectPastResForm(request.POST)
+        if sub.is_valid():
+            return redirect('/readmit_res/' + str(request.POST['resident']))
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
+
+
+# Readmit resident
+def readmit_res(request, id):
+    resident = Resident.objects.get(id=id)
+    form = ResidentForm(instance=resident)
+    if request.method == 'POST':
+        sub = ResidentForm(request.POST, instance=resident)
+        if sub.is_valid():
+            resident.notes = resident.notes + '\n Previous residency: ' + \
+                             str(resident.admit_date) + ' to ' + str(resident.discharge_date)
+            resident.discharge_date = None
+            resident.last_update = timezone.now()
+            sub.save()
+            resident.save()
+
+            # TODO Figure out how to handle readmission balance
+            return render(request, 'mrtr/temp_forms.html', {'form': form})
+        else:
+            form = ResidentForm(instance=resident)
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
+
+
+def show_res(request):
+    table = Resident.objects.all().prefetch_related('bed')
+    return render(request, 'mrtr/temp_tables.html', locals())
 
 
 # New transaction
 # TODO Figure out how to make method field appear conditional on if type == 'pmt' (possible workaround - separate form for payments)
 def new_trans(request):
-    form = NewTransactionForm()
+    form = TransactionForm()
     if request.method == 'POST':
-        sub = NewTransactionForm(request.POST)
+        sub = TransactionForm(request.POST)
         if sub.is_valid():
 
             # Make transaction amount negative for transactions that decrease a resident's balance
@@ -167,32 +233,45 @@ def new_trans(request):
             if sub.instance.type in decrease:
                 sub.instance.amount *= -1
             sub.save()
-    return render(request, 'mrtr/form_test.html', {'form': form})
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
 
 
-# Rent change
-def change_rent(request):
-    form = RentChangeForm()
+# TODO Figure out better way to select residents from a list/search
+def select_trans(request):
+    form = SelectTransForm()
     if request.method == 'POST':
-        sub = RentChangeForm(request.POST)
+        sub = SelectTransForm(request.POST)
         if sub.is_valid():
-            res_to_edit = sub.cleaned_data['resident']
+            if 'edit' in request.POST:
+                return redirect('/edit_trans/' + str(request.POST['transaction']))
+            elif 'delete' in request.POST:
+                trans_to_delete = Transaction.objects.get(id=request.POST['transaction'])
+                trans_to_delete.delete()
+            elif 'discharge' in request.POST:
+                render(request, 'mrtr/temp_selects.html', {'form': form})
+    return render(request, 'mrtr/temp_selects.html', {'form': form})
 
-            # Create adjustment transaction for new rent amount
-            adj_trans = Transaction(date=sub.cleaned_data['effective_date'],
-                                    amount=prorate(sub.cleaned_data['new_rent'] - res_to_edit.rent,
-                                                   sub.cleaned_data['effective_date']),
-                                    type='nra',
-                                    resident=res_to_edit,
-                                    notes='Change: $' +
-                                          str(res_to_edit.rent) + ' > $' + str(sub.cleaned_data['new_rent']) +
-                                          '; Reason: ' + str(sub.cleaned_data['reason'])
-                                    )
-            adj_trans.save()
-            res_to_edit.rent = sub.cleaned_data['new_rent']
-            res_to_edit.last_update = timezone.now()
-            res_to_edit.save()
-    return render(request, 'mrtr/form_test.html', {'form': form})
+
+# Edit transaction
+def edit_trans(request, id):
+    transaction = Transaction.objects.get(id=id)
+    form = TransactionForm(instance=transaction)
+    if request.method == 'POST':
+        old_type = transaction.type
+        sub = TransactionForm(request.POST, instance=transaction)
+        if sub.is_valid():
+
+            # Make transaction amount negative for transactions that decrease a resident's balance
+            # But also keep amount negative if it wasn't changed
+            decrease = ['pmt', 'bon', 'wrk', 'sos']
+            if old_type not in decrease and sub.instance.type in decrease:
+                sub.instance.amount *= -1
+            transaction.last_update = timezone.now()
+            sub.save()
+            return render(request, 'mrtr/temp_forms.html', {'form': form})
+        else:
+            form = TransactionForm(instance=transaction)
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
 
 
 # Change House Manager
@@ -237,7 +316,7 @@ def change_hm(request):
             house_to_edit.manager = new_hm
             house_to_edit.last_update = current_datetime
             house_to_edit.save()
-    return render(request, 'mrtr/form_test.html', {'form': form})
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
 
 
 # House manager forms
@@ -250,4 +329,4 @@ def new_dtest(request):
         sub = DrugTestForm(request.POST)
         if sub.is_valid():
             sub.save()
-    return render(request, 'mrtr/form_test.html', {'form': form})
+    return render(request, 'mrtr/temp_forms.html', {'form': form})
