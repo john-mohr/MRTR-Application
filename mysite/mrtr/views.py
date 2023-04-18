@@ -330,3 +330,14 @@ def new_dtest(request):
         if sub.is_valid():
             sub.save()
     return render(request, 'mrtr/temp_forms.html', {'form': form})
+
+
+# New Check-in
+# TODO Restrict residents to residents in the manager's house
+def new_check_in(request):
+    form = CheckInForm()
+    if request.method == 'POST':
+        sub = CheckInForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+    return render(request, 'mrtr/temp_forms.html', {'form': form})

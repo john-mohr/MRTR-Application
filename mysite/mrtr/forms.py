@@ -84,43 +84,9 @@ class SelectPastResForm(forms.Form):
 
 
 class TransactionForm(forms.ModelForm):
-    TYPE_CHOICES = [
-        # # Auto apply
-        # ('rnt', 'Rent charge'),
-        # ('rfd', 'Refund'),
-        # ('inc', 'Sober incentive'),
-        # ('nra', 'New rent amount adjustment'),
-
-        # Decrease balance
-        ('pmt', 'Rent payment'),
-        # ('bon', 'Bonus'),
-        # ('wrk', 'Work/reimbursement'),
-        # ('sos', "Sober support (won't pay back)"),
-
-        # Increase balance
-        ('fee', 'Fee'),
-        # ('lon', 'Loan (will pay back)'),
-
-        # Other
-        # ('fix', 'Balance fix'),
-        ('oth', 'Other adjustment (specify)')
-    ]
-    METHOD_CHOICES = [
-        ('ach', 'ACH'),
-        ('csh', 'Cash'),
-        ('cap', 'Cash App'),
-        ('chk', 'Check'),
-        ('mod', 'Money order'),
-        ('ppl', 'PayPal'),
-        ('vnm', 'Venmo'),
-        ('zel', 'Zelle'),
-        ('oth', 'Other (specify)'),
-        ('', '')
-    ]
-
+    type = forms.ChoiceField(choices=Transaction.TYPE_CHOICES)
+    method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
     resident = ResidentField(queryset=Resident.objects.all())
-    type = forms.ChoiceField(choices=TYPE_CHOICES)
-    method = forms.ChoiceField(choices=METHOD_CHOICES, required=False)
     notes = forms.CharField(widget=forms.Textarea, required=False)
 
     class Meta:
@@ -182,6 +148,26 @@ class DrugTestForm(forms.ModelForm):
                   'marijuana',
                   'opiates',
                   'phencyclidine',
+                  ]
+        widgets = {
+            'date': DateInput(),
+        }
+
+
+class CheckInForm(forms.ModelForm):
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
+    house_managers = House.objects.all().filter(manager_id__isnull=False).distinct()
+    manager = ResidentField(queryset=Resident.objects.filter(id__in=house_managers.values_list('manager_id', flat=True)))
+    method = forms.ChoiceField(choices=Check_in.METHOD_CHOICES)
+    notes = forms.CharField(widget=forms.Textarea, required=False)
+
+    class Meta:
+        model = Check_in
+        fields = ['manager',
+                  'resident',
+                  'date',
+                  'method',
+                  'notes',
                   ]
         widgets = {
             'date': DateInput(),

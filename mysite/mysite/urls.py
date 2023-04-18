@@ -46,7 +46,8 @@ urlpatterns = [
 
     # Other
     path('change_hm', views.change_hm),
-    # path('new_dtest', views.new_dtest),
+    path('new_dtest', views.new_dtest),
+    path('new_check_in', views.new_check_in),
 
 ]
 

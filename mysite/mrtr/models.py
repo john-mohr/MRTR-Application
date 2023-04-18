@@ -23,24 +23,24 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     # TODO Cut down on the amount of transaction types
     TYPE_CHOICES = [
-        # Auto apply
-        ('rnt', 'Rent charge'),
-        ('rfd', 'Refund'),
-        ('inc', 'Sober incentive'),
-        ('nra', 'New rent amount adjustment'),
-
-        # Increase balance
-        ('fee', 'Assess fee'),
-        ('lon', 'Loan (will pay back)'),
+        # # Auto apply
+        # ('rnt', 'Rent charge'),
+        # ('rfd', 'Refund'),
+        # ('inc', 'Sober incentive'),
+        # ('nra', 'New rent amount adjustment'),
 
         # Decrease balance
         ('pmt', 'Rent payment'),
-        ('bon', 'Bonus'),
-        ('wrk', 'Work/reimbursement'),
-        ('sos', "Sober support (won't pay back)"),
+        # ('bon', 'Bonus'),
+        # ('wrk', 'Work/reimbursement'),
+        # ('sos', "Sober support (won't pay back)"),
+
+        # Increase balance
+        ('fee', 'Fee'),
+        # ('lon', 'Loan (will pay back)'),
 
         # Other
-        ('fix', 'Balance fix'),
+        # ('fix', 'Balance fix'),
         ('oth', 'Other adjustment (specify)')
     ]
     type = models.CharField(max_length=3, choices=TYPE_CHOICES, blank=True)
@@ -95,6 +95,21 @@ class House(models.Model):
 class Bed(models.Model):
     name = models.CharField(max_length=7)
     house = models.ForeignKey('House', on_delete=models.CASCADE)
+
+
+class Check_in(models.Model):
+    date = models.DateField(default=timezone.now)
+    METHOD_CHOICES = [
+        ('ip', 'In person'),
+        ('pc', 'Phone call'),
+        ('tx', 'Text')
+    ]
+    method = models.CharField(max_length=2, choices=METHOD_CHOICES)
+    notes = models.TextField(null=True)
+    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', related_name='manager')  #, blank=True, null=True)  # maybe add limit_to() argument
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
 
 
 # class Shopping_trip(models.Model):
@@ -172,21 +187,6 @@ class Bed(models.Model):
 #     status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=True)
 #     expected_completion = models.DateField()  #blank=True, null=True)
 #     meeting = models.ForeignKey('Manager_meeting', on_delete=models.CASCADE)  #, blank=True, null=True)  # automatic
-#     submission_date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
-#     last_update = models.DateTimeField(null=True)  # automatic
-#
-#
-# class Check_in(models.Model):
-#     date = models.DateField(default=timezone.now)  #blank=True, null=True)
-#     METHOD_CHOICES = [
-#         ('ip', 'In person'),
-#         ('pc', 'Phone call'),
-#         ('tx', 'Text')
-#     ]
-#     method = models.CharField(max_length=2, choices=METHOD_CHOICES)
-#     notes = models.TextField(null=True)
-#     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)  #, blank=True, null=True)
-#     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', related_name='manager')  #, blank=True, null=True)  # maybe add limit_to() argument
 #     submission_date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
 #     last_update = models.DateTimeField(null=True)  # automatic
 #
