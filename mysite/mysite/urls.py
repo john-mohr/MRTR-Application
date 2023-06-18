@@ -38,9 +38,11 @@ urlpatterns = [
     path('portal/readmit_res', views.select_past_res),
     path('portal/readmit_res/<int:id>', views.readmit_res),
     path('portal/show_res', views.show_res),
+    path('portal/resident/<int:id>', views.single_res),
 
     # Transactions
     path('portal/new_trans', views.new_trans),
+    path('portal/new_rent_pmt', views.new_rent_pmt),
     path('portal/select_trans', views.select_trans),
     path('portal/edit_trans/<int:id>', views.edit_trans),
 
@@ -48,6 +50,7 @@ urlpatterns = [
     path('portal/change_hm', views.change_hm),
     path('portal/new_dtest', views.new_dtest),
     path('portal/new_check_in', views.new_check_in),
+    path('portal/houses', views.houses),
 
 ]
 

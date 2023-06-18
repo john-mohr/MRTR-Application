@@ -1,12 +1,14 @@
 from .forms import *
 from .models import *
+from .tables import *
 from .utils import prorate
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db.models import Sum
+from django_tables2 import RequestConfig
 from dateutil.relativedelta import relativedelta
-
 
 # Create your views here.
 
@@ -46,19 +48,15 @@ def home(request):
     return render(request, 'mrtr/index.html', {'form': form})
 
 def locations(request):
-
     return render(request, 'mrtr/ourlocations.html')
 
 def sobriety_support(request):
-
     return render(request, 'mrtr/sobriety_support.html')
 
 def about(request):
-
     return render(request, 'mrtr/about_us.html')
 
 def payment(request):
-
     return render(request, 'mrtr/payment_options.html')
 
 def contact(request):
@@ -219,13 +217,63 @@ def readmit_res(request, id):
 
 
 def show_res(request):
-    table = Resident.objects.all().prefetch_related('bed')
+    # table = Resident.objects.all().prefetch_related('bed')
+    table = ResidentTable(Resident.objects.all(), order_by='first_name', orderable=True)
+    RequestConfig(request).configure(table)
+    name = 'Residents'
+    button_name = 'Add New Resident'
+    button_link = '/new_res'
     return render(request, 'mrtr/administrative.html', locals())
 
 
+def single_res(request, id):
+    res = Resident.objects.get(id=id)
+    name = res.full_name()
+
+    if res.discharge_date is None:
+        buttons = [('Add Rent Payment', '/new_rent_pmt'), ('Adjust Balance', '/new_trans'),
+                   ('Discharge', '/discharge_res/' + str(id)), ('Edit info', '/edit_res/' + str(id))]
+    else:
+        buttons = [('Add Rent Payment', '/new_rent_pmt'), ('Adjust Balance', '/new_trans'),
+                   ('Readmit', '/readmit_res/' + str(id)), ('Edit info', '/edit_res/' + str(id))]
+
+    ledger = TransactionTable(Transaction.objects.filter(resident=1).order_by('-date'))
+
+    balance = Transaction.objects.filter(resident=1).aggregate(Sum('amount'))['amount__sum']
+
+    if res.bed is not None:
+        bed_name = res.bed.name
+        house_name = res.bed.house.name
+    else:
+        bed_name = None
+        house_name = None
+
+    res_dict = res.__dict__
+
+    for key in res_dict.copy():
+        if key.startswith('_'):
+            del res_dict[key]
+
+    fields = list((res_dict.keys()))
+    insrt = fields.index('bed_id')
+    fields.pop(insrt)
+    fields.insert(insrt, 'Bed')
+    fields.insert(insrt + 1, 'House')
+    fields = [x.replace('_', ' ') for x in fields]
+    fields = [x.title() for x in fields]
+
+    values = list((res_dict.values()))
+    values.pop(insrt)
+    values.insert(insrt, bed_name)
+    values.insert(insrt + 1, house_name)
+
+    info = zip(fields, values)
+    return render(request, 'mrtr/temp_single.html', locals())
+
+
 # New transaction
-# TODO Figure out how to make method field appear conditional on if type == 'pmt' (possible workaround - separate form for payments)
 def new_trans(request):
+    title = 'New Transaction'
     form = TransactionForm()
     if request.method == 'POST':
         sub = TransactionForm(request.POST)
@@ -236,7 +284,19 @@ def new_trans(request):
             if sub.instance.type in decrease:
                 sub.instance.amount *= -1
             sub.save()
-    return render(request, 'mrtr/administrative.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', locals())
+
+
+def new_rent_pmt(request):
+    title = 'New Rent Payment'
+    form = RentPaymentForm()
+    if request.method == 'POST':
+        sub = RentPaymentForm(request.POST)
+        if sub.is_valid():
+            sub.instance.amount *= -1
+            sub.instance.type = 'pmt'
+            sub.save()
+    return render(request, 'mrtr/administrative.html', locals())
 
 
 # TODO Figure out better way to select residents from a list/search
@@ -275,6 +335,17 @@ def edit_trans(request, id):
         else:
             form = TransactionForm(instance=transaction)
     return render(request, 'mrtr/administrative.html', {'form': form})
+
+
+def houses(request):
+    table = HouseTable(House.objects.all(), orderable=True)
+    x = Resident.objects.get(pk=1)
+    print(x.full_name())
+    RequestConfig(request).configure(table)
+    name = 'Houses'
+    button_name = 'Add New House'
+    button_link = ''
+    return render(request, 'mrtr/temp_tables.html', locals())
 
 
 # Change House Manager

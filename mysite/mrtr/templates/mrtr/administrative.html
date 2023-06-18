@@ -90,6 +90,7 @@
                 </div>
             </nav>
             <body class="body">
+                <h1>{{ title }}</h1>
                 <form action="" method="post">
                     {%  csrf_token %}
                     {{ form | crispy}}
