@@ -28,26 +28,26 @@ urlpatterns = [
     path('sobriety-support', views.sobriety_support),
     path('contact', views.contact),
     path('payment-options', views.payment),
-    # path('portal', views.portal),
+    path('portal', views.portal),
 
     # Resident
-    path('new_res', views.new_res),
-    path('select_res', views.select_res),
-    path('edit_res/<int:id>', views.edit_res),
-    path('discharge_res/<int:id>', views.discharge_res),
-    path('readmit_res', views.select_past_res),
-    path('readmit_res/<int:id>', views.readmit_res),
-    path('show_res', views.show_res),
+    path('portal/new_res', views.new_res),
+    path('portal/select_res', views.select_res),
+    path('portal/edit_res/<int:id>', views.edit_res),
+    path('portal/discharge_res/<int:id>', views.discharge_res),
+    path('portal/readmit_res', views.select_past_res),
+    path('portal/readmit_res/<int:id>', views.readmit_res),
+    path('portal/show_res', views.show_res),
 
     # Transactions
-    path('new_trans', views.new_trans),
-    path('select_trans', views.select_trans),
-    path('edit_trans/<int:id>', views.edit_trans),
+    path('portal/new_trans', views.new_trans),
+    path('portal/select_trans', views.select_trans),
+    path('portal/edit_trans/<int:id>', views.edit_trans),
 
     # Other
-    path('change_hm', views.change_hm),
-    path('new_dtest', views.new_dtest),
-    path('new_check_in', views.new_check_in),
+    path('portal/change_hm', views.change_hm),
+    path('portal/new_dtest', views.new_dtest),
+    path('portal/new_check_in', views.new_check_in),
 
 ]
 

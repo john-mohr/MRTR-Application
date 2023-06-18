@@ -85,9 +85,12 @@ def contact(request):
 
 
 # Admin forms
+@groups_only('House Manager')
+def portal(request):
+    return render(request, 'mrtr/administrative.html')
 
 # New Resident
-# @groups_only('House Manager')
+@groups_only('House Manager')
 def new_res(request):
     form = ResidentForm()
     if request.method == 'POST':
@@ -120,7 +123,7 @@ def new_res(request):
                                     submission_date=sub.instance.submission_date
                                     )
             second_mo.save()
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
     # return render(request, 'mrtr/administrative.html', context)
 
 
@@ -137,7 +140,7 @@ def select_res(request):
             elif 'delete' in request.POST:
                 res_to_delete = Resident.objects.get(id=request.POST['resident'])
                 res_to_delete.delete()
-    return render(request, 'mrtr/temp_selects.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # Edit resident
@@ -161,10 +164,10 @@ def edit_res(request, id):
             sub.save()
             resident.last_update = timezone.now()
             resident.save()
-            return render(request, 'mrtr/temp_forms.html', {'form': form})
+            return render(request, 'mrtr/administrative.html', {'form': form})
         else:
             form = ResidentForm(instance=resident)
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # Discharge resident
@@ -181,8 +184,8 @@ def discharge_res(request, id):
                 resident.notes = str(resident.notes) + '\nReason Discharged (' + str(sub.cleaned_data['date']) + '): ' + sub.cleaned_data['reason']
             # TODO Figure out if TC wants an option to refund rent
             resident.save()
-            return render(request, 'mrtr/temp_forms.html', {'form': form})
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+            return render(request, 'mrtr/administrative.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 def select_past_res(request):
@@ -191,7 +194,7 @@ def select_past_res(request):
         sub = SelectPastResForm(request.POST)
         if sub.is_valid():
             return redirect('/readmit_res/' + str(request.POST['resident']))
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # Readmit resident
@@ -209,15 +212,15 @@ def readmit_res(request, id):
             resident.save()
 
             # TODO Figure out how to handle readmission balance
-            return render(request, 'mrtr/temp_forms.html', {'form': form})
+            return render(request,'mrtr/administrative.html', {'form': form})
         else:
             form = ResidentForm(instance=resident)
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request,'mrtr/administrative.html', {'form': form})
 
 
 def show_res(request):
     table = Resident.objects.all().prefetch_related('bed')
-    return render(request, 'mrtr/temp_tables.html', locals())
+    return render(request, 'mrtr/administrative.html', locals())
 
 
 # New transaction
@@ -233,7 +236,7 @@ def new_trans(request):
             if sub.instance.type in decrease:
                 sub.instance.amount *= -1
             sub.save()
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # TODO Figure out better way to select residents from a list/search
@@ -248,8 +251,8 @@ def select_trans(request):
                 trans_to_delete = Transaction.objects.get(id=request.POST['transaction'])
                 trans_to_delete.delete()
             elif 'discharge' in request.POST:
-                render(request, 'mrtr/temp_selects.html', {'form': form})
-    return render(request, 'mrtr/temp_selects.html', {'form': form})
+                render(request, 'mrtr/administrative.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # Edit transaction
@@ -268,10 +271,10 @@ def edit_trans(request, id):
                 sub.instance.amount *= -1
             transaction.last_update = timezone.now()
             sub.save()
-            return render(request, 'mrtr/temp_forms.html', {'form': form})
+            return render(request,'mrtr/administrative.html', {'form': form})
         else:
             form = TransactionForm(instance=transaction)
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # Change House Manager
@@ -316,7 +319,7 @@ def change_hm(request):
             house_to_edit.manager = new_hm
             house_to_edit.last_update = current_datetime
             house_to_edit.save()
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # House manager forms
@@ -329,7 +332,7 @@ def new_dtest(request):
         sub = DrugTestForm(request.POST)
         if sub.is_valid():
             sub.save()
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
 
 
 # New Check-in
@@ -340,4 +343,4 @@ def new_check_in(request):
         sub = CheckInForm(request.POST)
         if sub.is_valid():
             sub.save()
-    return render(request, 'mrtr/temp_forms.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form})
