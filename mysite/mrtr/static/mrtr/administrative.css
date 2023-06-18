@@ -112,3 +112,11 @@ body{
   margin-right: 10px;
   
 }
+
+.admin-section .form{
+  padding: 50px;
+}
+
+.admin-section .form-container{
+  padding: 50px;
+}

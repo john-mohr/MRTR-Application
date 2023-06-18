@@ -28,13 +28,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/portal">
+                    <a href="/portal/discharge_select_res">
                         <i class="fa-solid fa-person-circle-xmark"></i>
                         <span class="form_name">Remove Residents</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/portal/edit_res">
+                    <a href="/portal/edit_select_res">
                         <i class="fa-solid fa-person-circle-minus"></i>
                         <span class="form_name">Edit Resident Information</span>
                     </a>
@@ -82,7 +82,7 @@
             <nav>
                 <div class="sidebar-button">
                     <i class="fa-solid fa-bars sidebarButton"></i>
-                    <span class="dashboard">Dashboard</span>
+                    <span class="dashboard">{{ page }}</span>
                 </div>
                 <div class="profile-details">
                     <span class="user-name">Name Pham</span>
@@ -90,12 +90,49 @@
                 </div>
             </nav>
             <body class="body">
-                <h1>{{ title }}</h1>
-                <form action="" method="post">
-                    {%  csrf_token %}
-                    {{ form | crispy}}
-                    <input type="submit" name="new_resident">
-                </form>
+                <div class="form-container">
+                    <style> 
+                        select {
+                          width: 100%;
+                          padding: 16px 20px;
+                          border: none;
+                          border-radius: 4px;
+                          background-color: #f1f1f1;
+                        }
+                        input {
+                            width: 100%;
+                            padding: 12px 20px;
+                            margin: 8px 0;
+                            box-sizing: border-box;
+                            }
+                        input[type=button], input[type=submit], input[type=reset] {
+                            background-color: #04AA6D;
+                            border: none;
+                            color: white;
+                            padding: 16px 32px;
+                            text-decoration: none;
+                            margin: 4px 2px;
+                            cursor: pointer;
+                        }
+                        textarea {
+                            width: 100%;
+                            height: 150px;
+                            padding: 12px 20px;
+                            box-sizing: border-box;
+                            border: 2px solid #ccc;
+                            border-radius: 4px;
+                            background-color: #f8f8f8;
+                            resize: none;
+                            }
+                    </style>
+                    
+                    <form class= "form" action="" method="post">
+                        {%  csrf_token %}
+                        {{ form | crispy}}
+                        <input type="submit" name="new_resident">
+                    </form>
+                </div>
+                
             </body>
         </section>
         <script src="{% static 'mrtr/administrative.js' %}"  type="text/javascript"></script>

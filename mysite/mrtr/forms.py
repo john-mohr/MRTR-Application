@@ -83,27 +83,9 @@ class SelectPastResForm(forms.Form):
     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=False))
 
 
-class RentPaymentForm(forms.ModelForm):
-    method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
-    resident = ResidentField(queryset=Resident.objects.all())
-    notes = forms.CharField(widget=forms.Textarea, required=False)
-
-    class Meta:
-        model = Transaction
-        fields = ['resident',
-                  'date',
-                  'amount',
-                  'method',
-                  'notes',
-                  ]
-        widgets = {
-            'date': DateInput(),
-        }
-
-
 class TransactionForm(forms.ModelForm):
     type = forms.ChoiceField(choices=Transaction.TYPE_CHOICES)
-    # method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
+    method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
     resident = ResidentField(queryset=Resident.objects.all())
     notes = forms.CharField(widget=forms.Textarea, required=False)
 
@@ -113,7 +95,7 @@ class TransactionForm(forms.ModelForm):
                   'date',
                   'type',
                   'amount',
-                  # 'method',
+                  'method',
                   'notes',
                   ]
         widgets = {
