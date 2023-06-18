@@ -1,0 +1,53 @@
+{% extends "mrtr/base_generic.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container-2 w-container"></div>
+<div class="div_block">
+    <center>
+    <h1 class="heading-4">CONTACT US</h1>
+    </center>
+    <div class="flex-container">
+        <div class="display-box" style="height: 420px;">
+            <h3 style="text-align: left; position: relative; top: -50px;">
+                Locations
+            </h3>
+            <p>
+                Incentive program for all clients accruing weekly and awarded after 6 months in good standing with MRTR.
+            </p>
+        </div>
+        <div class="display-box" style="height: 420px;">
+            <h3 style="text-align: left; position: relative; top: -50px;">
+                Phone
+            </h3>
+            <p>
+                Clients and individual house managers are in direct contact with treatment centers, Certified Peer Support and Lead House Manager.
+            </p>
+        </div>
+        <div class="display-box" style="height: 420px;">
+            <h3 style="text-align: left; position: relative; top: -50px;">
+                Opening Hours
+            </h3>
+            <p>
+                MRTR is provided with many ways to involve clients for service projects within the community.
+            </p>
+        </div>
+      </div>
+      <br>
+      <br>
+      <br>
+    <div class="div-block" style="padding: 25px;">
+    <div style="margin:80px">
+		<h4>Contact us directly if you have any questions</h4>
+		<p>
+			Please write your name, email address and a message below if you have any questions.
+		</p>
+		<form method="post">
+        {% csrf_token %}
+            {{form | crispy}}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

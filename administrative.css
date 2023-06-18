@@ -1,0 +1,114 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body{
+  min-height: 100vh;
+  width: 100%;
+}
+
+.sidebar{
+  position: fixed;
+  height: 100%;
+  width: 260px;
+  background: #0A2558;
+  transition: all 0.5s ease;
+}
+
+.sidebar.active{
+  width: 60px;
+}
+.sidebar .logo-details{
+  height: 80px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.sidebar .logo-details i{
+  font-size: 26px;
+  font-weight: 500;
+  color: #fff;
+  min-width: 60px;
+  text-align: center;
+}
+.sidebar .logo-details .logo_name{
+  font-size: 24px;
+  font-weight: 500;
+  color: #fff;
+  margin-left: 8px;
+}
+
+.sidebar .admin-nav-links{
+  margin-top: 16px;
+}
+
+.sidebar .admin-nav-links li{
+  height: 50px;
+  width: 100%;
+  list-style: none;
+}
+
+.sidebar .admin-nav-links li a{
+ height: 100%;
+ width: 100%;
+ display: flex;
+ align-items: center;
+ text-decoration: none;
+
+}
+
+.sidebar .admin-nav-links li a{
+  min-width: 60px;
+  text-align: center;
+  color: #fff;
+  font-size: 18px;
+}
+
+.sidebar .admin-nav-links li a i{
+  min-width: 60px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.sidebar .admin-nav-links li a .form_name{
+  margin-left: 18px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+/* Admin section */
+.admin-section{
+  background: #f5f5f5;
+  position: relative;
+  min-height: 100vh;
+  width: calc(100% - 260px);
+  left:260px;
+  transition: all 0.5s ease;
+}
+.sidebar.active ~ .admin-section{
+  width: calc(100% - 60px);
+  left: 60px;
+}
+.admin-section nav{
+  height: 80px;
+  background: #fff;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.admin-section nav .sidebar-button{
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 400;
+}
+.admin-section nav .sidebar-button i{
+  font-size: 35px;
+  margin-right: 10px;
+  
+}
