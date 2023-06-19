@@ -17,6 +17,11 @@ class Resident(models.Model):
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
+    def get_absolute_url(self):
+        return '/portal/resident/%i' % self.id
+
+    def full_name(self):
+        return self.first_name + ' ' + self.last_name
 
 class Transaction(models.Model):
     date = models.DateField(default=timezone.now)

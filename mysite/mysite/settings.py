@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
+    'django_tables2',
+    
     
 ]
 

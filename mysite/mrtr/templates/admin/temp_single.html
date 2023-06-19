@@ -1,0 +1,47 @@
+{% extends "admin/administrative.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% load render_table from django_tables2 %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <style>
+        table, th, td {
+            text-align: left;
+            border:1px solid black;
+            border-collapse: collapse;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+    </style>
+    <body>
+        <h1>{{ name }}</h1>
+        <p>Balance: ${{ balance }}</p>
+        <section>
+            {% for x in buttons %}
+                <button type="button">
+                        <a href="{{ x.1 }}">{{ x.0 }}</a>
+                </button>
+            {% endfor %}
+            &nbsp;
+        </section>
+        <section>
+            <h2>Ledger</h2>
+            {% render_table ledger %}
+        </section>
+        <section>
+            <table>
+                {% for x in info %}
+                <tr>
+                    <th>{{x.0}}</th>
+                    <td>{{x.1}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </section>
+    </body>
+</html>
+{% endblock content %}
