@@ -6,6 +6,7 @@ from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+from django.contrib import messages
 
 
 # Create your views here.
@@ -126,6 +127,7 @@ def new_res(request):
                                     submission_date=sub.instance.submission_date
                                     )
             second_mo.save()
+            messages.success(request, 'Form submission successful')
     return render(request, 'mrtr/administrative.html', {'form': form, 'page': 'New Resident'})
     # return render(request, 'mrtr/administrative.html', context)
 
@@ -153,7 +155,7 @@ def edit_select_res(request):
     if request.method == 'POST':
         sub = SelectResForm(request.POST)
         return redirect('/portal/edit_res/' + str(request.POST['resident']))
-    return render(request, 'mrtr/administrative.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form, 'page': 'Edit Resident Information'})
 def edit_res(request, id):
     resident = Resident.objects.get(id=id)
     old_rent = resident.rent
@@ -173,10 +175,11 @@ def edit_res(request, id):
             sub.save()
             resident.last_update = timezone.now()
             resident.save()
-            return render(request, 'mrtr/administrative.html', {'form': form})
+            messages.success(request, 'Form submission successful')
+            return render(request, 'mrtr/administrative.html', {'form': form, 'page': 'Edit Resident Information'})
         else:
             form = ResidentForm(instance=resident)
-    return render(request, 'mrtr/administrative.html', {'form': form})
+    return render(request, 'mrtr/administrative.html', {'form': form, 'page': 'Edit Resident Information'})
 
 
 # Discharge resident
@@ -185,7 +188,7 @@ def discharge_select_res(request):
     if request.method == 'POST':
         sub = SelectResForm(request.POST)
         return redirect('/portal/discharge_res/' + str(request.POST['resident']))
-    return render(request, 'mrtr/administrative.html', {'form': form})
+    return render(request, 'mrtr/administrative.html',  {'form': form, 'page': 'Remove Resident'})
 
 
 def discharge_res(request, id):
@@ -201,8 +204,9 @@ def discharge_res(request, id):
                 resident.notes = str(resident.notes) + '\nReason Discharged (' + str(sub.cleaned_data['date']) + '): ' + sub.cleaned_data['reason']
             # TODO Figure out if TC wants an option to refund rent
             resident.save()
-            return render(request, 'mrtr/administrative.html', {'form': form})
-    return render(request, 'mrtr/administrative.html', {'form': form})
+            messages.success(request, 'Form submission successful')
+            return render(request, 'mrtr/administrative.html', {'form': form, 'page': 'Remove Resident'})
+    return render(request, 'mrtr/administrative.html',  {'form': form, 'page': 'Remove Resident'})
 
 
 def select_past_res(request):
@@ -252,6 +256,7 @@ def new_trans(request):
             decrease = ['pmt', 'bon', 'wrk', 'sos']
             if sub.instance.type in decrease:
                 sub.instance.amount *= -1
+            messages.success(request, 'Form submission successful')
             sub.save()
     return render(request, 'mrtr/administrative.html', {'form': form})
 

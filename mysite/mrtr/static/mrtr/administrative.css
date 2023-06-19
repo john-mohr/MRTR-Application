@@ -19,7 +19,7 @@ body{
 }
 
 .sidebar.active{
-  width: 60px;
+  width: 260px;
 }
 .sidebar .logo-details{
   height: 80px;
@@ -51,6 +51,7 @@ body{
   list-style: none;
 }
 
+
 .sidebar .admin-nav-links li a{
  height: 100%;
  width: 100%;
@@ -71,6 +72,12 @@ body{
   min-width: 60px;
   text-align: center;
   font-size: 18px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.sidebar .admin-nav-links li a i:hover{
+  background-color: white;
+  color: #0A2558;
 }
 
 .sidebar .admin-nav-links li a .form_name{
@@ -80,18 +87,22 @@ body{
   font-weight: 400;
   white-space: nowrap;
 }
+.sidebar .admin-nav-links li a .form_name:hover{
+  font-size: 16px;
+}
+
 /* Admin section */
 .admin-section{
   background: #f5f5f5;
   position: relative;
   min-height: 100vh;
-  width: calc(100% - 260px);
-  left:260px;
+  width: calc(100% - 60px);
+  left:60px;
   transition: all 0.5s ease;
 }
 .sidebar.active ~ .admin-section{
-  width: calc(100% - 60px);
-  left: 60px;
+  width: calc(100% - 260px);
+  left: 260px;
 }
 .admin-section nav{
   height: 80px;
@@ -100,6 +111,9 @@ body{
   display: flex;
   align-items: center;
   justify-content: space-between;
+  top: 0px;
+  position: fixed;
+  width: calc(100% - 60px);
 }
 .admin-section nav .sidebar-button{
   display: flex;
@@ -118,5 +132,20 @@ body{
 }
 
 .admin-section .form-container{
-  padding: 50px;
+  padding: 250px;
+  padding-top: 100px;
+  
 }
+
+@media screen and (max-width: 991px) {
+  .sidebar .admin-nav-links li a i{
+    min-width: 60px;
+    text-align: center;
+    font-size: 28px;
+    
+  }
+  .admin-section .form-container{
+    padding: 50px;
+    
+  }
+ }
