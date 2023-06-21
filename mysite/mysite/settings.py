@@ -141,7 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'custom_user.User'
 
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
-LOGIN_REDIRECT_URL = '/portal'
+LOGIN_REDIRECT_URL = '/portal/house_manager'
 
 #Email backend, AWS for production
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

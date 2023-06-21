@@ -55,6 +55,9 @@ urlpatterns = [
     path('portal/new_check_in', views.new_check_in),
     path('portal/houses', views.houses),
 
+    #House Manager Page
+    path('portal/house_manager/', views.house_manager),
+
 ]
 
 urlpatterns += [
