@@ -30,7 +30,7 @@ body{
 .sidebar .logo-details i{
   font-size: 26px;
   font-weight: 500;
-  color: white;
+  color: #ff9610;
   min-width: 60px;
   text-align: center;
 }
@@ -71,7 +71,7 @@ body{
 .sidebar .admin-nav-links li a i{
   min-width: 60px;
   text-align: center;
-  font-size: 18px;
+  font-size: 24px;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -125,6 +125,14 @@ body{
 .admin-section nav .sidebar-button i{
   font-size: 35px;
   margin-right: 10px;
+  
+}
+.admin-section nav .sidebar-button span{
+  padding: 10px;
+  
+}
+.admin-section nav .user-name{
+  padding: 5px;
   
 }
 

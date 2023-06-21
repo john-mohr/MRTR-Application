@@ -85,14 +85,18 @@ def contact(request):
             return redirect('/')
 
     form = ContactForm()
-    return render(request, 'admin/contact_us.html', {'form': form})
+    return render(request, 'mrtr/contact_us.html', {'form': form})
 
 
 # Admin forms
+def username(request):
+    username = request.user.first_name +" " + request.user.last_name
+    return username
 @groups_only('House Manager')
 def portal(request):
     context = {
         'page': 'Dashboard',
+        'fullname': username(request),
     }
     return render(request, 'admin/administrative.html',context)
 
@@ -131,7 +135,7 @@ def new_res(request):
                                     )
             second_mo.save()
             messages.success(request, 'Form submission successful')
-    return render(request, 'admin/forms.html', {'form': form, 'page': 'New Resident'})
+    return render(request, 'admin/forms.html', {'form': form, 'page': 'New Resident', 'fullname': username(request)})
     # return render(request, 'mrtr/administrative.html', context)
 
 
@@ -158,7 +162,7 @@ def edit_select_res(request):
     if request.method == 'POST':
         sub = SelectResForm(request.POST)
         return redirect('/portal/edit_res/' + str(request.POST['resident']))
-    return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information'})
+    return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'fullname': username(request)})
 def edit_res(request, id):
     resident = Resident.objects.get(id=id)
     old_rent = resident.rent
@@ -179,10 +183,10 @@ def edit_res(request, id):
             resident.last_update = timezone.now()
             resident.save()
             messages.success(request, 'Form submission successful')
-            return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information'})
+            return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'username': username(request)})
         else:
             form = ResidentForm(instance=resident)
-    return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information'})
+    return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'username': username(request)})
 
 
 # Discharge resident
@@ -191,7 +195,7 @@ def discharge_select_res(request):
     if request.method == 'POST':
         sub = SelectResForm(request.POST)
         return redirect('/portal/discharge_res/' + str(request.POST['resident']))
-    return render(request, 'admin/forms.html',  {'form': form, 'page': 'Remove Resident'})
+    return render(request, 'admin/forms.html',  {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
 
 
 def discharge_res(request, id):
@@ -208,8 +212,8 @@ def discharge_res(request, id):
             # TODO Figure out if TC wants an option to refund rent
             resident.save()
             messages.success(request, 'Form submission successful')
-            return render(request, 'admin/forms.html', {'form': form, 'page': 'Remove Resident'})
-    return render(request, 'admin/forms.html',  {'form': form, 'page': 'Remove Resident'})
+            return render(request, 'admin/forms.html', {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
+    return render(request, 'admin/forms.html',  {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
 
 
 # def select_past_res(request):
@@ -250,6 +254,8 @@ def show_res(request):
     button_name = 'Add New Resident'
     button_link = '/portal/new_res'
     page = 'View Resident Information'
+    fullname = str(username(request))
+    
     return render(request, 'admin/temp_tables.html', locals())
 
 def single_res(request, id):
@@ -294,12 +300,14 @@ def single_res(request, id):
     values.insert(insrt + 1, house_name)
 
     info = zip(fields, values)
+    fullname = username(request)
     return render(request, 'admin/temp_single.html', locals())
 
 
 # New transaction
 def new_trans(request):
     page = 'New Transaction'
+    fullname = username(request)
     form = TransactionForm()
     if request.method == 'POST':
         sub = TransactionForm(request.POST)
@@ -316,6 +324,7 @@ def new_trans(request):
 
 def new_rent_pmt(request):
     page = 'New Rent Payment'
+    fullname = username(request)
     form = RentPaymentForm()
     if request.method == 'POST':
         sub = RentPaymentForm(request.POST)
@@ -345,6 +354,7 @@ def select_trans(request):
 # Edit transaction
 def edit_trans(request, id):
     transaction = Transaction.objects.get(id=id)
+    fullname = username(request)
     form = TransactionForm(instance=transaction)
     if request.method == 'POST':
         old_type = transaction.type
@@ -364,6 +374,7 @@ def edit_trans(request, id):
     return render(request, 'admin/forms.html', {'form': form})
 
 def houses(request):
+    fullname = username(request)
     table = HouseTable(House.objects.all(), orderable=True)
     x = Resident.objects.get(pk=1)
     print(x.full_name())
@@ -376,6 +387,7 @@ def houses(request):
 # Change House Manager
 # TODO Handle multiple house managers for one house (replace House.manager with a relationship table)
 def change_hm(request):
+    fullname = username(request)
     form = ChangeHMForm()
     if request.method == 'POST':
         sub = ChangeHMForm(request.POST)
@@ -440,3 +452,12 @@ def new_check_in(request):
         if sub.is_valid():
             sub.save()
     return render(request, 'mrtr/forms.html', {'form': form})
+
+# House Manager forms
+@groups_only('House Manager')
+def house_manager(request):
+    context = {
+        'page': 'Dashboard',
+        'fullname': username(request),
+    }
+    return render(request, 'house/house_generic.html',context)
