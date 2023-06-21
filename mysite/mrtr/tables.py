@@ -6,6 +6,7 @@ class ResidentTable(tables.Table):
     id = tables.Column(linkify=True)
     first_name = tables.Column(linkify=True)
     last_name = tables.Column(linkify=True)
+    
 
 
     class Meta:

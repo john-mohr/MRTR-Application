@@ -5,6 +5,7 @@
 {% block content %}
 <!doctype html>
 <html>
+    <div style="overflow-x:auto; padding: 50px">
     <style>
         table, th, td {
             text-align: left;
@@ -18,12 +19,13 @@
     <body>
         <section>
             <button type="button">
-                <a href="{{ button_link }}">{{ button_name }}</a>
+                <a href="/portal/new_res">{{ button_name }}</a>
             </button>
         </section>
         <section>
             {% render_table table %}
         </section>
     </body>
+    </div>
 </html>
 {% endblock content %}

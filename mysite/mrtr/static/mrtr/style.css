@@ -574,18 +574,21 @@
    }
    .display-box{
     padding: 56px 16px 16px 16px;
+    border-style: solid;
     border-radius: 15px;
-    background-color: #dae3ee;
+    background-color: white;
+    border-color: #ff9610;
     width: 300px;
     height: 300px;
     text-align: center;
     margin: 15px;
-
-    
     justify-content: center;
     align-items: center;
- 
    }
+   .display-box span{
+    color: #003f5a;
+   }
+   
    .display-hero{
     background-color: #dae3ee;
     width: 550px;
