@@ -46,7 +46,7 @@ urlpatterns = [
     path('portal/edit_trans/<int:id>', views.edit_trans),
 
     # Other
-    path('portal/change_hm', views.change_hm),
+    # path('portal/change_hm', views.change_hm),
     # path('portal/new_dtest', views.new_dtest),
     # path('portal/new_check_in', views.new_check_in),
     path('portal/new_house', views.new_house),

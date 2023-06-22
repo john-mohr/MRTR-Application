@@ -9,6 +9,8 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.db.models import Sum
+from django.db.models import Value as V
+from django.db.models.functions import Concat
 from django_tables2 import RequestConfig
 
 
@@ -399,50 +401,50 @@ def single_house(request, id):
     return render(request, 'admin/single_house.html', locals())
 
 
-# Change House Manager
-# TODO Handle multiple house managers for one house (replace House.manager with a relationship table)
-def change_hm(request):
-    fullname = username(request)
-    form = ChangeHMForm()
-    if request.method == 'POST':
-        sub = ChangeHMForm(request.POST)
-        if sub.is_valid():
-            house_to_edit = sub.cleaned_data['house']
-            old_hm = house_to_edit.manager
-            new_hm = sub.cleaned_data['new_manager']
-            current_datetime = timezone.now()
-            current_date = current_datetime.date()
-
-            # Remove old house manager's rent discount
-            if old_hm is not None:
-                rm_discount = Transaction(date=current_date,
-                                          amount=prorate((old_hm.rent * 2) - old_hm.rent, current_date),
-                                          type='nra',
-                                          resident=old_hm,
-                                          notes='Change: $' + str(old_hm.rent) + ' > $' + str(old_hm.rent * 2) +
-                                                '; Reason: removed house manager discount'
-                                          )
-                rm_discount.save()
-                old_hm.rent = old_hm.rent * 2
-                old_hm.save()
-
-            # Give new house manager the rent discount
-            add_discount = Transaction(date=current_date,
-                                       amount=prorate((new_hm.rent / 2) - new_hm.rent, current_date),
-                                       type='nra',
-                                       resident=new_hm,
-                                       notes='Change: $' + str(new_hm.rent) + ' > $' + str(new_hm.rent / 2) +
-                                             '; Reason: house manager discount'
-                                       )
-            add_discount.save()
-            new_hm.rent = new_hm.rent / 2
-            new_hm.save()
-
-            # Assign new house manager
-            house_to_edit.manager = new_hm
-            house_to_edit.last_update = current_datetime
-            house_to_edit.save()
-    return render(request, 'mrtr/forms.html', {'form': form})
+# # Change House Manager
+# # TODO Handle multiple house managers for one house (replace House.manager with a relationship table)
+# def change_hm(request):
+#     fullname = username(request)
+#     form = ChangeHMForm()
+#     if request.method == 'POST':
+#         sub = ChangeHMForm(request.POST)
+#         if sub.is_valid():
+#             house_to_edit = sub.cleaned_data['house']
+#             old_hm = house_to_edit.manager
+#             new_hm = sub.cleaned_data['new_manager']
+#             current_datetime = timezone.now()
+#             current_date = current_datetime.date()
+#
+#             # Remove old house manager's rent discount
+#             if old_hm is not None:
+#                 rm_discount = Transaction(date=current_date,
+#                                           amount=prorate((old_hm.rent * 2) - old_hm.rent, current_date),
+#                                           type='nra',
+#                                           resident=old_hm,
+#                                           notes='Change: $' + str(old_hm.rent) + ' > $' + str(old_hm.rent * 2) +
+#                                                 '; Reason: removed house manager discount'
+#                                           )
+#                 rm_discount.save()
+#                 old_hm.rent = old_hm.rent * 2
+#                 old_hm.save()
+#
+#             # Give new house manager the rent discount
+#             add_discount = Transaction(date=current_date,
+#                                        amount=prorate((new_hm.rent / 2) - new_hm.rent, current_date),
+#                                        type='nra',
+#                                        resident=new_hm,
+#                                        notes='Change: $' + str(new_hm.rent) + ' > $' + str(new_hm.rent / 2) +
+#                                              '; Reason: house manager discount'
+#                                        )
+#             add_discount.save()
+#             new_hm.rent = new_hm.rent / 2
+#             new_hm.save()
+#
+#             # Assign new house manager
+#             house_to_edit.manager = new_hm
+#             house_to_edit.last_update = current_datetime
+#             house_to_edit.save()
+#     return render(request, 'mrtr/forms.html', {'form': form})
 
 
 def beds(request):
