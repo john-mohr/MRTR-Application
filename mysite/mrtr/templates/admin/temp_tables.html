@@ -2,6 +2,7 @@
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load crispy_forms_tags %}
+
 {% block content %}
 <!doctype html>
 <html>
@@ -19,7 +20,7 @@
     <body>
         <section>
             <button type="button">
-                <a href="/portal/new_res">{{ button_name }}</a>
+                <a href="{{ button_link }}">{{ button_name }}</a>
             </button>
         </section>
         <section>

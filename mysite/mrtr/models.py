@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator
 from django.utils import timezone
+from django.db.models import Sum
 
 class Resident(models.Model):
     first_name = models.CharField(max_length=50)
@@ -8,8 +9,8 @@ class Resident(models.Model):
     phone = models.BigIntegerField(validators=[MaxValueValidator(9999999999)], null=True)
     email = models.EmailField(max_length=62, null=True)
     admit_date = models.DateField(default=timezone.now)
-    bed = models.OneToOneField('Bed', on_delete=models.CASCADE, blank=True, null=True)
     rent = models.IntegerField(validators=[MaxValueValidator(1000)])
+    bed = models.OneToOneField('Bed', on_delete=models.CASCADE, blank=True, null=True)
     door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True)
     referral_info = models.TextField(null=True)
     notes = models.TextField(null=True)
@@ -23,13 +24,17 @@ class Resident(models.Model):
     def full_name(self):
         return self.first_name + ' ' + self.last_name
 
+    def balance(self):
+        return Transaction.objects.filter(resident=self.id).aggregate(Sum('amount'))['amount__sum']
+
+
 class Transaction(models.Model):
     date = models.DateField(default=timezone.now)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     # TODO Cut down on the amount of transaction types
     TYPE_CHOICES = [
         # # Auto apply
-        # ('rnt', 'Rent charge'),
+        ('rnt', 'Rent charge'),
         # ('rfd', 'Refund'),
         # ('inc', 'Sober incentive'),
         # ('nra', 'New rent amount adjustment'),
@@ -68,33 +73,40 @@ class Transaction(models.Model):
     last_update = models.DateTimeField(null=True)  # automatic
 
 
-class Drug_test(models.Model):
-    date = models.DateField(default=timezone.now, blank=True)
-    RESULT_CHOICES = [
-        ('neg', 'Negative'),
-        ('pos', 'Positive'),
-        ('med', 'Positive (meds)'),
-        ('inv', 'Invalid'),
-        ('oth', 'Other (specify)')
-    ]
-    result = models.CharField(max_length=3, choices=RESULT_CHOICES)
-    amphetamines = models.BooleanField()
-    barbiturates = models.BooleanField()
-    benzodiazepines = models.BooleanField()
-    cocaine = models.BooleanField()
-    marijuana = models.BooleanField()
-    opiates = models.BooleanField()
-    phencyclidine = models.BooleanField()
-    other = models.CharField(max_length=50, null=True)
-    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
-    submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+# class Drug_test(models.Model):
+#     date = models.DateField(default=timezone.now, blank=True)
+#     RESULT_CHOICES = [
+#         ('neg', 'Negative'),
+#         ('pos', 'Positive'),
+#         ('med', 'Positive (meds)'),
+#         ('inv', 'Invalid'),
+#         ('oth', 'Other (specify)')
+#     ]
+#     result = models.CharField(max_length=3, choices=RESULT_CHOICES)
+#     amphetamines = models.BooleanField()
+#     barbiturates = models.BooleanField()
+#     benzodiazepines = models.BooleanField()
+#     cocaine = models.BooleanField()
+#     marijuana = models.BooleanField()
+#     opiates = models.BooleanField()
+#     phencyclidine = models.BooleanField()
+#     other = models.CharField(max_length=50, null=True)
+#     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+#     submission_date = models.DateTimeField(default=timezone.now)  # automatic
+#     last_update = models.DateTimeField(null=True)  # automatic
 
 
 class House(models.Model):
     name = models.CharField(max_length=25)
     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', null=True)
+    address = models.CharField(max_length=50)
+    city = models.CharField(max_length=25)
+    state = models.CharField(max_length=2)
     last_update = models.DateTimeField(null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/house/%i' % self.id
+
 
 
 class Bed(models.Model):
@@ -102,19 +114,19 @@ class Bed(models.Model):
     house = models.ForeignKey('House', on_delete=models.CASCADE)
 
 
-class Check_in(models.Model):
-    date = models.DateField(default=timezone.now)
-    METHOD_CHOICES = [
-        ('ip', 'In person'),
-        ('pc', 'Phone call'),
-        ('tx', 'Text')
-    ]
-    method = models.CharField(max_length=2, choices=METHOD_CHOICES)
-    notes = models.TextField(null=True)
-    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
-    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', related_name='manager')  #, blank=True, null=True)  # maybe add limit_to() argument
-    submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+# class Check_in(models.Model):
+#     date = models.DateField(default=timezone.now)
+#     METHOD_CHOICES = [
+#         ('ip', 'In person'),
+#         ('pc', 'Phone call'),
+#         ('tx', 'Text')
+#     ]
+#     method = models.CharField(max_length=2, choices=METHOD_CHOICES)
+#     notes = models.TextField(null=True)
+#     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+#     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', related_name='manager')  #, blank=True, null=True)  # maybe add limit_to() argument
+#     submission_date = models.DateTimeField(default=timezone.now)  # automatic
+#     last_update = models.DateTimeField(null=True)  # automatic
 
 
 # class Shopping_trip(models.Model):

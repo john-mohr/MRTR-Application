@@ -92,13 +92,36 @@ def contact(request):
 def username(request):
     username = request.user.first_name +" " + request.user.last_name
     return username
+
+
 @groups_only('House Manager')
 def portal(request):
-    context = {
-        'page': 'Dashboard',
-        'fullname': username(request),
-    }
-    return render(request, 'admin/administrative.html',context)
+    page = 'Dashboard'
+    fullname = username(request)
+
+    buttons = [('Add Resident', '/portal/new_res'),
+               ('Add Rent Payment', '/portal/new_rent_pmt'),
+               ('Adjust Balance', '/portal/new_trans')]
+
+    occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
+    vacant_beds = BedTable(
+        Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
+        order_by='house', orderable=True, exclude=('id', 'occupant'))
+    RequestConfig(request).configure(vacant_beds)
+
+    # TODO:
+    #  Distinguish between current and past residents
+    #  Add a limit to number of residents shown or a threshold balance
+    res_balances = ResidentBalanceTable(Resident.objects.annotate(
+        balance=Sum('transaction__amount'), full_name=Concat('first_name', V(' '), 'last_name')),
+        order_by='-balance')
+    RequestConfig(request).configure(res_balances)
+
+    # TODO:
+    #  Calculate and display some key metrics (forecasted revenue, occupancy, maintenance costs, etc.)
+
+    return render(request, 'admin/homepage.html', locals())
+
 
 # New Resident
 @groups_only('House Manager')
@@ -135,34 +158,9 @@ def new_res(request):
                                     )
             second_mo.save()
             messages.success(request, 'Form submission successful')
-    return render(request, 'admin/forms.html', {'form': form, 'page': 'New Resident', 'fullname': username(request)})
-    # return render(request, 'mrtr/administrative.html', context)
+    return render(request, 'admin/forms.html', locals())
 
 
-# TODO Figure out better way to select residents from a list/search
-# def select_res(request):
-#     form = SelectResForm()
-#     if request.method == 'POST':
-#         sub = SelectResForm(request.POST)
-#         if sub.is_valid():
-#             if 'edit' in request.POST:
-#                 return redirect('/edit_res/' + str(request.POST['resident']))
-#             elif 'discharge' in request.POST:
-#                 return redirect('/discharge_res/' + str(request.POST['resident']))
-#             elif 'delete' in request.POST:
-#                 res_to_delete = Resident.objects.get(id=request.POST['resident'])
-#                 res_to_delete.delete()
-#     return render(request, 'admin/administrative.html', {'form': form})
-
-
-# Edit resident
-# TODO Handle resident balance when admit date is changed
-def edit_select_res(request):
-    form = SelectResForm()
-    if request.method == 'POST':
-        sub = SelectResForm(request.POST)
-        return redirect('/portal/edit_res/' + str(request.POST['resident']))
-    return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'fullname': username(request)})
 def edit_res(request, id):
     resident = Resident.objects.get(id=id)
     old_rent = resident.rent
@@ -189,15 +187,6 @@ def edit_res(request, id):
     return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'username': username(request)})
 
 
-# Discharge resident
-def discharge_select_res(request):
-    form = SelectResForm()
-    if request.method == 'POST':
-        sub = SelectResForm(request.POST)
-        return redirect('/portal/discharge_res/' + str(request.POST['resident']))
-    return render(request, 'admin/forms.html',  {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
-
-
 def discharge_res(request, id):
     resident = Resident.objects.get(id=id)
     form = DischargeResForm()
@@ -214,15 +203,6 @@ def discharge_res(request, id):
             messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
     return render(request, 'admin/forms.html',  {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
-
-
-# def select_past_res(request):
-#     form = SelectPastResForm()
-#     if request.method == 'POST':
-#         sub = SelectPastResForm(request.POST)
-#         if sub.is_valid():
-#             return redirect('/readmit_res/' + str(request.POST['resident']))
-#     return render(request, 'admin/administrative.html', {'form': form})
 
 
 # Readmit resident
@@ -246,73 +226,64 @@ def readmit_res(request, id):
     return render(request,'admin/administrative.html', {'form': form})
 
 
-def show_res(request):
-    # table = Resident.objects.all().prefetch_related('bed')
-    table = ResidentTable(Resident.objects.all(), order_by='first_name', orderable=True)
+def residents(request):
+    table = ResidentsTable(Resident.objects.annotate(balance=Sum('transaction__amount')), order_by='-submission_date', orderable=True, exclude='full_name')
     RequestConfig(request).configure(table)
-    name = 'Residents'
     button_name = 'Add New Resident'
     button_link = '/portal/new_res'
-    page = 'View Resident Information'
+    page = 'View Residents'
     fullname = str(username(request))
-    
+
     return render(request, 'admin/temp_tables.html', locals())
 
+
 def single_res(request, id):
+    page = "Current Resident"
     res = Resident.objects.get(id=id)
     name = res.full_name()
-    page = "Current Resident"
+    balance = res.balance()
+
     if res.discharge_date is None:
-        buttons = [('Add Rent Payment', '/portal/new_rent_pmt'), ('Adjust Balance', '/portal/new_trans'),
-                   ('Discharge', '/portal/discharge_res/' + str(id)), ('Edit info', '/portal/edit_res/' + str(id))]
-    else:
-        buttons = [('Add Rent Payment', '/portal/new_rent_pmt'), ('Adjust Balance', '/portal/new_trans'),
-                   ('Readmit', '/portal/readmit_res/' + str(id)), ('Edit info', '/portal/edit_res/' + str(id))]
-
-    ledger = TransactionTable(Transaction.objects.filter(resident=1).order_by('-date'))
-
-    balance = Transaction.objects.filter(resident=1).aggregate(Sum('amount'))['amount__sum']
-
-    if res.bed is not None:
+        buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
+                   ('Adjust Balance', '/portal/new_trans/' + str(id)),
+                   ('Discharge', '/portal/discharge_res/' + str(id)),
+                   ('Edit info', '/portal/edit_res/' + str(id))]
         bed_name = res.bed.name
         house_name = res.bed.house.name
     else:
+        buttons = [('Add Rent Payment', '/portal/new_rent_pmt' + str(id)),
+                   ('Adjust Balance', '/portal/new_trans' + str(id)),
+                   ('Readmit', '/portal/readmit_res/' + str(id)),
+                   ('Edit info', '/portal/edit_res/' + str(id))]
         bed_name = None
         house_name = None
 
-    res_dict = res.__dict__
+    res_info = list(res.__dict__.items())
+    res_info = [(item[0].replace('_', ' '), item[1]) for item in res_info]
+    res_info = [(item[0].title(), item[1]) for item in res_info]
+    res_info.append(('Bed Name', bed_name))
+    res_info.append(('House Name', house_name))
 
-    for key in res_dict.copy():
-        if key.startswith('_'):
-            del res_dict[key]
+    contact_info = res_info[4:6]
+    res_details = [res_info[i] for i in [6, 12, 8, 16, 15, 9, 10, 11]]
+    ledger = TransactionTable(Transaction.objects.filter(resident=id).order_by('-date'))
 
-    fields = list((res_dict.keys()))
-    insrt = fields.index('bed_id')
-    fields.pop(insrt)
-    fields.insert(insrt, 'Bed')
-    fields.insert(insrt + 1, 'House')
-    fields = [x.replace('_', ' ') for x in fields]
-    fields = [x.title() for x in fields]
-
-    values = list((res_dict.values()))
-    values.pop(insrt)
-    values.insert(insrt, bed_name)
-    values.insert(insrt + 1, house_name)
-
-    info = zip(fields, values)
     fullname = username(request)
-    return render(request, 'admin/temp_single.html', locals())
+    return render(request, 'admin/single_res.html', locals())
 
 
 # New transaction
-def new_trans(request):
+def new_trans(request, id=None):
     page = 'New Transaction'
     fullname = username(request)
-    form = TransactionForm()
+    if id is not None:
+        form = TransactionForm(initial={'resident': Resident.objects.get(pk=id)})
+        form.fields['resident'].widget = forms.HiddenInput()
+    else:
+        form = TransactionForm()
     if request.method == 'POST':
         sub = TransactionForm(request.POST)
         if sub.is_valid():
-
             # Make transaction amount negative for transactions that decrease a resident's balance
             decrease = ['pmt', 'bon', 'wrk', 'sos']
             if sub.instance.type in decrease:
@@ -322,10 +293,14 @@ def new_trans(request):
     return render(request, 'admin/forms.html', locals())
 
 
-def new_rent_pmt(request):
+def new_rent_pmt(request, id=None):
     page = 'New Rent Payment'
     fullname = username(request)
-    form = RentPaymentForm()
+    if id is not None:
+        form = RentPaymentForm(initial={'resident': Resident.objects.get(pk=id)})
+        form.fields['resident'].widget = forms.HiddenInput()
+    else:
+        form = RentPaymentForm()
     if request.method == 'POST':
         sub = RentPaymentForm(request.POST)
         if sub.is_valid():
@@ -333,22 +308,6 @@ def new_rent_pmt(request):
             sub.instance.type = 'pmt'
             sub.save()
     return render(request, 'admin/forms.html', locals())
-
-
-# TODO Figure out better way to select residents from a list/search
-def select_trans(request):
-    form = SelectTransForm()
-    if request.method == 'POST':
-        sub = SelectTransForm(request.POST)
-        if sub.is_valid():
-            if 'edit' in request.POST:
-                return redirect('/edit_trans/' + str(request.POST['transaction']))
-            elif 'delete' in request.POST:
-                trans_to_delete = Transaction.objects.get(id=request.POST['transaction'])
-                trans_to_delete.delete()
-            elif 'discharge' in request.POST:
-                render(request, 'admin/forms.html', {'form': form})
-    return render(request, 'admin/forms.html', {'form': form})
 
 
 # Edit transaction
@@ -368,21 +327,77 @@ def edit_trans(request, id):
                 sub.instance.amount *= -1
             transaction.last_update = timezone.now()
             sub.save()
-            return render(request,'admin/forms.html', {'form': form})
+            return render(request, 'admin/forms.html', {'form': form})
         else:
             form = TransactionForm(instance=transaction)
     return render(request, 'admin/forms.html', {'form': form})
 
+
+def new_house(request):
+    page = 'Edit House'
+    fullname = username(request)
+
+    form = HouseForm()
+    if request.method == 'POST':
+        sub = HouseForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+            messages.success(request, 'Form submission successful')
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_house(request, id):
+    page = 'Edit House'
+    fullname = username(request)
+
+    house = House.objects.get(id=id)
+    form = HouseForm(instance=house)
+    if request.method == 'POST':
+        sub = HouseForm(request.POST, instance=house)
+        if sub.is_valid():
+            sub.save()
+            house.last_update = timezone.now()
+            house.save()
+            messages.success(request, 'Form submission successful')
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = HouseForm(instance=house)
+    return render(request, 'admin/forms.html', locals())
+
+
 def houses(request):
+    page = 'Houses'
     fullname = username(request)
     table = HouseTable(House.objects.all(), orderable=True)
-    x = Resident.objects.get(pk=1)
-    print(x.full_name())
     RequestConfig(request).configure(table)
     name = 'Houses'
     button_name = 'Add New House'
-    button_link = ''
+    button_link = '/portal/new_house'
     return render(request, 'admin/temp_tables.html', locals())
+
+
+def single_house(request, id):
+    page = 'Houses'
+    cur_house = House.objects.get(id=id)
+    name = cur_house.name
+    address = cur_house.address + ' ' + cur_house.city + ', ' + cur_house.state
+
+    buttons = [('Edit info', '/portal/edit_house/' + str(id))]
+
+    house_res = ResidentsTable(Resident.objects.filter(bed__house=id).annotate(balance=Sum('transaction__amount')),
+                               exclude=('submission_date', 'house', 'referral_info', 'notes', 'last_update'),
+                               orderable=True, order_by='-balance')
+    RequestConfig(request).configure(house_res)
+
+    occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
+    vacant_beds = BedTable(
+        Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)).filter(id=id),
+        order_by='house', orderable=True, exclude=('occupant', 'house'))
+    RequestConfig(request).configure(vacant_beds)
+
+    fullname = username(request)
+    return render(request, 'admin/single_house.html', locals())
+
 
 # Change House Manager
 # TODO Handle multiple house managers for one house (replace House.manager with a relationship table)
@@ -430,28 +445,49 @@ def change_hm(request):
     return render(request, 'mrtr/forms.html', {'form': form})
 
 
+def beds(request):
+    fullname = username(request)
+    page = 'Beds'
+
+    qs = Bed.objects.all().select_related('resident').annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name'))
+
+    table = BedTable(qs, exclude=('id',))
+
+    # table = BedTable(Bed.objects.all()
+    #                  .select_related('resident')
+    #                  .values()
+    #                  .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
+    #                  exclude=('id',))
+    RequestConfig(request).configure(table)
+
+    name = 'Beds'
+    button_name = 'Add New Bed'
+    button_link = '/portal/#'  # new_house'
+    return render(request, 'admin/temp_tables.html', locals())
+
+
 # House manager forms
 
-# New Drug Test
-# TODO Make drug field checkboxes inline with their label; Make other field appear conditional on if result == 'oth'
-def new_dtest(request):
-    form = DrugTestForm()
-    if request.method == 'POST':
-        sub = DrugTestForm(request.POST)
-        if sub.is_valid():
-            sub.save()
-    return render(request, 'mrtr/forms.html', {'form': form})
-
-
-# New Check-in
-# TODO Restrict residents to residents in the manager's house
-def new_check_in(request):
-    form = CheckInForm()
-    if request.method == 'POST':
-        sub = CheckInForm(request.POST)
-        if sub.is_valid():
-            sub.save()
-    return render(request, 'mrtr/forms.html', {'form': form})
+# # New Drug Test
+# # TODO Make drug field checkboxes inline with their label; Make other field appear conditional on if result == 'oth'
+# def new_dtest(request):
+#     form = DrugTestForm()
+#     if request.method == 'POST':
+#         sub = DrugTestForm(request.POST)
+#         if sub.is_valid():
+#             sub.save()
+#     return render(request, 'mrtr/forms.html', {'form': form})
+#
+#
+# # New Check-in
+# # TODO Restrict residents to residents in the manager's house
+# def new_check_in(request):
+#     form = CheckInForm()
+#     if request.method == 'POST':
+#         sub = CheckInForm(request.POST)
+#         if sub.is_valid():
+#             sub.save()
+#     return render(request, 'mrtr/forms.html', {'form': form})
 
 # House Manager forms
 @groups_only('House Manager')

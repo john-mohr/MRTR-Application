@@ -75,12 +75,23 @@ class ResidentField(forms.ModelChoiceField):
         return label
 
 
-class SelectResForm(forms.Form):
+class TransactionForm(forms.ModelForm):
+    type = forms.ChoiceField(choices=Transaction.TYPE_CHOICES)
     resident = ResidentField(queryset=Resident.objects.all())
+    notes = forms.CharField(widget=forms.Textarea, required=False)
 
+    class Meta:
+        model = Transaction
+        fields = ['resident',
+                  'date',
+                  'type',
+                  'amount',
+                  'notes',
+                  ]
+        widgets = {
+            'date': DateInput(),
+        }
 
-class SelectPastResForm(forms.Form):
-    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=False))
 
 class RentPaymentForm(forms.ModelForm):
     method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
@@ -100,28 +111,31 @@ class RentPaymentForm(forms.ModelForm):
         }
 
 
-class TransactionForm(forms.ModelForm):
-    type = forms.ChoiceField(choices=Transaction.TYPE_CHOICES)
-    # method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
-    resident = ResidentField(queryset=Resident.objects.all())
-    notes = forms.CharField(widget=forms.Textarea, required=False)
+class HouseField(forms.ModelChoiceField):
+    def label_from_instance(self, house):
+        label = f"{house.name}"
+        return label
+
+
+class HouseForm(forms.ModelForm):
+    current_HMs = House.objects.all().filter(manager_id__isnull=False).distinct()
+    manager = ResidentField(
+        queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)), required=False)
 
     class Meta:
-        model = Transaction
-        fields = ['resident',
-                  'date',
-                  'type',
-                  'amount',
-                  #'method',
-                  'notes',
+        model = House
+        fields = ['name',
+                  'manager',
+                  'address',
+                  'city',
+                  'state',
                   ]
-        widgets = {
-            'date': DateInput(),
-        }
 
 
-class SelectTransForm(forms.Form):
-    transaction = forms.ModelChoiceField(queryset=Transaction.objects.all())
+class ChangeHMForm(forms.Form):
+    house = HouseField(queryset=House.objects.all())
+    current_HMs = House.objects.all().filter(manager_id__isnull=False).distinct()
+    new_manager = ResidentField(queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)))
 
 
 # class NewPaymentForm(forms.ModelForm):
@@ -147,61 +161,49 @@ class SelectTransForm(forms.Form):
 #         widgets = {
 #             'date': DateInput(),
 #         }
+#
+#
+# class DrugTestForm(forms.ModelForm):
+#     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
+#     other = forms.CharField(required=False)
+#
+#     class Meta:
+#         model = Drug_test
+#         fields = ['resident',
+#                   'date',
+#                   'result',
+#                   'amphetamines',
+#                   'barbiturates',
+#                   'benzodiazepines',
+#                   'cocaine',
+#                   'marijuana',
+#                   'opiates',
+#                   'phencyclidine',
+#                   ]
+#         widgets = {
+#             'date': DateInput(),
+#         }
+#
+#
+# class CheckInForm(forms.ModelForm):
+#     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
+#     house_managers = House.objects.all().filter(manager_id__isnull=False).distinct()
+#     manager = ResidentField(queryset=Resident.objects.filter(id__in=house_managers.values_list('manager_id', flat=True)))
+#     method = forms.ChoiceField(choices=Check_in.METHOD_CHOICES)
+#     notes = forms.CharField(widget=forms.Textarea, required=False)
+#
+#     class Meta:
+#         model = Check_in
+#         fields = ['manager',
+#                   'resident',
+#                   'date',
+#                   'method',
+#                   'notes',
+#                   ]
+#         widgets = {
+#             'date': DateInput(),
+#         }
 
-
-class DrugTestForm(forms.ModelForm):
-    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
-    other = forms.CharField(required=False)
-
-    class Meta:
-        model = Drug_test
-        fields = ['resident',
-                  'date',
-                  'result',
-                  'amphetamines',
-                  'barbiturates',
-                  'benzodiazepines',
-                  'cocaine',
-                  'marijuana',
-                  'opiates',
-                  'phencyclidine',
-                  ]
-        widgets = {
-            'date': DateInput(),
-        }
-
-
-class CheckInForm(forms.ModelForm):
-    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
-    house_managers = House.objects.all().filter(manager_id__isnull=False).distinct()
-    manager = ResidentField(queryset=Resident.objects.filter(id__in=house_managers.values_list('manager_id', flat=True)))
-    method = forms.ChoiceField(choices=Check_in.METHOD_CHOICES)
-    notes = forms.CharField(widget=forms.Textarea, required=False)
-
-    class Meta:
-        model = Check_in
-        fields = ['manager',
-                  'resident',
-                  'date',
-                  'method',
-                  'notes',
-                  ]
-        widgets = {
-            'date': DateInput(),
-        }
-
-
-class HouseField(forms.ModelChoiceField):
-    def label_from_instance(self, house):
-        label = f"{house.name}"
-        return label
-
-
-class ChangeHMForm(forms.Form):
-    house = HouseField(queryset=House.objects.all())
-    current_HMs = House.objects.all().filter(manager_id__isnull=False).distinct()
-    # TODO Filter residents who reside in house
-    new_manager = ResidentField(queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)))
 
 # class ManagerMeetingForm:
 #     x = ''
@@ -215,11 +217,6 @@ class ChangeHMForm(forms.Form):
 #         widgets = {
 #             'date': DateInput()
 #         }
-#
-#
-# # May be unnecessary, could add/edit/delete from console instead
-# class HouseForm:
-#     x = ''
 #
 #
 # # May be unnecessary, could add/edit/delete from console instead
