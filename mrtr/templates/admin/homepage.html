@@ -1,0 +1,39 @@
+{% extends "admin/administrative.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <style>
+      table, th, td {
+            text-align: left;
+            border:1px solid black;
+            border-collapse: collapse;
+        }
+        section {
+            margin-bottom: 30px;
+        }  
+        
+       
+    </style>
+    <html>
+        <section>
+            <form>
+                {% for x in buttons %}
+                    <button type="submit" formaction="{{ x.1 }}">{{ x.0 }}</button>
+                {% endfor %}
+            </form>
+        </section>
+        <section>
+            <h2>Vacant Beds</h2>
+            {% render_table vacant_beds %}
+        </section>
+        <section>
+            <h2>Resident Balances</h2>
+            {% render_table res_balances %}
+        </section>
+    </html>
+
+
+{% endblock content %}
