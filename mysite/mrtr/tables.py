@@ -1,6 +1,7 @@
 import django_tables2 as tables
 # from django_tables2
 from .models import *
+from django_tables2.utils import A
 
 
 # TODO:
@@ -14,7 +15,7 @@ class ResidentsTable(tables.Table):
     bed = tables.Column(accessor='bed.name', verbose_name='Bed')
     house = tables.Column(accessor='bed.house.name', verbose_name='House')
     balance = tables.Column(accessor=tables.A('balance'))
-    
+
     class Meta:
         model = Resident
         sequence = ('submission_date',
@@ -42,32 +43,57 @@ class ResidentBalanceTable(tables.Table):
 
 
 class TransactionTable(tables.Table):
+    submission_date = tables.Column(linkify=True)
+    full_name = tables.Column(verbose_name='Resident')
+    date = tables.Column(verbose_name='Date of Transaction')
 
     class Meta:
         model = Transaction
-        fields = ('date', 'amount', 'type', 'method', 'notes')
+        exclude = ('id', 'resident')
+        sequence = ('submission_date', 'date', 'full_name', 'amount', 'type', 'method')
+        # fields = ('date', 'amount', 'type', 'method', 'notes')
 
+
+# class ManNameColumn(tables.Column):
+#     def render(self, value, record):
+#         if record.state == False:
+#             return ''
+#         return super().render(value, record)
 
 class HouseTable(tables.Table):
     name = tables.Column(linkify=True)
-    manager = tables.Column(accessor='manager.full_name')
+    full_name = tables.Column(verbose_name='Manager')
+    # full_name = tables.Column(verbose_name='Manager', linkify=('resident', [A('manager_id')]))
+
+    # TODO Prevent linkifying rows where manager is None
+    # def before_render(self, request):
+    #     print(request)
+    #     if self.columns.__getitem__('full_name') is None:
+    #         self.columns.__getitem__('full_name').linkify = False
+    #     else:
+    #         self.columns.__getitem__('full_name').linkify = ('resident', [A('manager_id')])
 
     class Meta:
         model = House
-        exclude = ('id',)
+        sequence = ('name', 'full_name')
+        exclude = ('id', 'manager')
 
 
 class BedTable(tables.Table):
-    occupant = tables.Column(accessor='resident.full_name', verbose_name='Occupant')
+    full_name = tables.Column(verbose_name='Occupant')
+    # TODO linkify occupant
+    # full_name = tables.Column(verbose_name='Occupant', linkify=('resident', [A('id')]))
     house = tables.Column(accessor='house.name', verbose_name='House')
     name = tables.Column(verbose_name='Bed')
 
     class Meta:
         model = Bed
-        # fields = ('house', 'name')
+        exclude = ('id', 'occupant')
+        # fields = ('name', 'house', 'full_name')
 
 class ManagerMeetingTable(tables.Table):
     title = tables.Column(linkify=True)
+
     class Meta:
         model = Manager_meeting
         sequence = ('title',
@@ -77,5 +103,26 @@ class ManagerMeetingTable(tables.Table):
                     'last_update',
                     'attendee',
                     )
-        exclude = ('issues','id' )
-    
+        exclude = ('issues', 'id')
+
+
+class DrugTestTable(tables.Table):
+    id = tables.Column(verbose_name='Edit', linkify=True)
+    full_name = tables.Column(verbose_name='Resident')
+
+    class Meta:
+        model = Drug_test
+        sequence = ('id', 'full_name',)
+        exclude = ('resident', )
+
+
+class CheckInTable(tables.Table):
+    id = tables.Column(verbose_name='Edit', linkify=True)
+    r_full_name = tables.Column(verbose_name='Resident')
+    m_full_name = tables.Column(verbose_name='Manager')
+
+    class Meta:
+        model = Check_in
+        sequence = ('id', 'r_full_name', 'm_full_name')
+        exclude = ('resident', 'manager')
+
