@@ -1,0 +1,65 @@
+{% extends "mrtr/base_generic.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container-2 w-container"></div>
+<div class="div_block">
+    <center>
+    <h1 class="heading-4">CONTACT US</h1>
+    </center>
+    <div class="flex-container">
+        <div class="display-box" style="height: 420px;">
+            <h3 style="text-align: left; position: relative; top: -50px;">
+                Locations
+            </h3>
+            <p>
+                We operate six houses in locations such as Rose Park, Liberty Wells, Sugar House, and the Avenues. All houses are furnished and move in ready. Contact us below for more information.
+            </p>
+        </div>
+        <div class="display-box" style="height: 420px;">
+            <h3 style="text-align: left; position: relative; top: -50px;">
+                Contact Information
+            </h3>
+            <p>
+                Feel free to message, call, or email TC Mohr for any questions or additional information.
+            </p>
+            <p>
+                <u>Call or Text:</u> 801-674-8224
+            </p>
+            <p>
+                <u>Email:</u> cobhpropertiesllc@gmail.com
+            </p>
+            <p>
+               <u>Facebook:</u> TC Mohr
+            </p>
+            <p>
+               <u>WhatsApp:</u> TC Mohr
+            </p>
+        </div>
+        <div class="display-box" style="height: 420px;">
+            <h3 style="text-align: left; position: relative; top: -50px;">
+                Operating Hours
+            </h3>
+            <p>
+                Feel free to reach out anytime, our administration staff works hard to serve our existing and potential new residents as soon as possible. If your unable to get a hold of us please be patient and we will get back to you as soon as we can.
+            </p>
+        </div>
+      </div>
+      <br>
+      <br>
+      <br>
+    <div class="div-block" style="padding: 25px;">
+    <div style="margin:80px">
+		<h4>Contact us directly if you have any questions</h4>
+		<p>
+			Please write your name, email address and a message below if you have any questions.
+		</p>
+		<form method="post">
+        {% csrf_token %}
+            {{form | crispy}}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

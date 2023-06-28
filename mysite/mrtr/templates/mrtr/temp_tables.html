@@ -1,0 +1,26 @@
+{% load render_table from django_tables2 %}
+{% load static %}
+<!doctype html>
+<html>
+    <style>
+        table, th, td {
+            text-align: left;
+            border:1px solid black;
+            border-collapse: collapse;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+    </style>
+    <body>
+        <h1>{{ name }}</h1>
+        <section>
+            <button type="button">
+                <a href="{{ button_link }}">{{ button_name }}</a>
+            </button>
+        </section>
+        <section>
+            {% render_table table %}
+        </section>
+    </body>
+</html>
