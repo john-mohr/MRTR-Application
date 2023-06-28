@@ -34,67 +34,47 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     # TODO Cut down on the amount of transaction types
     TYPE_CHOICES = [
-        # # Auto apply
-        ('rnt', 'Rent charge'),
-        # ('rfd', 'Refund'),
-        # ('inc', 'Sober incentive'),
-        # ('nra', 'New rent amount adjustment'),
+        # Auto apply
+        ('Rent charge', 'Rent charge'),                 # 0
+        ('Refund', 'Refund'),                           # 1
+        ('Incentive', 'Incentive'),                     # 2
+        ('Rent adjustment', 'Rent adjustment'),         # 3
 
         # Decrease balance
-        ('pmt', 'Rent payment'),
-        # ('bon', 'Bonus'),
-        # ('wrk', 'Work/reimbursement'),
-        # ('sos', "Sober support (won't pay back)"),
+        ('Rent payment', 'Rent payment'),               # 4
+        ('Bonus', 'Bonus'),                             # 5
+        ('Work/reimbursement', 'Work/reimbursement'),   # 6
+        ('Sober support', "Sober support"),             # 7
 
         # Increase balance
-        ('fee', 'Fee'),
-        # ('lon', 'Loan (will pay back)'),
+        ('Fee', 'Fee'),                                 # 8
+        ('Loan', 'Loan'),                               # 9
 
         # Other
-        # ('fix', 'Balance fix'),
-        ('oth', 'Other adjustment (specify)')
+        ('Fix', 'Fix'),                                 # 10
+        ('Other (specify)', 'Other (specify)')          # 11
     ]
-    type = models.CharField(max_length=3, choices=TYPE_CHOICES, blank=True)
+    type = models.CharField(max_length=30, blank=True)
     METHOD_CHOICES = [
-        ('ach', 'ACH'),
-        ('csh', 'Cash'),
-        ('cap', 'Cash App'),
-        ('chk', 'Check'),
-        ('mod', 'Money order'),
-        ('ppl', 'PayPal'),
-        ('vnm', 'Venmo'),
-        ('zel', 'Zelle'),
-        ('oth', 'Other (specify)'),
-        ('', '')
+        ('', ''),
+        ('ACH', 'ACH'),
+        ('Cash', 'Cash'),
+        ('Cash App', 'Cash App'),
+        ('Check', 'Check'),
+        ('Money order', 'Money order'),
+        ('PayPal', 'PayPal'),
+        ('Venmo', 'Venmo'),
+        ('Zelle', 'Zelle'),
+        ('Other (specify)', 'Other (specify)')
     ]
-    method = models.CharField(max_length=3, choices=METHOD_CHOICES, blank=True)
+    method = models.CharField(max_length=15, blank=True)
     notes = models.TextField(null=True)
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
-
-# class Drug_test(models.Model):
-#     date = models.DateField(default=timezone.now, blank=True)
-#     RESULT_CHOICES = [
-#         ('neg', 'Negative'),
-#         ('pos', 'Positive'),
-#         ('med', 'Positive (meds)'),
-#         ('inv', 'Invalid'),
-#         ('oth', 'Other (specify)')
-#     ]
-#     result = models.CharField(max_length=3, choices=RESULT_CHOICES)
-#     amphetamines = models.BooleanField()
-#     barbiturates = models.BooleanField()
-#     benzodiazepines = models.BooleanField()
-#     cocaine = models.BooleanField()
-#     marijuana = models.BooleanField()
-#     opiates = models.BooleanField()
-#     phencyclidine = models.BooleanField()
-#     other = models.CharField(max_length=50, null=True)
-#     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
-#     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-#     last_update = models.DateTimeField(null=True)  # automatic
+    def get_absolute_url(self):
+        return '/portal/transaction/%i' % self.id
 
 
 class House(models.Model):
@@ -109,25 +89,54 @@ class House(models.Model):
         return '/portal/house/%i' % self.id
 
 
-
 class Bed(models.Model):
     name = models.CharField(max_length=7)
     house = models.ForeignKey('House', on_delete=models.CASCADE)
 
 
-# class Check_in(models.Model):
-#     date = models.DateField(default=timezone.now)
-#     METHOD_CHOICES = [
-#         ('ip', 'In person'),
-#         ('pc', 'Phone call'),
-#         ('tx', 'Text')
-#     ]
-#     method = models.CharField(max_length=2, choices=METHOD_CHOICES)
-#     notes = models.TextField(null=True)
-#     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
-#     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', related_name='manager')  #, blank=True, null=True)  # maybe add limit_to() argument
-#     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-#     last_update = models.DateTimeField(null=True)  # automatic
+class Drug_test(models.Model):
+    date = models.DateField(default=timezone.now, blank=True)
+    RESULT_CHOICES = [
+        ('Negative', 'Negative'),
+        ('Positive', 'Positive'),
+        ('Positive (meds)', 'Positive (meds)'),
+        ('Invalid', 'Invalid'),
+        ('Other (specify)', 'Other (specify)')
+    ]
+    result = models.CharField(max_length=17, choices=RESULT_CHOICES)
+    amphetamines = models.BooleanField()
+    barbiturates = models.BooleanField()
+    benzodiazepines = models.BooleanField()
+    cocaine = models.BooleanField()
+    marijuana = models.BooleanField()
+    opiates = models.BooleanField()
+    phencyclidine = models.BooleanField()
+    other = models.CharField(max_length=50, null=True)
+    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/edit_dtest/%i' % self.id
+
+
+class Check_in(models.Model):
+    date = models.DateField(default=timezone.now)
+    METHOD_CHOICES = [
+        ('In person', 'In person'),
+        ('Phone call', 'Phone call'),
+        ('Text', 'Text')
+    ]
+    method = models.CharField(max_length=12, choices=METHOD_CHOICES)
+    notes = models.TextField(null=True)
+    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE,
+                                db_column='manager_id', related_name='manager', blank=True, null=True)  # maybe add limit_to() argument
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/edit_check_in/%i' % self.id
 
 
 class Shopping_trip(models.Model):

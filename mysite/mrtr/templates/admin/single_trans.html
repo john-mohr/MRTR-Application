@@ -27,11 +27,6 @@
     </style>
     <body>
         <section>
-            <h1>{{ name }}</h1>
-            <h2>({{ status }} Resident)</h2>
-            <h2>Balance: ${{ balance }}</h2>
-        </section>
-        <section>
         <form>
             {% for x in buttons %}
                 <button type="submit" formaction="{{ x.1 }}">{{ x.0 }}</button>
@@ -39,30 +34,15 @@
         </form>
         </section>
         <section>
-            <h2>Contact Info</h2>
+            <h2>Transaction Details</h2>
             <table>
-                {% for x in contact_info %}
+                {% for x in trans_details %}
                 <tr>
                     <th>{{x.0}}</th>
                     <td>{{x.1}}</td>
                 </tr>
                 {% endfor %}
             </table>
-        </section>
-        <section>
-            <h2>Resident Details</h2>
-            <table>
-                {% for x in res_details %}
-                <tr>
-                    <th>{{x.0}}</th>
-                    <td>{{x.1}}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </section>
-        <section>
-            <h2>Ledger</h2>
-            {% render_table ledger %}
         </section>
     </body>
 </div>

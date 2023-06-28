@@ -76,7 +76,7 @@ class ResidentField(forms.ModelChoiceField):
 
 
 class TransactionForm(forms.ModelForm):
-    type = forms.ChoiceField(choices=Transaction.TYPE_CHOICES)
+    type = forms.ChoiceField(choices=Transaction.TYPE_CHOICES[5:])
     resident = ResidentField(queryset=Resident.objects.all())
     notes = forms.CharField(widget=forms.Textarea, required=False)
 
@@ -104,6 +104,24 @@ class RentPaymentForm(forms.ModelForm):
                   'date',
                   'amount',
                   'method',
+                  'notes',
+                  ]
+        widgets = {
+            'date': DateInput(),
+        }
+
+
+class AdjustBalanceForm(forms.ModelForm):
+    # method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
+    resident = ResidentField(queryset=Resident.objects.all())
+    notes = forms.CharField(widget=forms.Textarea, required=False)
+
+    class Meta:
+        model = Transaction
+        fields = ['resident',
+                  'date',
+                  'amount',
+                  # 'method',
                   'notes',
                   ]
         widgets = {
@@ -155,9 +173,9 @@ class ShoppingTripForm(forms.ModelForm):
     class Meta:
         model = Shopping_trip
         fields = ['date',
-        'amount',
-        'notes',
-        ]
+                  'amount',
+                  'notes',
+                  ]
         
 class SupplyRequestForm(forms.ModelForm):
     class Meta:
@@ -169,7 +187,7 @@ class SupplyRequestForm(forms.ModelForm):
                   'fulfilled',
                   'house',
                   'trip',
-                 ]
+                  ]
 
 # class NewPaymentForm(forms.ModelForm):
 #
@@ -196,49 +214,47 @@ class SupplyRequestForm(forms.ModelForm):
 #         }
 #
 #
-# class DrugTestForm(forms.ModelForm):
-#     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
-#     other = forms.CharField(required=False)
-#
-#     class Meta:
-#         model = Drug_test
-#         fields = ['resident',
-#                   'date',
-#                   'result',
-#                   'amphetamines',
-#                   'barbiturates',
-#                   'benzodiazepines',
-#                   'cocaine',
-#                   'marijuana',
-#                   'opiates',
-#                   'phencyclidine',
-#                   ]
-#         widgets = {
-#             'date': DateInput(),
-#         }
-#
-#
-# class CheckInForm(forms.ModelForm):
-#     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
-#     house_managers = House.objects.all().filter(manager_id__isnull=False).distinct()
-#     manager = ResidentField(queryset=Resident.objects.filter(id__in=house_managers.values_list('manager_id', flat=True)))
-#     method = forms.ChoiceField(choices=Check_in.METHOD_CHOICES)
-#     notes = forms.CharField(widget=forms.Textarea, required=False)
-#
-#     class Meta:
-#         model = Check_in
-#         fields = ['manager',
-#                   'resident',
-#                   'date',
-#                   'method',
-#                   'notes',
-#                   ]
-#         widgets = {
-#             'date': DateInput(),
-#         }
+class DrugTestForm(forms.ModelForm):
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
+    other = forms.CharField(required=False)
+
+    class Meta:
+        model = Drug_test
+        fields = ['resident',
+                  'date',
+                  'result',
+                  'amphetamines',
+                  'barbiturates',
+                  'benzodiazepines',
+                  'cocaine',
+                  'marijuana',
+                  'opiates',
+                  'phencyclidine',
+                  ]
+        widgets = {
+            'date': DateInput(),
+        }
 
 
+class CheckInForm(forms.ModelForm):
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
+    # house_managers = House.objects.all().filter(manager_id__isnull=False).distinct()
+    # manager = ResidentField(queryset=Resident.objects.filter(id__in=house_managers.values_list('manager_id', flat=True)))
+    method = forms.ChoiceField(choices=Check_in.METHOD_CHOICES)
+    notes = forms.CharField(widget=forms.Textarea, required=False)
 
+    class Meta:
+        model = Check_in
+        fields = ['manager',
+                  'resident',
+                  'date',
+                  'method',
+                  'notes',
+                  ]
+        widgets = {
+            'date': DateInput(),
+            'manager': forms.HiddenInput()
+        }
 
 
 # # May be unnecessary, could add/edit/delete from console instead

@@ -4,10 +4,10 @@ from .models import *
 
 admin.site.register(Resident)
 admin.site.register(Transaction)
-# admin.site.register(Drug_test)
 admin.site.register(House)
 admin.site.register(Bed)
-# admin.site.register(Check_in)
+admin.site.register(Drug_test)
+admin.site.register(Check_in)
 # admin.site.register(Shopping_trip)
 # admin.site.register(Supply_request)
 admin.site.register(Manager_meeting)

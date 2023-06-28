@@ -12,6 +12,15 @@
         border:1px solid black;
         border-collapse: collapse;
     }
+        input[type=checkbox] {
+        vertical-align: middle;
+        position: relative;
+        bottom: -25px;
+        left: -400px
+    }
+    label {
+        display: block;
+    }
     .container{
         padding: 16px 16px 16px 16px;
         border-style: solid;
@@ -36,8 +45,8 @@
     <form class= "form" action="" method="post">
         {%  csrf_token %}
         {{ form | crispy}}
-        <input type="submit" name="new_resident">
-    </form>
+        <input type="hidden" name="rdr" value="{{ rdr }}">
+        <input type="submit">    </form>
     {% if messages %}
         <ul class="messages">
     {% for message in messages %}

@@ -1,10 +1,14 @@
+# TODO
+#  Add tables for drug tests and check ins to house and resident pages
+#  Add proper redirects to each view (see new_trans and new_rent_pmt)
+
 from .forms import *
 from .models import *
 from .tables import *
 from .utils import prorate
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -108,7 +112,7 @@ def portal(request):
     occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
     vacant_beds = BedTable(
         Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
-        order_by='house', orderable=True, exclude=('id', 'occupant'))
+        order_by='house', orderable=True, exclude=('id', 'occupant', 'full_name'))
     RequestConfig(request).configure(vacant_beds)
 
     # TODO:
@@ -138,7 +142,7 @@ def new_res(request):
             # Add beginning balance transactions
             intake = Transaction(date=sub.instance.admit_date,
                                  amount=75,
-                                 type='fee',
+                                 type='Fee',
                                  resident=sub.instance,
                                  notes='Intake Fee',
                                  submission_date=sub.instance.submission_date
@@ -146,7 +150,7 @@ def new_res(request):
             intake.save()
             first_mo = Transaction(date=sub.instance.admit_date,
                                    amount=prorate(sub.instance.rent, sub.instance.admit_date),
-                                   type='rnt',
+                                   type='Rent charge',
                                    resident=sub.instance,
                                    notes=sub.instance.admit_date.strftime('%B') + ' (partial)',
                                    submission_date=sub.instance.submission_date
@@ -154,7 +158,7 @@ def new_res(request):
             first_mo.save()
             second_mo = Transaction(date=sub.instance.admit_date,
                                     amount=sub.instance.rent,
-                                    type='rnt',
+                                    type='Rent charge',
                                     resident=sub.instance,
                                     notes=(sub.instance.admit_date + relativedelta(months=1)).strftime('%B'),
                                     submission_date=sub.instance.submission_date
@@ -175,7 +179,7 @@ def edit_res(request, id):
             if old_rent != new_rent:
                 adj_trans = Transaction(date=sub.cleaned_data['effective_date'],
                                         amount=prorate(new_rent - old_rent, sub.cleaned_data['effective_date']),
-                                        type='nra',
+                                        type='Rent adjustment',
                                         resident=resident,
                                         notes='$' + str(old_rent) + ' > $' + str(new_rent) + ' (manual edit)'
                                         )
@@ -223,30 +227,31 @@ def readmit_res(request, id):
             resident.save()
 
             # TODO Figure out how to handle readmission balance
-            return render(request,'admin/administrative.html', {'form': form})
+            return render(request, 'admin/forms.html', locals())
         else:
             form = ResidentForm(instance=resident)
-    return render(request,'admin/administrative.html', {'form': form})
+    return render(request, 'admin/forms.html', locals())
 
 
 def residents(request):
+    page = 'View All Residents'
     table = ResidentsTable(Resident.objects.annotate(balance=Sum('transaction__amount')), order_by='-submission_date', orderable=True, exclude='full_name')
     RequestConfig(request).configure(table)
     button_name = 'Add New Resident'
     button_link = '/portal/new_res'
-    page = 'View Residents'
     fullname = str(username(request))
 
     return render(request, 'admin/temp_tables.html', locals())
 
 
 def single_res(request, id):
-    page = "Current Resident"
+    page = "Resident"
     res = Resident.objects.get(id=id)
     name = res.full_name()
     balance = res.balance()
 
     if res.discharge_date is None:
+        status = 'Current'
         buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
                    ('Adjust Balance', '/portal/new_trans/' + str(id)),
                    ('Discharge', '/portal/discharge_res/' + str(id)),
@@ -254,6 +259,7 @@ def single_res(request, id):
         bed_name = res.bed.name
         house_name = res.bed.house.name
     else:
+        status = 'Past'
         buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
                    ('Adjust Balance', '/portal/new_trans/' + str(id)),
                    ('Readmit', '/portal/readmit_res/' + str(id)),
@@ -269,73 +275,138 @@ def single_res(request, id):
 
     contact_info = res_info[4:6]
     res_details = [res_info[i] for i in [6, 12, 8, 16, 15, 9, 10, 11]]
-    ledger = TransactionTable(Transaction.objects.filter(resident=id).order_by('-date'))
+    ledger = TransactionTable(Transaction.objects.filter(resident=id).order_by('-submission_date'),
+                              exclude=('submission_date', 'full_name', 'last_update'))
 
     fullname = username(request)
     return render(request, 'admin/single_res.html', locals())
 
 
 # New transaction
-def new_trans(request, id=None):
+def new_trans(request, res_id=None):
     page = 'New Transaction'
     fullname = username(request)
-    if id is not None:
-        form = TransactionForm(initial={'resident': Resident.objects.get(pk=id)})
+
+    if res_id is not None:
+        form = TransactionForm(initial={'resident': Resident.objects.get(pk=res_id)})
         form.fields['resident'].widget = forms.HiddenInput()
     else:
         form = TransactionForm()
+
     if request.method == 'POST':
         sub = TransactionForm(request.POST)
         if sub.is_valid():
             # Make transaction amount negative for transactions that decrease a resident's balance
-            decrease = ['pmt', 'bon', 'wrk', 'sos']
+            decrease = ['Rent payment', 'Bonus', 'Work/reimbursement', 'Sober support']
             if sub.instance.type in decrease:
                 sub.instance.amount *= -1
             messages.success(request, 'Form submission successful')
             sub.save()
+            if res_id is not None:
+                return redirect('/portal/resident/' + str(res_id))
+            else:
+                return redirect('/portal')
     return render(request, 'admin/forms.html', locals())
 
 
-def new_rent_pmt(request, id=None):
+def new_rent_pmt(request, res_id=None):
     page = 'New Rent Payment'
     fullname = username(request)
-    if id is not None:
-        form = RentPaymentForm(initial={'resident': Resident.objects.get(pk=id)})
+
+    if res_id is not None:
+        form = RentPaymentForm(initial={'resident': Resident.objects.get(pk=res_id)})
         form.fields['resident'].widget = forms.HiddenInput()
     else:
         form = RentPaymentForm()
+
     if request.method == 'POST':
         sub = RentPaymentForm(request.POST)
         if sub.is_valid():
             sub.instance.amount *= -1
-            sub.instance.type = 'pmt'
+            sub.instance.type = 'Rent payment'
             sub.save()
+            if res_id is not None:
+                return redirect('/portal/resident/' + str(res_id))
+            else:
+                return redirect('/portal')
     return render(request, 'admin/forms.html', locals())
 
 
 # Edit transaction
 def edit_trans(request, id):
-    transaction = Transaction.objects.get(id=id)
+    trans = Transaction.objects.get(id=id)
     fullname = username(request)
-    form = TransactionForm(instance=transaction)
+    form = TransactionForm(instance=trans)
     if request.method == 'POST':
-        old_type = transaction.type
-        sub = TransactionForm(request.POST, instance=transaction)
+        old_type = trans.type
+        sub = TransactionForm(request.POST, instance=trans)
         if sub.is_valid():
 
             # Make transaction amount negative for transactions that decrease a resident's balance
             # But also keep amount negative if it wasn't changed
-            decrease = ['pmt', 'bon', 'wrk', 'sos']
+            decrease = ['Rent payment', 'Bonus', 'Work/reimbursement', 'Sober support']
             if old_type not in decrease and sub.instance.type in decrease:
                 sub.instance.amount *= -1
-            transaction.last_update = timezone.now()
+            trans.last_update = timezone.now()
             sub.save()
             return render(request, 'admin/forms.html', {'form': form})
         else:
-            form = TransactionForm(instance=transaction)
+            form = TransactionForm(instance=trans)
     return render(request, 'admin/forms.html', {'form': form})
 
-#New Meeting
+
+def transactions(request):
+    page = 'View All Transactions'
+    table = TransactionTable(Transaction.objects.all()
+                             .select_related('resident')
+                             .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
+                             ) # , order_by='-submission_date',
+                           # orderable=True, exclude='full_name')
+    RequestConfig(request).configure(table)
+    button_name = 'Add New Transaction'
+    button_link = '/portal/new_trans'
+    fullname = str(username(request))
+
+    return render(request, 'admin/temp_tables.html', locals())
+
+
+def transaction(request, id):
+    page = "Transaction"
+    trans = Transaction.objects.get(id=id)
+    # name = res.full_name()
+    # balance = res.balance()
+
+    # if res.discharge_date is None:
+    #     buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
+    #                ('Adjust Balance', '/portal/new_trans/' + str(id)),
+    #                ('Discharge', '/portal/discharge_res/' + str(id)),
+    #                ('Edit info', '/portal/edit_res/' + str(id))]
+    #     bed_name = res.bed.name
+    #     house_name = res.bed.house.name
+    # else:
+    #     buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
+    #                ('Adjust Balance', '/portal/new_trans/' + str(id)),
+    #                ('Readmit', '/portal/readmit_res/' + str(id)),
+    #                ('Edit info', '/portal/edit_res/' + str(id))]
+    #     bed_name = None
+    #     house_name = None
+
+    buttons = [('Edit', '/portal/edit_trans/' + str(id))]
+
+    trans_info = list(trans.__dict__.items())
+    trans_info = [(item[0].replace('_', ' '), item[1]) for item in trans_info]
+    trans_info = [(item[0].title(), item[1]) for item in trans_info]
+
+    # print(trans_info)
+    trans_details = trans_info[2:]
+    # ledger = TransactionTable(Transaction.objects.filter(resident=id).order_by('-date'),
+    #                           exclude=('submission_date', 'full_name', 'last_update'))
+
+    fullname = username(request)
+    return render(request, 'admin/single_trans.html', locals())
+
+
+# New Meeting
 def new_meeting(request):
     page = 'Add New Meeting'
     fullname = username(request)
@@ -385,7 +456,7 @@ def single_meeting(request, id):
     buttons = [('Edit info', '/portal/edit_meeting/' + str(id))]
     return render(request, 'admin/single_meeting.html', locals())
 
-#New House
+# New House
 def new_house(request):
     page = 'Add New House'
     fullname = username(request)
@@ -419,9 +490,19 @@ def edit_house(request, id):
 
 
 def houses(request):
-    page = 'Houses'
+    page = 'View All Houses'
     fullname = username(request)
-    table = HouseTable(House.objects.all(), orderable=True)
+    table = HouseTable(House.objects.all()
+                       .select_related('manager')
+                       .annotate(full_name=Concat('manager__first_name', V(' '), 'manager__last_name')),
+                       orderable=True)
+
+    # table = BedTable(Bed.objects.all()
+    #                  .select_related('resident')
+    #                  .values()
+    #                  .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
+    #                  exclude=('id',))
+
     RequestConfig(request).configure(table)
     name = 'Houses'
     button_name = 'Add New House'
@@ -451,8 +532,23 @@ def single_house(request, id):
     fullname = username(request)
     return render(request, 'admin/single_house.html', locals())
 
-#New Supply Request
 
+def beds(request):
+    page = 'View All Beds'
+    fullname = username(request)
+    table = BedTable(Bed.objects.all()
+                     .select_related('resident')
+                     .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
+                     exclude=('id',))
+    RequestConfig(request).configure(table)
+
+    name = 'Beds'
+    button_name = 'Add New Bed'
+    button_link = '/portal/beds#'  # new_house'
+    return render(request, 'admin/temp_tables.html', locals())
+
+
+# New Supply Request
 def new_supply_request(request):
     page = 'Add New Supply Request'
     fullname = username(request)
@@ -623,26 +719,104 @@ def beds(request):
 
 # House manager forms
 
-# # New Drug Test
-# # TODO Make drug field checkboxes inline with their label; Make other field appear conditional on if result == 'oth'
-# def new_dtest(request):
-#     form = DrugTestForm()
-#     if request.method == 'POST':
-#         sub = DrugTestForm(request.POST)
-#         if sub.is_valid():
-#             sub.save()
-#     return render(request, 'mrtr/forms.html', {'form': form})
-#
-#
-# # New Check-in
-# # TODO Restrict residents to residents in the manager's house
-# def new_check_in(request):
-#     form = CheckInForm()
-#     if request.method == 'POST':
-#         sub = CheckInForm(request.POST)
-#         if sub.is_valid():
-#             sub.save()
-#     return render(request, 'mrtr/forms.html', {'form': form})
+# New Drug Test
+# TODO Make drug field checkboxes inline with their label; Make other field appear conditional on if result == 'oth'
+def new_dtest(request):
+    page = 'New Drug Test'
+    fullname = username(request)
+    form = DrugTestForm()
+    if request.method == 'POST':
+        sub = DrugTestForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_dtest(request, test_id):
+    page = 'Edit Drug Test'
+    fullname = username(request)
+
+    dtest = Drug_test.objects.get(id=test_id)
+    form = DrugTestForm(instance=dtest)
+    if request.method == 'POST':
+        sub = DrugTestForm(request.POST, instance=dtest)
+        if sub.is_valid():
+            sub.save()
+            dtest.last_update = timezone.now()
+            dtest.save()
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = DrugTestForm(instance=dtest)
+    return render(request, 'admin/forms.html', locals())
+
+
+def dtests(request):
+    page = 'View All Drug Tests'
+    fullname = username(request)
+
+    table = DrugTestTable(Drug_test.objects.all().select_related('resident')
+                          .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')), )
+    RequestConfig(request).configure(table)
+
+    name = 'Drug Tests'
+    button_name = 'Add New Drug Test'
+    button_link = '/portal/new_dtest'
+    return render(request, 'admin/temp_tables.html', locals())
+
+
+# New Check-in
+# TODO Restrict residents to residents in the manager's house
+def new_check_in(request):
+    page = 'New Check In'
+    fullname = username(request)
+    mngr = Resident.objects.get(pk=1)
+
+    # TODO Automatically set manager to the manager who submitted the form
+    form = CheckInForm(initial={'manager': mngr})
+    if request.method == 'POST':
+        sub = CheckInForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_check_in(request, ci_id):
+    page = 'Edit Check In'
+    fullname = username(request)
+
+    ci = Check_in.objects.get(id=ci_id)
+    form = CheckInForm(instance=ci)
+    if request.method == 'POST':
+        sub = CheckInForm(request.POST, instance=ci)
+        if sub.is_valid():
+            sub.save()
+            ci.last_update = timezone.now()
+            ci.save()
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = CheckInForm(instance=ci)
+    return render(request, 'admin/forms.html', locals())
+
+def check_ins(request):
+    page = 'View All Check Ins'
+    fullname = username(request)
+
+    # table = DrugTestTable(Drug_test.objects.all().select_related('resident')
+    #                       .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')), )
+
+    table = CheckInTable(Check_in.objects.all().select_related('resident').select_related('manager')
+                         .annotate(r_full_name=Concat('resident__first_name', V(' '), 'resident__last_name'),
+                                   m_full_name=Concat('manager__first_name', V(' '), 'manager__last_name')))
+
+    # table = CheckInTable(Check_in.objects.all())
+
+    RequestConfig(request).configure(table)
+
+    name = 'Check ins'
+    button_name = 'Add New Check in'
+    button_link = '/portal/new_check)in'
+    return render(request, 'admin/temp_tables.html', locals())
+
 
 # House Manager forms
 @groups_only('House Manager')

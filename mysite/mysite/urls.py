@@ -36,28 +36,46 @@ urlpatterns = [
     path('portal/discharge_res/<int:id>', views.discharge_res),
     path('portal/readmit_res/<int:id>', views.readmit_res),
     path('portal/residents', views.residents),
-    path('portal/resident/<int:id>', views.single_res),
+    path('portal/resident/<int:id>', views.single_res, name='resident'),
 
     # Transactions
     path('portal/new_trans', views.new_trans),
-    path('portal/new_trans/<int:id>', views.new_trans),
+    path('portal/new_trans/<int:res_id>', views.new_trans),
     path('portal/new_rent_pmt', views.new_rent_pmt),
-    path('portal/new_rent_pmt/<int:id>', views.new_rent_pmt),
+    path('portal/new_rent_pmt/<int:res_id>', views.new_rent_pmt),
     path('portal/edit_trans/<int:id>', views.edit_trans),
+    path('portal/transactions', views.transactions),
+    path('portal/transaction/<int:id>', views.transaction),
 
-    #Meetings
+    # Houses
+    path('portal/new_house', views.new_house),
+    path('portal/edit_house/<int:id>', views.edit_house),
+    path('portal/houses', views.houses),
+    path('portal/house/<int:id>', views.single_house),
+
+    # Meetings
     path('portal/new_meeting', views.new_meeting),
     path('portal/edit_meeting/<int:id>', views.edit_meeting),
     path('portal/meetings', views.meetings),
     path('portal/meeting/<int:id>', views.single_meeting),
 
-    #Supply Request
+    # Drug tests
+    path('portal/new_dtest', views.new_dtest),
+    path('portal/edit_dtest/<int:test_id>', views.edit_dtest),
+    path('portal/dtests', views.dtests),
+
+    # Check ins
+    path('portal/new_check_in', views.new_check_in),
+    path('portal/edit_check_in/<int:ci_id>', views.edit_check_in),
+    path('portal/check_ins', views.check_ins),
+
+    # Supply Request
     path('portal/new_supply_request', views.new_supply_request),
     path('portal/edit_supply_request/<int:id>', views.edit_supply_request),
     path('portal/supply_request', views.supply_request),
     path('portal/supply_request/<int:id>', views.single_supply_request),
 
-    #Shopping Trip
+    # Shopping Trip
     path('portal/new_shopping_trip', views.new_shopping_trip),
     path('portal/edit_shopping_trip/<int:id>', views.edit_shopping_trip),
     path('portal/shopping_trip', views.shopping_trip),
@@ -67,12 +85,6 @@ urlpatterns = [
 
     # Other
     # path('portal/change_hm', views.change_hm),
-    # path('portal/new_dtest', views.new_dtest),
-    # path('portal/new_check_in', views.new_check_in),
-    path('portal/new_house', views.new_house),
-    path('portal/edit_house/<int:id>', views.edit_house),
-    path('portal/houses', views.houses),
-    path('portal/house/<int:id>', views.single_house),
     path('portal/beds', views.beds),
 
     # House Manager Page
