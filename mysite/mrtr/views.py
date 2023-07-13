@@ -329,7 +329,10 @@ def edit_meeting(request, id):
 def meetings(request):
     page = 'All Meetings'
     fullname = username(request)
-    latest_meeting = Manager_meeting.objects.latest('submission_date')
+    try:
+        latest_meeting = Manager_meeting.objects.latest('submission_date')
+    except :
+        print("Empty Database")
     table = ManagerMeetingTable(Manager_meeting.objects.all(), orderable=True)
     RequestConfig(request).configure(table)
     name = 'Meetings'
@@ -418,7 +421,10 @@ def edit_supply_request(request, id):
 def supply_request(request):
     page = 'All Supply Requests'
     fullname = username(request)
-    latest_supply_request = Supply_request.objects.latest('date')
+    try:
+        latest_supply_request = Supply_request.objects.latest('date')
+    except :
+        print("Empty Database")
     table = SupplyRequestTable(Supply_request.objects.all(), orderable=True)
     RequestConfig(request).configure(table)
     name = 'Supply Request'
@@ -471,7 +477,11 @@ def edit_shopping_trip(request, id):
 def shopping_trip(request):
     page = 'All Shopping Trip'
     fullname = username(request)
-    latest_shopping_trip = Shopping_trip.objects.latest('date')
+    
+    try:
+        latest_shopping_trip = Shopping_trip.objects.latest('date')
+    except :
+        print("Empty Database")
     table = ShoppingTripTable(Shopping_trip.objects.all(), orderable=True)
     RequestConfig(request).configure(table)
     name = 'Shopping Trip'
