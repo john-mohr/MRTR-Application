@@ -138,7 +138,8 @@ class HouseField(forms.ModelChoiceField):
 class HouseForm(forms.ModelForm):
     current_HMs = House.objects.all().filter(manager_id__isnull=False).distinct()
     manager = ResidentField(
-        queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)), required=False)
+        # queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)), required=False)
+        queryset=Resident.objects.all(), required=False)
 
     class Meta:
         model = House

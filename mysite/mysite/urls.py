@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from mrtr import views
+from mrtr import views, table_views, single_views
 from custom_user import views as user_view
 from django.contrib.auth import views as auth
 
@@ -35,8 +35,8 @@ urlpatterns = [
     path('portal/edit_res/<int:id>', views.edit_res),
     path('portal/discharge_res/<int:id>', views.discharge_res),
     path('portal/readmit_res/<int:id>', views.readmit_res),
-    path('portal/residents', views.residents),
-    path('portal/resident/<int:id>', views.single_res, name='resident'),
+    path('portal/residents', table_views.residents),
+    path('portal/resident/<int:res_id>', single_views.resident, name='resident'),
 
     # Transactions
     path('portal/new_trans', views.new_trans),
@@ -44,14 +44,14 @@ urlpatterns = [
     path('portal/new_rent_pmt', views.new_rent_pmt),
     path('portal/new_rent_pmt/<int:res_id>', views.new_rent_pmt),
     path('portal/edit_trans/<int:id>', views.edit_trans),
-    path('portal/transactions', views.transactions),
-    path('portal/transaction/<int:id>', views.transaction),
+    path('portal/transactions', table_views.transactions),
+    # path('portal/transaction/<int:id>', views.transaction),
 
     # Houses
     path('portal/new_house', views.new_house),
     path('portal/edit_house/<int:id>', views.edit_house),
-    path('portal/houses', views.houses),
-    path('portal/house/<int:id>', views.single_house),
+    path('portal/houses', table_views.houses),
+    path('portal/house/<int:house_id>', single_views.house),
 
     # Meetings
     path('portal/new_meeting', views.new_meeting),
@@ -62,12 +62,12 @@ urlpatterns = [
     # Drug tests
     path('portal/new_dtest', views.new_dtest),
     path('portal/edit_dtest/<int:test_id>', views.edit_dtest),
-    path('portal/dtests', views.dtests),
+    path('portal/dtests', table_views.dtests),
 
     # Check ins
     path('portal/new_check_in', views.new_check_in),
     path('portal/edit_check_in/<int:ci_id>', views.edit_check_in),
-    path('portal/check_ins', views.check_ins),
+    path('portal/check_ins', table_views.check_ins),
 
     # Supply Request
     path('portal/new_supply_request', views.new_supply_request),
@@ -85,7 +85,7 @@ urlpatterns = [
 
     # Other
     # path('portal/change_hm', views.change_hm),
-    path('portal/beds', views.beds),
+    path('portal/beds', table_views.beds),
 
     # House Manager Page
     path('portal/house_manager/', views.house_manager),

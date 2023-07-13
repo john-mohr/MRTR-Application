@@ -1,7 +1,3 @@
-# TODO
-#  Add tables for drug tests and check ins to house and resident pages
-#  Add proper redirects to each view (see new_trans and new_rent_pmt)
-
 from .forms import *
 from .models import *
 from .tables import *
@@ -16,10 +12,6 @@ from django.db.models import Sum
 from django.db.models import Value as V
 from django.db.models.functions import Concat
 from django_tables2 import RequestConfig
-
-
-# Create your views here.
-
 from functools import wraps
 
 def groups_only(*groups):
@@ -96,8 +88,8 @@ def contact(request):
 
 # Admin forms
 def username(request):
-    username = request.user.first_name +" " + request.user.last_name
-    return username
+    un = request.user.first_name + " " + request.user.last_name
+    return un
 
 
 @groups_only('House Manager')
@@ -122,10 +114,6 @@ def portal(request):
         balance=Sum('transaction__amount'), full_name=Concat('first_name', V(' '), 'last_name')),
         order_by='-balance')
     RequestConfig(request).configure(res_balances)
-
-    # TODO:
-    #  Calculate and display some key metrics (forecasted revenue, occupancy, maintenance costs, etc.)
-
     return render(request, 'admin/homepage.html', locals())
 
 
@@ -233,55 +221,6 @@ def readmit_res(request, id):
     return render(request, 'admin/forms.html', locals())
 
 
-def residents(request):
-    page = 'View All Residents'
-    table = ResidentsTable(Resident.objects.annotate(balance=Sum('transaction__amount')), order_by='-submission_date', orderable=True, exclude='full_name')
-    RequestConfig(request).configure(table)
-    button_name = 'Add New Resident'
-    button_link = '/portal/new_res'
-    fullname = str(username(request))
-
-    return render(request, 'admin/temp_tables.html', locals())
-
-
-def single_res(request, id):
-    page = "Resident"
-    res = Resident.objects.get(id=id)
-    name = res.full_name()
-    balance = res.balance()
-
-    if res.discharge_date is None:
-        status = 'Current'
-        buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
-                   ('Adjust Balance', '/portal/new_trans/' + str(id)),
-                   ('Discharge', '/portal/discharge_res/' + str(id)),
-                   ('Edit info', '/portal/edit_res/' + str(id))]
-        bed_name = res.bed.name
-        house_name = res.bed.house.name
-    else:
-        status = 'Past'
-        buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
-                   ('Adjust Balance', '/portal/new_trans/' + str(id)),
-                   ('Readmit', '/portal/readmit_res/' + str(id)),
-                   ('Edit info', '/portal/edit_res/' + str(id))]
-        bed_name = None
-        house_name = None
-
-    res_info = list(res.__dict__.items())
-    res_info = [(item[0].replace('_', ' '), item[1]) for item in res_info]
-    res_info = [(item[0].title(), item[1]) for item in res_info]
-    res_info.append(('Bed Name', bed_name))
-    res_info.append(('House Name', house_name))
-
-    contact_info = res_info[4:6]
-    res_details = [res_info[i] for i in [6, 12, 8, 16, 15, 9, 10, 11]]
-    ledger = TransactionTable(Transaction.objects.filter(resident=id).order_by('-submission_date'),
-                              exclude=('submission_date', 'full_name', 'last_update'))
-
-    fullname = username(request)
-    return render(request, 'admin/single_res.html', locals())
-
-
 # New transaction
 def new_trans(request, res_id=None):
     page = 'New Transaction'
@@ -355,58 +294,6 @@ def edit_trans(request, id):
     return render(request, 'admin/forms.html', {'form': form})
 
 
-def transactions(request):
-    page = 'View All Transactions'
-    table = TransactionTable(Transaction.objects.all()
-                             .select_related('resident')
-                             .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
-                             ) # , order_by='-submission_date',
-                           # orderable=True, exclude='full_name')
-    RequestConfig(request).configure(table)
-    button_name = 'Add New Transaction'
-    button_link = '/portal/new_trans'
-    fullname = str(username(request))
-
-    return render(request, 'admin/temp_tables.html', locals())
-
-
-def transaction(request, id):
-    page = "Transaction"
-    trans = Transaction.objects.get(id=id)
-    # name = res.full_name()
-    # balance = res.balance()
-
-    # if res.discharge_date is None:
-    #     buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
-    #                ('Adjust Balance', '/portal/new_trans/' + str(id)),
-    #                ('Discharge', '/portal/discharge_res/' + str(id)),
-    #                ('Edit info', '/portal/edit_res/' + str(id))]
-    #     bed_name = res.bed.name
-    #     house_name = res.bed.house.name
-    # else:
-    #     buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(id)),
-    #                ('Adjust Balance', '/portal/new_trans/' + str(id)),
-    #                ('Readmit', '/portal/readmit_res/' + str(id)),
-    #                ('Edit info', '/portal/edit_res/' + str(id))]
-    #     bed_name = None
-    #     house_name = None
-
-    buttons = [('Edit', '/portal/edit_trans/' + str(id))]
-
-    trans_info = list(trans.__dict__.items())
-    trans_info = [(item[0].replace('_', ' '), item[1]) for item in trans_info]
-    trans_info = [(item[0].title(), item[1]) for item in trans_info]
-
-    # print(trans_info)
-    trans_details = trans_info[2:]
-    # ledger = TransactionTable(Transaction.objects.filter(resident=id).order_by('-date'),
-    #                           exclude=('submission_date', 'full_name', 'last_update'))
-
-    fullname = username(request)
-    return render(request, 'admin/single_trans.html', locals())
-
-
-# New Meeting
 def new_meeting(request):
     page = 'Add New Meeting'
     fullname = username(request)
@@ -438,6 +325,7 @@ def edit_meeting(request, id):
             form = ManagerMeetingForm(instance=meeting)
     return render(request, 'admin/forms.html', locals())
 
+# TODO standardize and move to table_views
 def meetings(request):
     page = 'All Meetings'
     fullname = username(request)
@@ -449,6 +337,7 @@ def meetings(request):
     button_link = '/portal/new_meeting'
     return render(request, 'admin/meetings.html', locals())
 
+# TODO standardize and move to single_views (or get rid of)
 def single_meeting(request, id):
     page = 'Individual Meeting'
     fullname = username(request)
@@ -475,6 +364,7 @@ def edit_house(request, id):
     fullname = username(request)
 
     house = House.objects.get(id=id)
+    curr_mngr = house.manager
     form = HouseForm(instance=house)
     if request.method == 'POST':
         sub = HouseForm(request.POST, instance=house)
@@ -482,70 +372,14 @@ def edit_house(request, id):
             sub.save()
             house.last_update = timezone.now()
             house.save()
+            if house.manager != curr_mngr:
+                # TODO Give new manager a rent discount and remove discount for old manager
+                print('new manager')
             messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', locals())
         else:
             form = HouseForm(instance=house)
     return render(request, 'admin/forms.html', locals())
-
-
-def houses(request):
-    page = 'View All Houses'
-    fullname = username(request)
-    table = HouseTable(House.objects.all()
-                       .select_related('manager')
-                       .annotate(full_name=Concat('manager__first_name', V(' '), 'manager__last_name')),
-                       orderable=True)
-
-    # table = BedTable(Bed.objects.all()
-    #                  .select_related('resident')
-    #                  .values()
-    #                  .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
-    #                  exclude=('id',))
-
-    RequestConfig(request).configure(table)
-    name = 'Houses'
-    button_name = 'Add New House'
-    button_link = '/portal/new_house'
-    return render(request, 'admin/temp_tables.html', locals())
-
-
-def single_house(request, id):
-    page = 'Houses'
-    cur_house = House.objects.get(id=id)
-    name = cur_house.name
-    address = cur_house.address + ' ' + cur_house.city + ', ' + cur_house.state
-
-    buttons = [('Edit info', '/portal/edit_house/' + str(id))]
-
-    house_res = ResidentsTable(Resident.objects.filter(bed__house=id).annotate(balance=Sum('transaction__amount')),
-                               exclude=('submission_date', 'house', 'referral_info', 'notes', 'last_update'),
-                               orderable=True, order_by='-balance')
-    RequestConfig(request).configure(house_res)
-
-    occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
-    vacant_beds = BedTable(
-        Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)).filter(id=id),
-        order_by='house', orderable=True, exclude=('occupant', 'house'))
-    RequestConfig(request).configure(vacant_beds)
-
-    fullname = username(request)
-    return render(request, 'admin/single_house.html', locals())
-
-
-def beds(request):
-    page = 'View All Beds'
-    fullname = username(request)
-    table = BedTable(Bed.objects.all()
-                     .select_related('resident')
-                     .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
-                     exclude=('id',))
-    RequestConfig(request).configure(table)
-
-    name = 'Beds'
-    button_name = 'Add New Bed'
-    button_link = '/portal/beds#'  # new_house'
-    return render(request, 'admin/temp_tables.html', locals())
 
 
 # New Supply Request
@@ -579,6 +413,8 @@ def edit_supply_request(request, id):
             form = SupplyRequestForm(instance=supply_request)
     return render(request, 'admin/forms.html', locals())
 
+
+# TODO standardize and move to table_views
 def supply_request(request):
     page = 'All Supply Requests'
     fullname = username(request)
@@ -590,6 +426,7 @@ def supply_request(request):
     button_link = '/portal/new_supply_request'
     return render(request, 'admin/supply_requests.html', locals())
 
+# TODO standardize and move to single_views (or get rid of)
 def single_supply_request(request, id):
     page = 'Individual Supply Meeting'
     fullname = username(request)
@@ -629,6 +466,8 @@ def edit_shopping_trip(request, id):
             form = ShoppingTripForm(instance=shopping_trip)
     return render(request, 'admin/forms.html', locals())
 
+
+# TODO standardize and move to table_views
 def shopping_trip(request):
     page = 'All Shopping Trip'
     fullname = username(request)
@@ -640,6 +479,8 @@ def shopping_trip(request):
     button_link = '/portal/new_shopping_trip'
     return render(request, 'admin/shopping_trips.html', locals())
 
+
+# TODO standardize and move to single_views (or get rid of)
 def single_shopping_trip(request, id):
     page = 'Individual Shopping Trip'
     fullname = username(request)
@@ -648,6 +489,83 @@ def single_shopping_trip(request, id):
     return render(request, 'admin/single_shopping_trip.html', locals())
 
 
+# House manager forms
+
+# TODO:
+#  Make substance options appear conditional on if result is positive
+#  Make 'other' field appear conditional on if result == 'oth'
+def new_dtest(request):
+    page = 'New Drug Test'
+    fullname = username(request)
+    form = DrugTestForm()
+    if request.method == 'POST':
+        sub = DrugTestForm(request.POST)
+        if sub.is_valid():
+            print(request.POST)
+            sub.save()
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_dtest(request, test_id):
+    page = 'Edit Drug Test'
+    fullname = username(request)
+
+    dtest = Drug_test.objects.get(id=test_id)
+    form = DrugTestForm(instance=dtest)
+    if request.method == 'POST':
+        sub = DrugTestForm(request.POST, instance=dtest)
+        if sub.is_valid():
+            sub.save()
+            dtest.last_update = timezone.now()
+            dtest.save()
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = DrugTestForm(instance=dtest)
+    return render(request, 'admin/forms.html', locals())
+
+
+# New Check-in
+# TODO Restrict residents to residents in the manager's house
+def new_check_in(request):
+    page = 'New Check In'
+    fullname = username(request)
+    mngr = Resident.objects.get(pk=1)
+
+    # TODO Automatically set manager to the manager who submitted the form
+    form = CheckInForm(initial={'manager': mngr})
+    if request.method == 'POST':
+        sub = CheckInForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_check_in(request, ci_id):
+    page = 'Edit Check In'
+    fullname = username(request)
+
+    ci = Check_in.objects.get(id=ci_id)
+    form = CheckInForm(instance=ci)
+    if request.method == 'POST':
+        sub = CheckInForm(request.POST, instance=ci)
+        if sub.is_valid():
+            sub.save()
+            ci.last_update = timezone.now()
+            ci.save()
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = CheckInForm(instance=ci)
+    return render(request, 'admin/forms.html', locals())
+
+
+# House Manager forms
+@groups_only('House Manager')
+def house_manager(request):
+    context = {
+        'page': 'Dashboard',
+        'fullname': username(request),
+    }
+    return render(request, 'house/house_generic.html',context)
 
 
 # # Change House Manager
@@ -695,134 +613,3 @@ def single_shopping_trip(request, id):
 #             house_to_edit.save()
 #     return render(request, 'mrtr/forms.html', {'form': form})
 
-
-def beds(request):
-    fullname = username(request)
-    page = 'Beds'
-
-    qs = Bed.objects.all().select_related('resident').annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name'))
-
-    table = BedTable(qs, exclude=('id',))
-
-    # table = BedTable(Bed.objects.all()
-    #                  .select_related('resident')
-    #                  .values()
-    #                  .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')),
-    #                  exclude=('id',))
-    RequestConfig(request).configure(table)
-
-    name = 'Beds'
-    button_name = 'Add New Bed'
-    button_link = '/portal/#'  # new_house'
-    return render(request, 'admin/temp_tables.html', locals())
-
-
-# House manager forms
-
-# New Drug Test
-# TODO Make drug field checkboxes inline with their label; Make other field appear conditional on if result == 'oth'
-def new_dtest(request):
-    page = 'New Drug Test'
-    fullname = username(request)
-    form = DrugTestForm()
-    if request.method == 'POST':
-        sub = DrugTestForm(request.POST)
-        if sub.is_valid():
-            sub.save()
-    return render(request, 'admin/forms.html', locals())
-
-
-def edit_dtest(request, test_id):
-    page = 'Edit Drug Test'
-    fullname = username(request)
-
-    dtest = Drug_test.objects.get(id=test_id)
-    form = DrugTestForm(instance=dtest)
-    if request.method == 'POST':
-        sub = DrugTestForm(request.POST, instance=dtest)
-        if sub.is_valid():
-            sub.save()
-            dtest.last_update = timezone.now()
-            dtest.save()
-            return render(request, 'admin/forms.html', locals())
-        else:
-            form = DrugTestForm(instance=dtest)
-    return render(request, 'admin/forms.html', locals())
-
-
-def dtests(request):
-    page = 'View All Drug Tests'
-    fullname = username(request)
-
-    table = DrugTestTable(Drug_test.objects.all().select_related('resident')
-                          .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')), )
-    RequestConfig(request).configure(table)
-
-    name = 'Drug Tests'
-    button_name = 'Add New Drug Test'
-    button_link = '/portal/new_dtest'
-    return render(request, 'admin/temp_tables.html', locals())
-
-
-# New Check-in
-# TODO Restrict residents to residents in the manager's house
-def new_check_in(request):
-    page = 'New Check In'
-    fullname = username(request)
-    mngr = Resident.objects.get(pk=1)
-
-    # TODO Automatically set manager to the manager who submitted the form
-    form = CheckInForm(initial={'manager': mngr})
-    if request.method == 'POST':
-        sub = CheckInForm(request.POST)
-        if sub.is_valid():
-            sub.save()
-    return render(request, 'admin/forms.html', locals())
-
-
-def edit_check_in(request, ci_id):
-    page = 'Edit Check In'
-    fullname = username(request)
-
-    ci = Check_in.objects.get(id=ci_id)
-    form = CheckInForm(instance=ci)
-    if request.method == 'POST':
-        sub = CheckInForm(request.POST, instance=ci)
-        if sub.is_valid():
-            sub.save()
-            ci.last_update = timezone.now()
-            ci.save()
-            return render(request, 'admin/forms.html', locals())
-        else:
-            form = CheckInForm(instance=ci)
-    return render(request, 'admin/forms.html', locals())
-
-def check_ins(request):
-    page = 'View All Check Ins'
-    fullname = username(request)
-
-    # table = DrugTestTable(Drug_test.objects.all().select_related('resident')
-    #                       .annotate(full_name=Concat('resident__first_name', V(' '), 'resident__last_name')), )
-
-    table = CheckInTable(Check_in.objects.all().select_related('resident').select_related('manager')
-                         .annotate(r_full_name=Concat('resident__first_name', V(' '), 'resident__last_name'),
-                                   m_full_name=Concat('manager__first_name', V(' '), 'manager__last_name')))
-
-    # table = CheckInTable(Check_in.objects.all())
-
-    RequestConfig(request).configure(table)
-
-    name = 'Check ins'
-    button_name = 'Add New Check in'
-    button_link = '/portal/new_check)in'
-    return render(request, 'admin/temp_tables.html', locals())
-
-
-# House Manager forms
-@groups_only('House Manager')
-def house_manager(request):
-    context = {
-        'page': 'Dashboard',
-        'fullname': username(request),
-    }
-    return render(request, 'house/house_generic.html',context)

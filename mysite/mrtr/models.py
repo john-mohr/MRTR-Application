@@ -74,7 +74,7 @@ class Transaction(models.Model):
     last_update = models.DateTimeField(null=True)  # automatic
 
     def get_absolute_url(self):
-        return '/portal/transaction/%i' % self.id
+        return '/portal/edit_trans/%i' % self.id
 
 
 class House(models.Model):

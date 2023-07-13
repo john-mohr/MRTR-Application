@@ -1,5 +1,4 @@
 import django_tables2 as tables
-# from django_tables2
 from .models import *
 from django_tables2.utils import A
 
@@ -43,14 +42,15 @@ class ResidentBalanceTable(tables.Table):
 
 
 class TransactionTable(tables.Table):
+    id = tables.Column(verbose_name='Edit', linkify=True)
     submission_date = tables.Column(linkify=True)
     full_name = tables.Column(verbose_name='Resident')
     date = tables.Column(verbose_name='Date of Transaction')
 
     class Meta:
         model = Transaction
-        exclude = ('id', 'resident')
-        sequence = ('submission_date', 'date', 'full_name', 'amount', 'type', 'method')
+        exclude = ('resident',)
+        sequence = ('id', 'submission_date', 'date', 'full_name', 'amount', 'type', 'method')
         # fields = ('date', 'amount', 'type', 'method', 'notes')
 
 

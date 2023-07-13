@@ -26,7 +26,9 @@
     <body>
         <section>
             <h1>{{ name }}</h1>
-            <h2>Address: {{ address }}</h2>
+            {% for x in headers %}
+                <h2>{{ x }}</h2>
+            {% endfor %}
         </section>
         <section>
             <form>
@@ -35,14 +37,23 @@
                 {% endfor %}
             </form>
         </section>
-        <section>
-            <h2>Residents</h2>
-            {% render_table house_res %}
-        </section>
-        <section>
-            <h2>Vacant Beds</h2>
-            {% render_table vacant_beds %}
-        </section>
+        {% for x in sections %}
+            <section>
+                <h2>{{ x.0 }}</h2>
+                {% if x.1 %}
+                    {% render_table x.2 %}
+                {% else %}
+                    <table>
+                        {% for y in x.2 %}
+                            <tr>
+                                <th>{{y.0}}</th>
+                                <td>{{y.1}}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </section>
+        {% endfor %}
     </body>
 </div>
 </html>
