@@ -258,16 +258,42 @@ class CheckInForm(forms.ModelForm):
         }
 
 
+class SiteVisitForm(forms.ModelForm):
+    ISSUES = (
+        ('Safety issue', 'Safety issue'),
+        ('Site not sufficiently clean', 'Site not sufficiently clean'),
+        ('Visitors on premises outside visiting hours', 'Visitors on premises outside visiting hours'),
+        ('Alcohol/illicit substances present', 'Alcohol/illicit substances present'),
+        ('Medications found outside locked safes', 'Medications found outside locked safes'),
+        ('Resident curfew violation', 'Resident curfew violation')
+    )
+    issues = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                       choices=ISSUES,
+                                       required=False)
+    explanation = forms.CharField(widget=forms.Textarea, required=False)
+    house = HouseField(queryset=House.objects.all())
+
+    def clean_issues(self):
+        data = self.cleaned_data['issues']
+        data = ', '.join(data)
+        return data
+
+    class Meta:
+        model = Site_visit
+        fields = ['manager',
+                  'house',
+                  'date',
+                  'issues',
+                  'explanation',
+                  ]
+        widgets = {
+            'date': DateInput(),
+            'manager': forms.HiddenInput()
+        }
+
+
 # # May be unnecessary, could add/edit/delete from console instead
 # class BedForm:
-#     x = ''
-#
-#
-# class SiteVisitForm:
-#     x = ''
-#
-#
-# class CheckInForm:
 #     x = ''
 #
 #

@@ -64,3 +64,11 @@ def beds(request):
     table = BedTable(qs, exclude=('id',))
     return table_view(request, 'View All Beds', 'Add New Bed', 'beds#', table)
 
+
+def site_visits(request):
+    qs = Site_visit.objects.all().select_related('manager').annotate(
+        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name'))
+
+    table = SiteVisitTable(qs)
+    return table_view(request, 'View All Site Visits', 'Add New Site Visit', 'new_site_visit', table)
+

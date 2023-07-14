@@ -88,10 +88,17 @@ def house(request, house_id):
                                     .annotate(r_full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
                                     exclude='m_full_name')
 
+    # TODO limit to recent check ins only
+    recent_site_visits = SiteVisitTable(Site_visit.objects.select_related('manager')
+                                        .filter(house=house_id)
+                                        .annotate(full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
+                                        exclude='house')
+
     sections = [('Residents', True, house_res),
                 ('Vacant Beds', True, vacant_beds),
                 ('Recent Drug Tests', True, recent_dtests),
-                ('Recent Check-ins', True, recent_check_ins)]
+                ('Recent Check-ins', True, recent_check_ins),
+                ('Recent Site Visits', True, recent_site_visits)]
 
     return render(request, 'admin/overview.html', locals())
 

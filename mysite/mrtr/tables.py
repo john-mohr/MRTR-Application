@@ -122,6 +122,17 @@ class CheckInTable(tables.Table):
         exclude = ('resident', 'manager')
 
 
+class SiteVisitTable(tables.Table):
+    id = tables.Column(verbose_name='Edit', linkify=True)
+    house = tables.Column(accessor='house.name', verbose_name='House')
+    full_name = tables.Column(verbose_name='Manager')
+
+    class Meta:
+        model = Site_visit
+        sequence = ('id', 'date', 'full_name', 'house')
+        exclude = ('manager', )
+
+
 class SupplyRequestTable(tables.Table):
     id = tables.Column(linkify=True)
 

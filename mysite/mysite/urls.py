@@ -69,6 +69,11 @@ urlpatterns = [
     path('portal/edit_check_in/<int:ci_id>', views.edit_check_in),
     path('portal/check_ins', table_views.check_ins),
 
+    # Site visits
+    path('portal/new_site_visit', views.new_site_visit),
+    path('portal/edit_site_visit/<int:sv_id>', views.edit_site_visit),
+    path('portal/site_visits', table_views.site_visits),
+
     # Supply Request
     path('portal/new_supply_request', views.new_supply_request),
     path('portal/edit_supply_request/<int:id>', views.edit_supply_request),

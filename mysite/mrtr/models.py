@@ -207,15 +207,20 @@ class Manager_meeting(models.Model):
 #     manager = models.ForeignKey('Resident', on_delete=models.CASCADE)  #, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
 
 
-# class Site_visit(models.Model):
-#     date = models.DateField(default=timezone.now)  #blank=True, null=True)
-#     issues = models.TextField(null=True)
-#     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  #, blank=True, null=True)  # maybe add limit_to() argument
-#     house = models.ForeignKey('House', on_delete=models.CASCADE)  #, blank=True, null=True)
-#     submission_date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
-#     last_update = models.DateTimeField(null=True)  # automatic
-#
-#
+class Site_visit(models.Model):
+    date = models.DateField(default=timezone.now)
+    issues = models.TextField(null=True)
+    explanation = models.TextField(null=True)
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  # maybe add limit_to() argument
+    house = models.ForeignKey('House', on_delete=models.CASCADE)
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/edit_site_visit/%i' % self.id
+
+
+
 # class Manager_issue(models.Model):
 #     description = models.CharField(max_length=200)
 #     STATUS_CHOICES = [

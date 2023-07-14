@@ -511,7 +511,6 @@ def new_dtest(request):
     if request.method == 'POST':
         sub = DrugTestForm(request.POST)
         if sub.is_valid():
-            print(request.POST)
             sub.save()
     return render(request, 'admin/forms.html', locals())
 
@@ -539,9 +538,10 @@ def edit_dtest(request, test_id):
 def new_check_in(request):
     page = 'New Check In'
     fullname = username(request)
-    mngr = Resident.objects.get(pk=1)
 
     # TODO Automatically set manager to the manager who submitted the form
+    mngr = Resident.objects.get(pk=1)
+
     form = CheckInForm(initial={'manager': mngr})
     if request.method == 'POST':
         sub = CheckInForm(request.POST)
@@ -565,6 +565,41 @@ def edit_check_in(request, ci_id):
             return render(request, 'admin/forms.html', locals())
         else:
             form = CheckInForm(instance=ci)
+    return render(request, 'admin/forms.html', locals())
+
+
+def new_site_visit(request):
+    page = 'New Site Visit'
+    fullname = username(request)
+
+    # TODO Automatically set manager to the manager who submitted the form
+    mngr = Resident.objects.get(pk=1)
+
+    form = SiteVisitForm(initial={'manager': mngr})
+    if request.method == 'POST':
+        sub = SiteVisitForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_site_visit(request, sv_id):
+    page = 'Edit Site Visit'
+    fullname = username(request)
+
+    sv = Site_visit.objects.get(id=sv_id)
+    sv_issues = sv.issues.split(', ')
+
+    form = SiteVisitForm(instance=sv, initial={'issues': sv_issues})
+    if request.method == 'POST':
+        sub = SiteVisitForm(request.POST, instance=sv, initial={'issues': sv_issues})
+        if sub.is_valid():
+            sub.save()
+            sv.last_update = timezone.now()
+            sv.save()
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = SiteVisitForm(instance=sv, initial={'issues': sv_issues})
     return render(request, 'admin/forms.html', locals())
 
 
