@@ -219,6 +219,7 @@ class Absentee(models.Model):
     meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  # automatic
 
 
+# TODO ask TC if she's still doing manager meetings
 class Manager_meeting(models.Model):
     title = models.CharField(max_length=150)
     issues = models.TextField(null=True)

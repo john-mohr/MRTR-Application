@@ -1,6 +1,6 @@
-from .tables import *
-from .views import username
-from django.shortcuts import render, redirect
+from ..tables import *
+from .o_views import username
+from django.shortcuts import render
 from django.db.models.functions import Concat
 from django.db.models import Value, Sum
 from django_tables2 import RequestConfig

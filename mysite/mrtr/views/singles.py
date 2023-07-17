@@ -1,9 +1,10 @@
-from .tables import *
-from .views import username
-from django.shortcuts import render, redirect
+from ..tables import *
+from .o_views import username
+from django.shortcuts import render
 from django.db.models.functions import Concat
-from django.db.models import Value, Sum, Max, F
+from django.db.models import Value, Sum
 from django_tables2 import RequestConfig
+
 
 
 # TODO Make tables sortable
@@ -40,7 +41,7 @@ def resident(request, res_id):
 
     contact_info = res_info[4:6]
 
-    res_details = [res_info[i] for i in [6, 12, 8, 16, 15, 9, 10, 11]]
+    res_details = [res_info[i] for i in [6, 12, 7, 16, 15, 9, 10, 11]]
 
     ledger = TransactionTable(Transaction.objects
                               .filter(resident=res_id),
@@ -95,34 +96,41 @@ def house(request, house_id):
 
     # TODO limit to recent drug tests only
     recent_dtests = DrugTestTable(Drug_test.objects
-                                  .filter(resident__bed__house=house_id)
-                                  .annotate(full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
-                                  order_by='-date', orderable=True)
+    .filter(resident__bed__house=house_id)
+    .annotate(
+        full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
+        order_by='-date', orderable=True)
     RequestConfig(request).configure(recent_dtests)
 
     # TODO limit to recent check ins only
     recent_check_ins = CheckInTable(Check_in.objects.select_related('resident')
-                                    .filter(resident__bed__house=house_id)
-                                    .annotate(r_full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
-                                    order_by='-date', orderable=True,
-                                    exclude='m_full_name')
+    .filter(resident__bed__house=house_id)
+    .annotate(
+        r_full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
+        order_by='-date', orderable=True,
+        exclude='m_full_name')
     RequestConfig(request).configure(recent_check_ins)
 
     # TODO limit to recent site visits only
+    #   Could show only most recent (like Resident Details)
     recent_site_visits = SiteVisitTable(Site_visit.objects.select_related('manager')
-                                        .filter(house=house_id)
-                                        .annotate(full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
-                                        order_by='-date', orderable=True,
-                                        exclude='house')
+    .filter(house=house_id)
+    .annotate(
+        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
+        order_by='-date', orderable=True,
+        exclude='house')
     RequestConfig(request).configure(recent_site_visits)
 
     # TODO limit to recent house meetings only
+    #   Could show only most recent (like Resident Details)
+
     recent_house_meetings = HouseMeetingTable(House_meeting.objects.select_related('manager')
-                                              .filter(house=house_id)
-                                              .annotate(full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
-                                              order_by='-date', orderable=True,
-                                              exclude='house'
-                                              )
+    .filter(house=house_id)
+    .annotate(
+        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
+        order_by='-date', orderable=True,
+        exclude='house'
+    )
     RequestConfig(request).configure(recent_house_meetings)
 
     sections = [('Residents', True, house_res),
@@ -133,4 +141,3 @@ def house(request, house_id):
                 ('Recent House Meetings', True, recent_house_meetings)]
 
     return render(request, 'admin/overview.html', locals())
-
