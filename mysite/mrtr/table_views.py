@@ -6,6 +6,10 @@ from django.db.models import Value, Sum
 from django_tables2 import RequestConfig
 
 
+# TODO Make tables sortable
+# https://django-tables2.readthedocs.io/en/latest/pages/filtering.html
+
+
 def table_view(request, page_name, button_name, button_link, table):
     fullname = username(request)
     page = page_name
@@ -71,4 +75,13 @@ def site_visits(request):
 
     table = SiteVisitTable(qs)
     return table_view(request, 'View All Site Visits', 'Add New Site Visit', 'new_site_visit', table)
+
+
+def house_meetings(request):
+    qs = House_meeting.objects.all().select_related('manager').select_related('manager').annotate(
+        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name'))
+
+    table = HouseMeetingTable(qs)
+    return table_view(request, 'View All House Meetings', 'Add New House Meeting', 'new_house_meeting', table)
+
 

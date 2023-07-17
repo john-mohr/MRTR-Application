@@ -215,6 +215,7 @@ class SupplyRequestForm(forms.ModelForm):
 #         }
 #
 #
+# TODO Put substances into a MultipleChoiceField
 class DrugTestForm(forms.ModelForm):
     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
     other = forms.CharField(required=False)
@@ -292,13 +293,36 @@ class SiteVisitForm(forms.ModelForm):
         }
 
 
+class AbsenteeField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return obj.full_name()
+
+
+class HouseMeetingForm(forms.ModelForm):
+    absentees = AbsenteeField(widget=forms.CheckboxSelectMultiple,
+                              queryset=Resident.objects.all(),
+                              required=False)
+
+    house = HouseField(queryset=House.objects.all())
+    issues = forms.CharField(widget=forms.Textarea, required=False, label='Issues discussed')
+
+    class Meta:
+        model = House_meeting
+        fields = ['manager',
+                  'house',
+                  'date',
+                  'absentees',
+                  'issues',
+                  ]
+        widgets = {
+            'date': DateInput(),
+            'manager': forms.HiddenInput()
+        }
+
+
 # # May be unnecessary, could add/edit/delete from console instead
 # class BedForm:
 #     x = ''
 #
 #
-# class HouseMeetingForm:
-#     x = ''
-#
-#
-

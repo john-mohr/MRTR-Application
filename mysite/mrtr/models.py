@@ -189,6 +189,36 @@ class Supply_request(models.Model):
         return '/portal/supply_request/%i' % self.id
 
 
+class Site_visit(models.Model):
+    date = models.DateField(default=timezone.now)
+    issues = models.TextField(null=True)
+    explanation = models.TextField(null=True)
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  # maybe add limit_to() argument
+    house = models.ForeignKey('House', on_delete=models.CASCADE)
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/edit_site_visit/%i' % self.id
+
+
+class House_meeting(models.Model):
+    date = models.DateField(default=timezone.now)
+    issues = models.TextField(null=True)
+    house = models.ForeignKey('House', on_delete=models.CASCADE)
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  # maybe add limit_to() argument
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/edit_house_meeting/%i' % self.id
+
+
+class Absentee(models.Model):
+    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+    meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  # automatic
+
+
 class Manager_meeting(models.Model):
     title = models.CharField(max_length=150)
     issues = models.TextField(null=True)
@@ -202,23 +232,10 @@ class Manager_meeting(models.Model):
     def get_absolute_url(self):
         return '/portal/meeting/%i' % self.id
 
+
 # class Attendee(models.Model):
 #     meeting = models.ForeignKey('Manager_meeting', on_delete=models.CASCADE)  #, blank=True, null=True)
 #     manager = models.ForeignKey('Resident', on_delete=models.CASCADE)  #, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
-
-
-class Site_visit(models.Model):
-    date = models.DateField(default=timezone.now)
-    issues = models.TextField(null=True)
-    explanation = models.TextField(null=True)
-    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  # maybe add limit_to() argument
-    house = models.ForeignKey('House', on_delete=models.CASCADE)
-    submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
-
-    def get_absolute_url(self):
-        return '/portal/edit_site_visit/%i' % self.id
-
 
 
 # class Manager_issue(models.Model):
@@ -234,15 +251,3 @@ class Site_visit(models.Model):
 #     last_update = models.DateTimeField(null=True)  # automatic
 
 
-# class House_meeting(models.Model):
-#     date = models.DateField(default=timezone.now)  #blank=True, null=True)
-#     issues = models.TextField(null=True),
-#     house = models.ForeignKey('House', on_delete=models.CASCADE)  #, blank=True, null=True)
-#     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  #, blank=True, null=True)  # maybe add limit_to() argument
-#     submission_date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
-#     last_update = models.DateTimeField(null=True)  # automatic
-#
-#
-# class Absentee(models.Model):
-#     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)  #, blank=True, null=True)
-#     meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  #, blank=True, null=True)  # automatic

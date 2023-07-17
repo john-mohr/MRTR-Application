@@ -59,6 +59,10 @@ urlpatterns = [
     path('portal/meetings', views.meetings),
     path('portal/meeting/<int:id>', views.single_meeting),
 
+    path('portal/new_house_meeting', views.new_house_meeting),
+    path('portal/edit_house_meeting/<int:hm_id>', views.edit_house_meeting),
+    path('portal/house_meetings', table_views.house_meetings),
+
     # Drug tests
     path('portal/new_dtest', views.new_dtest),
     path('portal/edit_dtest/<int:test_id>', views.edit_dtest),

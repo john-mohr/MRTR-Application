@@ -1,6 +1,8 @@
 import django_tables2 as tables
 from .models import *
 from django_tables2.utils import A
+from django.db.models.functions import Concat
+from django.db.models import Value, Sum
 
 
 # TODO:
@@ -45,7 +47,7 @@ class TransactionTable(tables.Table):
     id = tables.Column(verbose_name='Edit', linkify=True)
     submission_date = tables.Column(linkify=True)
     full_name = tables.Column(verbose_name='Resident')
-    date = tables.Column(verbose_name='Date of Transaction')
+    # date = tables.Column(verbose_name='Date of Transaction')
 
     class Meta:
         model = Transaction
@@ -131,6 +133,23 @@ class SiteVisitTable(tables.Table):
         model = Site_visit
         sequence = ('id', 'date', 'full_name', 'house')
         exclude = ('manager', )
+
+
+class HouseMeetingTable(tables.Table):
+    id = tables.Column(verbose_name='Edit', linkify=True)
+    house = tables.Column(accessor='house.name', verbose_name='House')
+    full_name = tables.Column(verbose_name='Manager')
+    absentees = tables.Column(empty_values=())
+
+    class Meta:
+        model = House_meeting
+        sequence = ('id', 'date', 'full_name', 'house', 'issues', 'absentees')
+        exclude = ('manager', )
+
+    def render_absentees(self, record):
+        absentees = list(Absentee.objects.all().filter(meeting_id=record.pk).select_related('resident').annotate(
+            full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')).values_list('full_name', flat=True))
+        return ', '.join(absentees)
 
 
 class SupplyRequestTable(tables.Table):

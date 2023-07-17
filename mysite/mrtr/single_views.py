@@ -5,7 +5,10 @@ from django.db.models.functions import Concat
 from django.db.models import Value, Sum, Max, F
 from django_tables2 import RequestConfig
 
+
 # TODO Make tables sortable
+# https://django-tables2.readthedocs.io/en/latest/pages/filtering.html
+
 
 def resident(request, res_id):
     res = Resident.objects.get(id=res_id)
@@ -36,17 +39,28 @@ def resident(request, res_id):
     res_info.append(('House Name', house_name))
 
     contact_info = res_info[4:6]
+
     res_details = [res_info[i] for i in [6, 12, 8, 16, 15, 9, 10, 11]]
 
-    ledger = TransactionTable(Transaction.objects.filter(resident=res_id).order_by('-submission_date'),
+    ledger = TransactionTable(Transaction.objects
+                              .filter(resident=res_id),
+                              order_by='-date', orderable=True,
                               exclude=('submission_date', 'full_name', 'last_update'))
+    RequestConfig(request).configure(ledger)
 
-    dtests = DrugTestTable(Drug_test.objects.filter(resident=res_id).order_by('-date'),
+    dtests = DrugTestTable(Drug_test.objects
+                           .filter(resident=res_id),
+                           order_by='-date', orderable=True,
                            exclude={'full_name'})
+    RequestConfig(request).configure(dtests)
 
-    check_ins = CheckInTable(Check_in.objects.filter(resident=res_id).select_related('manager').annotate(
-        m_full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')).order_by('-date'),
-        exclude={'r_full_name'})
+    check_ins = CheckInTable(Check_in.objects
+                             .filter(resident=res_id)
+                             .select_related('manager')
+                             .annotate(m_full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
+                             order_by='-date', orderable=True,
+                             exclude={'r_full_name'})
+    RequestConfig(request).configure(check_ins)
 
     sections = [('Contact Info', False, contact_info),
                 ('Resident Details', False, res_details),
@@ -66,39 +80,57 @@ def house(request, house_id):
     headers = ['Address: ' + cur_house.address + ' ' + cur_house.city + ', ' + cur_house.state]
     buttons = [('Edit info', '/portal/edit_house/' + str(house_id))]
 
-    house_res = ResidentsTable(Resident.objects.filter(bed__house=house_id).annotate(balance=Sum('transaction__amount')),
-                               exclude=('submission_date', 'house', 'referral_info', 'notes', 'last_update'),
-                               orderable=True, order_by='-balance')
+    house_res = ResidentsTable(Resident.objects
+                               .filter(bed__house=house_id)
+                               .annotate(balance=Sum('transaction__amount')),
+                               order_by='-balance', orderable=True,
+                               exclude=('submission_date', 'house', 'referral_info', 'notes', 'last_update'))
+    RequestConfig(request).configure(house_res)
 
     occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
-    vacant_beds = BedTable(
-        Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)).filter(id=house_id),
-        order_by='house', orderable=True, exclude=('full_name', 'house'))
+    vacant_beds = BedTable(Bed.objects
+                           .exclude(id__in=occupied_beds.values_list('bed_id', flat=True))
+                           .filter(id=house_id),
+                           exclude=('full_name', 'house'))
 
     # TODO limit to recent drug tests only
     recent_dtests = DrugTestTable(Drug_test.objects
                                   .filter(resident__bed__house=house_id)
-                                  .annotate(full_name=Concat('resident__first_name', Value(' '), 'resident__last_name'))
-                                  # [:5]
-                                  )
+                                  .annotate(full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
+                                  order_by='-date', orderable=True)
+    RequestConfig(request).configure(recent_dtests)
 
     # TODO limit to recent check ins only
     recent_check_ins = CheckInTable(Check_in.objects.select_related('resident')
                                     .filter(resident__bed__house=house_id)
                                     .annotate(r_full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
+                                    order_by='-date', orderable=True,
                                     exclude='m_full_name')
+    RequestConfig(request).configure(recent_check_ins)
 
-    # TODO limit to recent check ins only
+    # TODO limit to recent site visits only
     recent_site_visits = SiteVisitTable(Site_visit.objects.select_related('manager')
                                         .filter(house=house_id)
                                         .annotate(full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
+                                        order_by='-date', orderable=True,
                                         exclude='house')
+    RequestConfig(request).configure(recent_site_visits)
+
+    # TODO limit to recent house meetings only
+    recent_house_meetings = HouseMeetingTable(House_meeting.objects.select_related('manager')
+                                              .filter(house=house_id)
+                                              .annotate(full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
+                                              order_by='-date', orderable=True,
+                                              exclude='house'
+                                              )
+    RequestConfig(request).configure(recent_house_meetings)
 
     sections = [('Residents', True, house_res),
                 ('Vacant Beds', True, vacant_beds),
                 ('Recent Drug Tests', True, recent_dtests),
                 ('Recent Check-ins', True, recent_check_ins),
-                ('Recent Site Visits', True, recent_site_visits)]
+                ('Recent Site Visits', True, recent_site_visits),
+                ('Recent House Meetings', True, recent_house_meetings)]
 
     return render(request, 'admin/overview.html', locals())
 
