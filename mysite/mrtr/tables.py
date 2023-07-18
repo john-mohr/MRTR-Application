@@ -6,6 +6,7 @@ from django.db.models import Value, Sum
 
 
 # TODO:
+#  Replace model name annotations with the model's object (I fixed it)
 #  Implement filter and search functionality
 #  Make house and bed (?) linkable
 

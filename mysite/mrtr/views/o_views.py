@@ -10,6 +10,11 @@ from django.db.models.functions import Concat
 from django_tables2 import RequestConfig
 from functools import wraps
 
+
+def forbidden(request):
+    return render(request, 'mrtr/forbidden.html')
+
+
 def groups_only(*groups):
     def inner(view_func):
         @wraps(view_func)
@@ -17,7 +22,7 @@ def groups_only(*groups):
             if request.user.groups.filter(name__in=groups).exists() or request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
             else:
-                return redirect('/accounts/logout')
+                return redirect('/forbidden')
         return wrapper_func
     return inner
 

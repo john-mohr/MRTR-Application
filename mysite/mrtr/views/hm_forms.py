@@ -1,6 +1,7 @@
+from .o_views import username, groups_only
 from ..forms import *
 from ..tables import *
-from .o_views import username
+from custom_user.models import User
 from django.shortcuts import render
 
 
@@ -9,6 +10,8 @@ from django.shortcuts import render
 #  Make 'other' field appear conditional on if result == 'oth'
 
 
+# TODO Maybe automatically set manager to the manager who submitted the form
+@groups_only('House Manager')
 def new_dtest(request):
     page = 'New Drug Test'
     fullname = username(request)
@@ -20,6 +23,7 @@ def new_dtest(request):
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def edit_dtest(request, test_id):
     page = 'Edit Drug Test'
     fullname = username(request)
@@ -44,8 +48,7 @@ def new_check_in(request):
     page = 'New Check In'
     fullname = username(request)
 
-    # TODO Automatically set manager to the manager who submitted the form
-    mngr = Resident.objects.get(pk=1)
+    mngr = User.objects.get(pk=request.user.pk)
 
     form = CheckInForm(initial={'manager': mngr})
     if request.method == 'POST':
@@ -77,8 +80,7 @@ def new_site_visit(request):
     page = 'New Site Visit'
     fullname = username(request)
 
-    # TODO Automatically set manager to the manager who submitted the form
-    mngr = Resident.objects.get(pk=1)
+    mngr = User.objects.get(pk=request.user.pk)
 
     form = SiteVisitForm(initial={'manager': mngr})
     if request.method == 'POST':
@@ -112,8 +114,7 @@ def new_house_meeting(request):
     page = 'New House Meeting'
     fullname = username(request)
 
-    # TODO Automatically set manager to the manager who submitted the form
-    mngr = Resident.objects.get(pk=1)
+    mngr = User.objects.get(pk=request.user.pk)
 
     form = HouseMeetingForm(initial={'manager': mngr})
     if request.method == 'POST':

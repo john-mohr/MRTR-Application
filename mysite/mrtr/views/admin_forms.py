@@ -11,6 +11,7 @@ from django.contrib import messages
 
 # TODO Add proper redirects to each view (see new_trans and new_rent_pmt)
 
+
 # New Resident
 @groups_only('House Manager')
 def new_res(request):

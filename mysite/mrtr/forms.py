@@ -8,7 +8,7 @@ class ContactForm(forms.Form):
     email = forms.EmailField()
     first_name = forms.CharField(label= 'First Name', max_length = 20)
     last_name = forms.CharField(label= 'Last Name', max_length = 20)
-    message = message = forms.CharField(widget = forms.Textarea, max_length = 2000)
+    message = forms.CharField(widget = forms.Textarea, max_length = 2000)
 
 
 class DateInput(forms.DateInput):
@@ -150,11 +150,6 @@ class HouseForm(forms.ModelForm):
                   'state',
                   ]
 
-
-class ChangeHMForm(forms.Form):
-    house = HouseField(queryset=House.objects.all())
-    current_HMs = House.objects.all().filter(manager_id__isnull=False).distinct()
-    new_manager = ResidentField(queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)))
 
 class ManagerMeetingForm(forms.ModelForm):
     class Meta:

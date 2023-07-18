@@ -28,6 +28,9 @@ class Resident(models.Model):
     def balance(self):
         return Transaction.objects.filter(resident=self.id).aggregate(Sum('amount'))['amount__sum']
 
+    def __str__(self):
+        return self.first_name + ' ' + self.last_name
+
 
 class Transaction(models.Model):
     date = models.DateField(default=timezone.now)
