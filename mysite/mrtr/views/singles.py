@@ -6,11 +6,6 @@ from django.db.models import Value, Sum
 from django_tables2 import RequestConfig
 
 
-
-# TODO Make tables sortable
-# https://django-tables2.readthedocs.io/en/latest/pages/filtering.html
-
-
 def resident(request, res_id):
     res = Resident.objects.get(id=res_id)
 

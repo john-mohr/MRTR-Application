@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
     'django_tables2',
+
+    'django_filters',
     
     
 ]

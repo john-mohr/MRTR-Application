@@ -47,7 +47,8 @@
         {%  csrf_token %}
         {{ form | crispy}}
         <input type="hidden" name="rdr" value="{{ rdr }}">
-        <input type="submit">    </form>
+        <input type="submit">
+    </form>
     {% if messages %}
         <ul class="messages">
     {% for message in messages %}

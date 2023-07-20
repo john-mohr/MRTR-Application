@@ -5,8 +5,6 @@ from django.db.models.functions import Concat
 from django.db.models import Value, Sum
 
 
-# TODO Implement filter and search functionality
-
 class ResidentsTable(tables.Table):
     first_name = tables.Column(linkify=True)
     last_name = tables.Column(linkify=True)
