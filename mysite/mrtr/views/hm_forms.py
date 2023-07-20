@@ -5,12 +5,6 @@ from custom_user.models import User
 from django.shortcuts import render
 
 
-# TODO:
-#  Make substance options appear conditional on if result is positive
-#  Make 'other' field appear conditional on if result == 'oth'
-
-
-# TODO Maybe automatically set manager to the manager who submitted the form
 @groups_only('House Manager')
 def new_dtest(request):
     page = 'New Drug Test'
@@ -29,16 +23,18 @@ def edit_dtest(request, test_id):
     fullname = username(request)
 
     dtest = Drug_test.objects.get(id=test_id)
-    form = DrugTestForm(instance=dtest)
+    dtest_subs = dtest.substances.split(', ')
+
+    form = DrugTestForm(instance=dtest, initial={'substances': dtest_subs})
     if request.method == 'POST':
-        sub = DrugTestForm(request.POST, instance=dtest)
+        sub = DrugTestForm(request.POST, instance=dtest, initial={'substances': dtest_subs})
         if sub.is_valid():
             sub.save()
             dtest.last_update = timezone.now()
             dtest.save()
             return render(request, 'admin/forms.html', locals())
         else:
-            form = DrugTestForm(instance=dtest)
+            form = DrugTestForm(instance=dtest, initial={'substances': dtest_subs})
     return render(request, 'admin/forms.html', locals())
 
 

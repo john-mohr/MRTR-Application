@@ -210,23 +210,44 @@ class SupplyRequestForm(forms.ModelForm):
 #         }
 #
 #
-# TODO Put substances into a MultipleChoiceField
 class DrugTestForm(forms.ModelForm):
     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
-    other = forms.CharField(required=False)
+    notes = forms.CharField(required=False)
+
+    SUBSTANCES = (
+        ('Amphetamines', 'Amphetamines'),
+        ('Barbiturates', 'Barbiturates'),
+        ('Benzodiazepines', 'Benzodiazepines'),
+        ('Cocaine', 'Cocaine'),
+        ('Marijuana', 'Marijuana'),
+        ('Opiates', 'Opiates'),
+        ('Phencyclidine', 'Phencyclidine'),
+        ('Other (Specify)', 'Other (Specify)'),
+    )
+    substances = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                           choices=SUBSTANCES,
+                                           required=False,
+                                           label='Substances (if positive)')
+
+    def clean_substances(self):
+        data = self.cleaned_data['substances']
+        data = ', '.join(data)
+        return data
 
     class Meta:
         model = Drug_test
         fields = ['resident',
                   'date',
                   'result',
-                  'amphetamines',
-                  'barbiturates',
-                  'benzodiazepines',
-                  'cocaine',
-                  'marijuana',
-                  'opiates',
-                  'phencyclidine',
+                  'substances',
+                  'notes',
+                  # 'amphetamines',
+                  # 'barbiturates',
+                  # 'benzodiazepines',
+                  # 'cocaine',
+                  # 'marijuana',
+                  # 'opiates',
+                  # 'phencyclidine',
                   ]
         widgets = {
             'date': DateInput(),

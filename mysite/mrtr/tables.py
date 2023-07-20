@@ -5,10 +5,7 @@ from django.db.models.functions import Concat
 from django.db.models import Value, Sum
 
 
-# TODO:
-#  Replace model name annotations with the model's object (I fixed it)
-#  Implement filter and search functionality
-#  Make house and bed (?) linkable
+# TODO Implement filter and search functionality
 
 class ResidentsTable(tables.Table):
     first_name = tables.Column(linkify=True)
@@ -47,46 +44,31 @@ class ResidentBalanceTable(tables.Table):
 class TransactionTable(tables.Table):
     id = tables.Column(verbose_name='Edit', linkify=True)
     submission_date = tables.Column(linkify=True)
-    full_name = tables.Column(verbose_name='Resident')
-    # date = tables.Column(verbose_name='Date of Transaction')
+    resident = tables.Column(linkify=True)
 
     class Meta:
         model = Transaction
-        exclude = ('resident',)
-        sequence = ('id', 'submission_date', 'date', 'full_name', 'amount', 'type', 'method')
-        # fields = ('date', 'amount', 'type', 'method', 'notes')
+        sequence = ('id', 'submission_date', 'date', 'resident', 'amount', 'type', 'method')
 
 
 class HouseTable(tables.Table):
     name = tables.Column(linkify=True)
-    full_name = tables.Column(verbose_name='Manager')
-    # full_name = tables.Column(verbose_name='Manager', linkify=('resident', [A('manager_id')]))
-
-    # TODO Prevent linkifying rows where manager is None
-    # def before_render(self, request):
-    #     print(request)
-    #     if self.columns.__getitem__('full_name') is None:
-    #         self.columns.__getitem__('full_name').linkify = False
-    #     else:
-    #         self.columns.__getitem__('full_name').linkify = ('resident', [A('manager_id')])
+    manager = tables.Column(linkify=True)
 
     class Meta:
         model = House
-        sequence = ('name', 'full_name')
-        exclude = ('id', 'manager')
+        sequence = ('name', 'manager')
+        exclude = ('id',)
 
 
 class BedTable(tables.Table):
-    full_name = tables.Column(verbose_name='Occupant')
-    # TODO linkify occupant
-    # full_name = tables.Column(verbose_name='Occupant', linkify=('resident', [A('id')]))
+    resident = tables.Column(linkify=True, verbose_name='Occupant')
     house = tables.Column(accessor='house.name', verbose_name='House')
     name = tables.Column(verbose_name='Bed')
 
     class Meta:
         model = Bed
         exclude = ('id', 'occupant')
-        # fields = ('name', 'house', 'full_name')
 
 
 class ManagerMeetingTable(tables.Table):
@@ -106,46 +88,42 @@ class ManagerMeetingTable(tables.Table):
 
 class DrugTestTable(tables.Table):
     id = tables.Column(verbose_name='Edit', linkify=True)
-    full_name = tables.Column(verbose_name='Resident')
+    resident = tables.Column(linkify=True)
 
     class Meta:
         model = Drug_test
-        sequence = ('id', 'full_name',)
-        exclude = ('resident', )
+        sequence = ('id', 'resident',)
 
 
 class CheckInTable(tables.Table):
     id = tables.Column(verbose_name='Edit', linkify=True)
-    r_full_name = tables.Column(verbose_name='Resident')
-    m_full_name = tables.Column(verbose_name='Manager')
+    resident = tables.Column(linkify=True)
+    manager = tables.Column(linkify=True)
 
     class Meta:
         model = Check_in
-        sequence = ('id', 'r_full_name', 'm_full_name')
-        exclude = ('resident', 'manager')
+        sequence = ('id', 'resident', 'manager')
 
 
 class SiteVisitTable(tables.Table):
     id = tables.Column(verbose_name='Edit', linkify=True)
-    house = tables.Column(accessor='house.name', verbose_name='House')
-    full_name = tables.Column(verbose_name='Manager')
+    house = tables.Column(linkify=True)
+    manager = tables.Column(linkify=True)
 
     class Meta:
         model = Site_visit
-        sequence = ('id', 'date', 'full_name', 'house')
-        exclude = ('manager', )
+        sequence = ('id', 'date', 'manager', 'house')
 
 
 class HouseMeetingTable(tables.Table):
     id = tables.Column(verbose_name='Edit', linkify=True)
-    house = tables.Column(accessor='house.name', verbose_name='House')
-    full_name = tables.Column(verbose_name='Manager')
+    house = tables.Column(linkify=True)
+    manager = tables.Column(linkify=True)
     absentees = tables.Column(empty_values=())
 
     class Meta:
         model = House_meeting
-        sequence = ('id', 'date', 'full_name', 'house', 'issues', 'absentees')
-        exclude = ('manager', )
+        sequence = ('id', 'date', 'manager', 'house', 'issues', 'absentees')
 
     def render_absentees(self, record):
         absentees = list(Absentee.objects.all().filter(meeting_id=record.pk).select_related('resident').annotate(

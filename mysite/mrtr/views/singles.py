@@ -46,21 +46,19 @@ def resident(request, res_id):
     ledger = TransactionTable(Transaction.objects
                               .filter(resident=res_id),
                               order_by='-date', orderable=True,
-                              exclude=('submission_date', 'full_name', 'last_update'))
+                              exclude=('submission_date', 'resident', 'last_update'))
     RequestConfig(request).configure(ledger)
 
     dtests = DrugTestTable(Drug_test.objects
                            .filter(resident=res_id),
                            order_by='-date', orderable=True,
-                           exclude={'full_name'})
+                           exclude={'resident'})
     RequestConfig(request).configure(dtests)
 
     check_ins = CheckInTable(Check_in.objects
-                             .filter(resident=res_id)
-                             .select_related('manager')
-                             .annotate(m_full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
+                             .filter(resident=res_id),
                              order_by='-date', orderable=True,
-                             exclude={'r_full_name'})
+                             exclude={'resident'})
     RequestConfig(request).configure(check_ins)
 
     sections = [('Contact Info', False, contact_info),
@@ -92,45 +90,36 @@ def house(request, house_id):
     vacant_beds = BedTable(Bed.objects
                            .exclude(id__in=occupied_beds.values_list('bed_id', flat=True))
                            .filter(id=house_id),
-                           exclude=('full_name', 'house'))
+                           exclude=('resident', 'house'))
 
     # TODO limit to recent drug tests only
     recent_dtests = DrugTestTable(Drug_test.objects
-    .filter(resident__bed__house=house_id)
-    .annotate(
-        full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
-        order_by='-date', orderable=True)
+                                  .filter(resident__bed__house=house_id),
+                                  order_by='-date', orderable=True)
     RequestConfig(request).configure(recent_dtests)
 
     # TODO limit to recent check ins only
-    recent_check_ins = CheckInTable(Check_in.objects.select_related('resident')
-    .filter(resident__bed__house=house_id)
-    .annotate(
-        r_full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')),
-        order_by='-date', orderable=True,
-        exclude='m_full_name')
+    recent_check_ins = CheckInTable(Check_in.objects
+                                    .filter(resident__bed__house=house_id),
+                                    order_by='-date', orderable=True,
+                                    exclude='manager')
     RequestConfig(request).configure(recent_check_ins)
 
     # TODO limit to recent site visits only
     #   Could show only most recent (like Resident Details)
-    recent_site_visits = SiteVisitTable(Site_visit.objects.select_related('manager')
-    .filter(house=house_id)
-    .annotate(
-        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
-        order_by='-date', orderable=True,
-        exclude='house')
+    recent_site_visits = SiteVisitTable(Site_visit.objects
+                                        .filter(house=house_id),
+                                        order_by='-date', orderable=True,
+                                        exclude='house')
     RequestConfig(request).configure(recent_site_visits)
 
     # TODO limit to recent house meetings only
     #   Could show only most recent (like Resident Details)
 
-    recent_house_meetings = HouseMeetingTable(House_meeting.objects.select_related('manager')
-    .filter(house=house_id)
-    .annotate(
-        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name')),
-        order_by='-date', orderable=True,
-        exclude='house'
-    )
+    recent_house_meetings = HouseMeetingTable(House_meeting.objects
+                                              .filter(house=house_id),
+                                              order_by='-date', orderable=True,
+                                              exclude='house')
     RequestConfig(request).configure(recent_house_meetings)
 
     sections = [('Residents', True, house_res),

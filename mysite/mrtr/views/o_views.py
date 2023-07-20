@@ -105,7 +105,7 @@ def portal(request):
     occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
     vacant_beds = BedTable(
         Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
-        order_by='house', orderable=True, exclude=('id', 'occupant', 'full_name'))
+        order_by='house', orderable=True, exclude=('id', 'resident', ))
     RequestConfig(request).configure(vacant_beds)
 
     # TODO:

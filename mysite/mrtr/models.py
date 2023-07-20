@@ -91,6 +91,9 @@ class House(models.Model):
     def get_absolute_url(self):
         return '/portal/house/%i' % self.id
 
+    def __str__(self):
+        return self.name
+
 
 class Bed(models.Model):
     name = models.CharField(max_length=7)
@@ -107,14 +110,18 @@ class Drug_test(models.Model):
         ('Other (specify)', 'Other (specify)')
     ]
     result = models.CharField(max_length=17, choices=RESULT_CHOICES)
-    amphetamines = models.BooleanField()
-    barbiturates = models.BooleanField()
-    benzodiazepines = models.BooleanField()
-    cocaine = models.BooleanField()
-    marijuana = models.BooleanField()
-    opiates = models.BooleanField()
-    phencyclidine = models.BooleanField()
-    other = models.CharField(max_length=50, null=True)
+
+    substances = models.TextField(null=True)
+
+    # amphetamines = models.BooleanField()
+    # barbiturates = models.BooleanField()
+    # benzodiazepines = models.BooleanField()
+    # cocaine = models.BooleanField()
+    # marijuana = models.BooleanField()
+    # opiates = models.BooleanField()
+    # phencyclidine = models.BooleanField()
+
+    notes = models.CharField(max_length=50, null=True)
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic

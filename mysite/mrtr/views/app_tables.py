@@ -29,57 +29,49 @@ def residents(request):
 
 
 def transactions(request):
-    qs = Transaction.objects.all().select_related('resident').annotate(
-        full_name=Concat('resident__first_name', Value(' '), 'resident__last_name'))
+    qs = Transaction.objects.all().select_related('resident')
 
     table = TransactionTable(qs, order_by='-submission_date', orderable=True)
     return table_view(request, 'View All Transactions', 'Add New Transaction', 'new_trans', table)
 
 
 def dtests(request):
-    qs = Drug_test.objects.all().select_related('resident').annotate(
-        full_name=Concat('resident__first_name', Value(' '), 'resident__last_name'))
+    qs = Drug_test.objects.all()
 
     table = DrugTestTable(qs, order_by='-submission_date', orderable=True)
     return table_view(request, 'View All Drug Tests', 'Add New Drug Test', 'new_dtest', table)
 
 
 def check_ins(request):
-    qs = Check_in.objects.all().select_related('resident').select_related('manager').annotate(
-        r_full_name=Concat('resident__first_name', Value(' '), 'resident__last_name'),
-        m_full_name=Concat('manager__first_name', Value(' '), 'manager__last_name'))
+    qs = Check_in.objects.all()
 
     table = CheckInTable(qs, order_by='-submission_date', orderable=True)
     return table_view(request, 'View All Check Ins', 'Add New Check In', 'new_check_in', table)
 
 
 def houses(request):
-    qs = House.objects.all().select_related('manager').annotate(
-        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name'))
+    qs = House.objects.all()
 
     table = HouseTable(qs, orderable=True)
     return table_view(request, 'View All Houses', 'Add New House', 'new_house', table)
 
 
 def beds(request):
-    qs = Bed.objects.all().select_related('resident').annotate(
-        full_name=Concat('resident__first_name', Value(' '), 'resident__last_name'))
+    qs = Bed.objects.all()
 
     table = BedTable(qs, exclude=('id',))
     return table_view(request, 'View All Beds', 'Add New Bed', 'beds#', table)
 
 
 def site_visits(request):
-    qs = Site_visit.objects.all().select_related('manager').annotate(
-        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name'))
+    qs = Site_visit.objects.all()
 
     table = SiteVisitTable(qs)
     return table_view(request, 'View All Site Visits', 'Add New Site Visit', 'new_site_visit', table)
 
 
 def house_meetings(request):
-    qs = House_meeting.objects.all().select_related('manager').select_related('manager').annotate(
-        full_name=Concat('manager__first_name', Value(' '), 'manager__last_name'))
+    qs = House_meeting.objects.all()
 
     table = HouseMeetingTable(qs)
     return table_view(request, 'View All House Meetings', 'Add New House Meeting', 'new_house_meeting', table)

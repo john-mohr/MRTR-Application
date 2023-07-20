@@ -20,6 +20,8 @@ from custom_user import views as user_view
 from django.contrib.auth import views as auth
 
 urlpatterns = [
+    path('forbidden', o_views.forbidden),
+
     path('admin/', admin.site.urls),
     path('', o_views.home),
     path('home', o_views.home),
