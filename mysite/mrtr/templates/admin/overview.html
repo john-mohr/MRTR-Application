@@ -47,7 +47,11 @@
                         {% for y in x.2 %}
                             <tr>
                                 <th>{{y.0}}</th>
-                                <td>{{y.1}}</td>
+                                <td>
+                                    <a{{ y.2 }}>
+                                        {{y.1}}
+                                    </a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </table>

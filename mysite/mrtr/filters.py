@@ -1,127 +1,172 @@
-import django_filters as filters
 from .models import *
-from django import forms
+from django_filters.widgets import RangeWidget
 from django.db.models import Q
+from functools import reduce
+from operator import or_
+import datetime
+import django_filters as filters
 
-# TODO Implement filter and search functionality
+
+# TODO Make filters for supply requests, shopping trips, and manager meetings when ready
 
 
-class ResidentFilter(filters.FilterSet):
-    search = filters.CharFilter(method='search_all',
+class MasterFilter(filters.FilterSet):
+    field_list = []
+    search = filters.CharFilter(method='search_fields',
                                 label='Search')
+    date = filters.DateFromToRangeFilter(method='date_filter',
+                                         widget=RangeWidget(attrs={'type': 'date'}),
+                                         label='Filter by date')
+
+    class Meta:
+        abstract = True
+
+    def search_fields(self, queryset, name, value):
+        q = reduce(or_, [Q(**{f'{f}__icontains': value}) for f in self.field_list], Q())
+        return queryset.filter(q)
+
+    @staticmethod
+    def date_filter(queryset, name, value):
+        start = value.start
+        if start is None:
+            start = datetime.datetime(1970, 1, 1)
+
+        stop = value.stop
+        if stop is None:
+            stop = datetime.datetime.now()
+
+        return queryset.filter(date__range=[start, stop])
+
+
+class ResidentFilter(MasterFilter):
+    field_list = [
+        'first_name',
+        'last_name',
+        'phone',
+        'email',
+        'bed__name',
+        'bed__house__name'
+    ]
+
+    date = None
     status = filters.ChoiceFilter(method='status_filter',
                                   choices=((1, 'Current'), (0, 'Past')),
                                   empty_label='All',
                                   label='Filter by residency status')
-    # house = filters.ModelMultipleChoiceFilter(queryset=House.objects.all(),
-    #                                           method='house_filter',
-    #                                           widget=forms.CheckboxSelectMultiple,
-    #                                           label='Filter by house')
 
     class Meta:
         model = Resident
-        fields = [
-            'search',
-            'status',
-            # 'house'
+        fields = ['search', 'status']
+
+    @staticmethod
+    def status_filter(queryset, name, value):
+        return queryset.filter(discharge_date__isnull=bool(int(value)))
+
+
+class TransactionFilter(MasterFilter):
+    field_list = [
+        'resident__first_name',
+        'resident__last_name',
+        'amount',
+        'type',
+        'method',
+        'notes'
         ]
 
-    def search_all(self, queryset, name, value):
-        return queryset.filter(
-            Q(first_name__icontains=value) |
-            Q(last_name__icontains=value) |
-            Q(phone__icontains=value) |
-            Q(email__icontains=value) |
-            Q(bed__name__icontains=value)
-        )
-
-    def status_filter(self, queryset, name, value):
-        return queryset.filter(
-            discharge_date__isnull=bool(int(value))
-        )
-
-    # def house_filter(self, queryset, name, value):
-    #     if len(value) == 0:
-    #         return queryset
-    #     else:
-    #         house_residents = Bed.objects.exclude(resident=None).filter(house__in=value).distinct()
-    #         return queryset.filter(
-    #             pk__in=house_residents.values_list('resident', flat=True)
-    #         )
-
-
-class TransactionFilter(filters.FilterSet):
     class Meta:
-        model = Resident
-        fields = [
-            # 'search',
-            'id'
-            # 'status',
-            # 'house'
-        ]
+        model = Transaction
+        fields = ['search', 'date']
 
 
-class DrugTestFilter(filters.FilterSet):
+class DrugTestFilter(MasterFilter):
+    field_list = [
+        'resident__first_name',
+        'resident__last_name',
+        'result',
+        'substances',
+        'notes'
+    ]
+
     class Meta:
-        model = Resident
-        fields = [
-            # 'search',
-            'id'
-            # 'status',
-            # 'house'
-        ]
+        model = Drug_test
+        fields = ['search', 'date']
 
 
-class CheckInFilter(filters.FilterSet):
+class CheckInFilter(MasterFilter):
+    field_list = [
+        'resident__first_name',
+        'resident__last_name',
+        'manager__first_name',
+        'manager__last_name',
+        'method',
+        'notes'
+    ]
+
     class Meta:
-        model = Resident
-        fields = [
-            # 'search',
-            'id'
-            # 'status',
-            # 'house'
-        ]
+        model = Check_in
+        fields = ['search', 'date']
 
 
-class HouseFilter(filters.FilterSet):
+class SiteVisitFilter(MasterFilter):
+    field_list = [
+        'manager__first_name',
+        'manager__last_name',
+        'house__name',
+        'issues'
+    ]
+
     class Meta:
-        model = Resident
-        fields = [
-            # 'search',
-            'id'
-            # 'status',
-            # 'house'
-        ]
+        model = Site_visit
+        fields = ['search', 'date']
 
 
-class BedFilter(filters.FilterSet):
+class HouseMeetingFilter(MasterFilter):
+    field_list = [
+        'manager__first_name',
+        'manager__last_name',
+        'house__name',
+        'issues',
+        'absentee__resident__first_name',
+        'absentee__resident__last_name'
+    ]
+
     class Meta:
-        model = Resident
-        fields = [
-            # 'search',
-            'id'
-            # 'status',
-            # 'house'
-        ]
+        model = House_meeting
+        fields = ['search', 'date']
 
 
-class SiteVisitFilter(filters.FilterSet):
+class HouseFilter(MasterFilter):
+    field_list = [
+        'name',
+        'manager__first_name',
+        'manager__last_name',
+        'address',
+        'city',
+        'state'
+    ]
+    date = None
+
     class Meta:
-        model = Resident
-        fields = [
-            # 'search',
-            'id'
-            # 'status',
-            # 'house'
-        ]
+        model = House
+        fields = ['search', ]
 
 
-class HouseMeetingFilter(filters.FilterSet):
+class BedFilter(MasterFilter):
+    field_list = [
+        'name',
+        'house__name'
+    ]
+
+    date = None
+    occupied = filters.ChoiceFilter(method='occupied_filter',
+                                    choices=((1, 'Vacant'), (0, 'Occupied')),
+                                    empty_label='All',
+                                    label='Filter by occupancy status')
+
     class Meta:
-        model = Resident
-        fields = [
-            # 'search',
-            'id'
-            # 'status',
-            # 'house'
-        ]
+        model = Bed
+        fields = ['search', 'occupied']
+
+    @staticmethod
+    def occupied_filter(queryset, name, value):
+        return queryset.filter(resident__isnull=bool(int(value)))

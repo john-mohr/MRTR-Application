@@ -99,6 +99,9 @@ class Bed(models.Model):
     name = models.CharField(max_length=7)
     house = models.ForeignKey('House', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
+
 
 class Drug_test(models.Model):
     date = models.DateField(default=timezone.now, blank=True)

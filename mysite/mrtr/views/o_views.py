@@ -111,9 +111,14 @@ def portal(request):
     # TODO:
     #  Distinguish between current and past residents
     #  Add a limit to number of residents shown or a threshold balance
-    res_balances = ResidentBalanceTable(Resident.objects.annotate(
-        balance=Sum('transaction__amount'), full_name=Concat('first_name', Value(' '), 'last_name')),
-        order_by='-balance')
+    #  Maybe add a filter
+
+    res_balances = ShortResidentsTable(Resident.objects.annotate(
+        balance=Sum('transaction__amount'),
+        full_name=Concat('first_name', Value(' '), 'last_name')),
+        order_by='-balance',
+        exclude=('rent', 'bed', 'door_code'))
+
     RequestConfig(request).configure(res_balances)
     return render(request, 'admin/homepage.html', locals())
 

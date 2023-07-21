@@ -7,9 +7,6 @@ from django.db.models import Value, Sum, Q
 from django_tables2 import RequestConfig
 
 
-# TODO Implement filter and search functionality
-
-
 def table_view(request, page_name, button_name, button_link, table_filter, table):
     fullname = username(request)
     page = page_name
@@ -36,7 +33,7 @@ def transactions(request):
 
     table_filter = TransactionFilter(request.GET, queryset=qs)
 
-    table = TransactionTable(qs, order_by='-submission_date', orderable=True)
+    table = TransactionTable(table_filter.qs, order_by='-submission_date', orderable=True)
     return table_view(request, 'View All Transactions', 'Add New Transaction', 'new_trans', table_filter, table)
 
 
@@ -45,7 +42,7 @@ def dtests(request):
 
     table_filter = DrugTestFilter(request.GET, queryset=qs)
 
-    table = DrugTestTable(qs, order_by='-submission_date', orderable=True)
+    table = DrugTestTable(table_filter.qs, order_by='-submission_date', orderable=True)
     return table_view(request, 'View All Drug Tests', 'Add New Drug Test', 'new_dtest', table_filter, table)
 
 
@@ -54,7 +51,7 @@ def check_ins(request):
 
     table_filter = CheckInFilter(request.GET, queryset=qs)
 
-    table = CheckInTable(qs, order_by='-submission_date', orderable=True)
+    table = CheckInTable(table_filter.qs, order_by='-submission_date', orderable=True)
     return table_view(request, 'View All Check Ins', 'Add New Check In', 'new_check_in', table_filter, table)
 
 
@@ -63,7 +60,7 @@ def houses(request):
 
     table_filter = HouseFilter(request.GET, queryset=qs)
 
-    table = HouseTable(qs, orderable=True)
+    table = HouseTable(table_filter.qs, orderable=True)
     return table_view(request, 'View All Houses', 'Add New House', 'new_house', table_filter, table)
 
 
@@ -72,7 +69,7 @@ def beds(request):
 
     table_filter = BedFilter(request.GET, queryset=qs)
 
-    table = BedTable(qs, exclude=('id',))
+    table = BedTable(table_filter.qs, exclude=('id',))
     return table_view(request, 'View All Beds', 'Add New Bed', 'beds#', table_filter, table)
 
 
@@ -81,7 +78,7 @@ def site_visits(request):
 
     table_filter = SiteVisitFilter(request.GET, queryset=qs)
 
-    table = SiteVisitTable(qs)
+    table = SiteVisitTable(table_filter.qs)
     return table_view(request, 'View All Site Visits', 'Add New Site Visit', 'new_site_visit', table_filter, table)
 
 
@@ -90,7 +87,7 @@ def house_meetings(request):
 
     table_filter = HouseMeetingFilter(request.GET, queryset=qs)
 
-    table = HouseMeetingTable(qs)
+    table = HouseMeetingTable(table_filter.qs)
     return table_view(request, 'View All House Meetings', 'Add New House Meeting', 'new_house_meeting', table_filter, table)
 
 

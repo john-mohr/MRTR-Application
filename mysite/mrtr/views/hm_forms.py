@@ -39,7 +39,7 @@ def edit_dtest(request, test_id):
 
 
 # New Check-in
-# TODO Restrict residents to residents in the manager's house
+# TODO Restrict residents to residents in the manager's house (do when we start building the house manager portal)
 def new_check_in(request):
     page = 'New Check In'
     fullname = username(request)
