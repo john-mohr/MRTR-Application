@@ -1,6 +1,5 @@
 import django_tables2 as tables
 from .models import *
-from django_tables2.utils import A
 from django.db.models.functions import Concat
 from django.db.models import Value, Sum
 
@@ -8,14 +7,14 @@ from django.db.models import Value, Sum
 class ResidentsTable(tables.Table):
     first_name = tables.Column(linkify=True)
     last_name = tables.Column(linkify=True)
-    bed_obj = tables.RelatedLinkColumn()
-    bed = tables.Column(accessor='bed.name', verbose_name='Bed')
-    house = tables.Column(accessor='bed.house.name', verbose_name='House')
+    house = tables.Column(accessor='bed.house', verbose_name='House')
     balance = tables.Column(accessor=tables.A('balance'))
+    full_name = tables.Column(linkify=True, verbose_name='Name')
 
     class Meta:
         model = Resident
         sequence = ('submission_date',
+                    'full_name',
                     'first_name',
                     'last_name',
                     'balance',
@@ -28,15 +27,20 @@ class ResidentsTable(tables.Table):
                     'admit_date',
                     'discharge_date',
                     )
-        exclude = ('id', 'bed_obj', )
+        exclude = ('id', )
 
 
-class ResidentBalanceTable(tables.Table):
+class ShortResidentsTable(tables.Table):
     full_name = tables.Column(linkify=True, verbose_name='Name')
 
     class Meta:
         model = Resident
-        fields = ('full_name', 'balance',)
+        fields = ('full_name',
+                  'balance',
+                  'rent',
+                  'bed',
+                  'door_code'
+                  )
 
 
 class TransactionTable(tables.Table):
@@ -123,7 +127,8 @@ class HouseMeetingTable(tables.Table):
         model = House_meeting
         sequence = ('id', 'date', 'manager', 'house', 'issues', 'absentees')
 
-    def render_absentees(self, record):
+    @staticmethod
+    def render_absentees(record):
         absentees = list(Absentee.objects.all().filter(meeting_id=record.pk).select_related('resident').annotate(
             full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')).values_list('full_name', flat=True))
         return ', '.join(absentees)
