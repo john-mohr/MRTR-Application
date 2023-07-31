@@ -91,3 +91,29 @@ def house_meetings(request):
     return table_view(request, 'View All House Meetings', 'Add New House Meeting', 'new_house_meeting', table_filter, table)
 
 
+def meetings(request):
+    qs = Manager_meeting.objects.all()
+
+    table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
+
+    table = ManagerMeetingTable(table_filter.qs)
+    return table_view(request, 'View All Meetings', 'Add New Meeting', 'new_meeting', table_filter, table)
+
+
+def supply_requests(request):
+    qs = Supply_request.objects.all()
+
+    table_filter = SupplyRequestFilter(request.GET, queryset=qs)
+
+    table = SupplyRequestTable(table_filter.qs)
+    return table_view(request, 'View All Supply Requests', 'Add New Supply Request', 'new_supply_request', table_filter, table)
+
+
+def shopping_trips(request):
+    qs = Shopping_trip.objects.all()
+
+    table_filter = ShoppingTripFilter(request.GET, queryset=qs)
+
+    table = ShoppingTripTable(table_filter.qs)
+    return table_view(request, 'View All Shopping Trips', 'Add New Shopping Trip', 'new_shopping_trip', table_filter, table)
+

@@ -69,6 +69,35 @@
                 <p>Amount: {{ shopping_trip.amount }}</p>
                 <p>Notes :{{ shopping_trip.notes }}</p>
             </section>
+            <section class="container">
+                <h2>Unfulfilled Supply Requests</h2>
+            </section>
+  
+
+            
+            
+                    {% for x in forms %}
+                    <section class="container">
+                    <form action="" method="post">{% csrf_token %}
+                        
+                        {{ x | crispy}}
+            
+                    </section>
+                    {% endfor %}
+                    <input type="submit">
+            </form>
+                    
+
+            {% if messages %}
+                <ul class="messages">
+            {% for message in messages %}
+                <li  {% if message.tags %} class=" {{ message.tags }} " {% endif %}> {{ message }} </li>
+            {% endfor %}
+                </ul>
+            {% endif %}
+                    
+                
+            
         </div>
         
     </body>

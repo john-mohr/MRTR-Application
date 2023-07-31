@@ -191,12 +191,12 @@ class Supply_request(models.Model):
         ('oth', 'Other (specify')
     ]
     product = models.CharField(max_length=3, choices=PRODUCT_CHOICES, null=True)
-    other = models.CharField(max_length=50, null=True)
+    other = models.CharField(max_length=50, null=True, blank= True)
     quantity = models.IntegerField(validators=[MaxValueValidator(10)])  # blank=True, null=True)
-    notes = models.TextField(null=True)
+    notes = models.TextField(null= True, blank= True)
     fulfilled = models.BooleanField()  #blank=True, null=True)  # automatic
     house = models.ForeignKey('House', on_delete=models.CASCADE)  #, blank=True, null=True)
-    trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE)  #, blank=True, null=True)  # might be unnecessary
+    trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE, null = True, blank = True)  #, blank=True, null=True)  # might be unnecessary
 
     def get_absolute_url(self):
         return '/portal/supply_request/%i' % self.id

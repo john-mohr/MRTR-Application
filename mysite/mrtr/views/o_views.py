@@ -1,6 +1,7 @@
 from ..forms import *
 from ..tables import *
 from django.shortcuts import render, redirect
+from django.forms import modelformset_factory
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
@@ -287,7 +288,20 @@ def single_shopping_trip(request, id):
     page = 'Individual Shopping Trip'
     fullname = username(request)
     shopping_trip = Shopping_trip.objects.get(id=id)
-    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id))]
+    supplies = Supply_request.objects.filter(fulfilled=False)
+    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id)),('Add Supply Requests', '/portal/edit_shopping_trip/' + str(id))]
+    forms = []
+    for x in supplies:
+        form = AddSupplyForm(instance=x)
+        forms.append(form)
+    if request.method == "POST":    
+        forms = []
+        for x in supplies:
+            sub = AddSupplyForm(request.POST, instance=x)
+            if sub.is_valid():
+                sub.save()
+                forms.append(sub)
+            return render(request, 'admin/single_shopping_trip.html', locals())
     return render(request, 'admin/single_shopping_trip.html', locals())
 
 

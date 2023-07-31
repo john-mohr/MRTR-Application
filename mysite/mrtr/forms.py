@@ -337,6 +337,14 @@ class HouseMeetingForm(forms.ModelForm):
         }
 
 
+class AddSupplyForm(forms.ModelForm):
+    class Meta:
+        model = Supply_request
+        fields = ['date',
+                  'product',
+                  'quantity',
+                  'trip',
+                  ]
 # # May be unnecessary, could add/edit/delete from console instead
 # class BedForm:
 #     x = ''

@@ -146,7 +146,6 @@ class SupplyRequestTable(tables.Table):
                     'quantity',
                     'notes',
                     'house',
-                    'trip',
                     )
 
 class ShoppingTripTable(tables.Table):
