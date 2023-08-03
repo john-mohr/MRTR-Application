@@ -11,9 +11,9 @@ admin_sidebar = [
     ('/portal/check_ins', 'gear', 'View Check Ins'),
     ('/portal/site_visits', 'gear', 'View Site Visits'),
     ('/portal/house_meetings', 'gear', 'View House Meetings'),
-    # ('/meetings', 'handshake', 'View Manager Meetings'),
-    # ('/supply_request', 'handshake', 'View Supply Requests'),
-    # ('/shopping_trip', 'handshake', 'View Shopping Trips'),
+    ('/portal/meetings', 'handshake', 'View Manager Meetings'),
+    ('/portal/supply_requests', 'handshake', 'View Supply Requests'),
+    ('/portal/shopping_trips', 'handshake', 'View Shopping Trips'),
 ]
 
 hm_sidebar = [

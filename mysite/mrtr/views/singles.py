@@ -48,7 +48,7 @@ def resident(request, res_id):
 
     res_details = [res_info[i] for i in [6, 12, 7, 16, 15, 9, 10, 11]]
 
-    # TODO Maybe add date filters to ledger, dtests, and check_ins
+    # TODO (dean) allow users to show/hide the ledger, dtests, and check_ins tables
     ledger = TransactionTable(Transaction.objects.filter(resident=res_id),
                               order_by='-date', orderable=True,
                               exclude=('submission_date', 'resident', 'last_update') + hm_exc)
@@ -106,7 +106,7 @@ def house(request, house_id):
     house_res = ShortResidentsTable(Resident.objects.filter(bed__house=house_id)
                                     .annotate(balance=Sum('transaction__amount'),
                                               full_name=Concat('first_name', Value(' '), 'last_name')),
-                                    order_by='-balance', orderable=True)
+                                    order_by='-balance', orderable=True, exclude='discharge_date')
     RequestConfig(request).configure(house_res)
 
     # Vacant beds table
@@ -143,9 +143,15 @@ def house(request, house_id):
         latest_sv = house_sv.latest('date')
         sv_list = list(latest_sv.__dict__.items())
         sv_list = [(item[0].replace('_', ' ').title(), item[1]) for item in sv_list]
-        sv_list.append(('Manager', latest_sv.manager, ' href=' + latest_sv.manager.get_absolute_url()))
+        if latest_sv.manager is None:
+            sv_list.append(('Manager', latest_sv.manager))
+        else:
+            sv_list.append(('Manager', latest_sv.manager, ' href=' + latest_sv.manager.get_absolute_url()))
         sv_list.append(('Edit link', 'Click here', ' href=' + latest_sv.get_absolute_url()))
         visit = [sv_list[i] for i in [2, 3, 4, 9, 7, 8, 10]]
+        if user_is_hm(request):
+            visit[3] = (visit[3][0], visit[3][1], '')
+            visit = visit[:-1]
     else:
         visit = [('None', )]
 
@@ -155,7 +161,10 @@ def house(request, house_id):
         latest_m = house_m.latest('date')
         m_list = list(latest_m.__dict__.items())
         m_list = [(item[0].replace('_', ' ').title(), item[1]) for item in m_list]
-        m_list.append(('Manager', latest_m.manager, ' href=' + latest_m.manager.get_absolute_url()))
+        if latest_m.manager is None:
+            m_list.append(('Manager', latest_m.manager))
+        else:
+            m_list.append(('Manager', latest_m.manager, ' href=' + latest_m.manager.get_absolute_url()))
         m_list.append(('Edit link', 'Click here', ' href=' + latest_m.get_absolute_url()))
         absentees = ', '.join(list(Absentee.objects.all()
                                    .filter(meeting_id=latest_m.pk)
@@ -164,15 +173,11 @@ def house(request, house_id):
                                    .values_list('full_name', flat=True)))
         m_list.append(('Absentees', absentees, ''))
         meeting = [m_list[i] for i in [2, 3, 10, 8, 6, 7, 9]]
+        if user_is_hm(request):
+            meeting[3] = (meeting[3][0], meeting[3][1], '')
+            meeting = meeting[:-1]
     else:
         meeting = [('None', )]
-
-    if user_is_hm(request):
-        visit[3] = (visit[3][0], visit[3][1], '')
-        visit = visit[:-1]
-
-        meeting[3] = (meeting[3][0], meeting[3][1], '')
-        meeting = meeting[:-1]
 
     sections = [
         ('Residents', True, house_res),

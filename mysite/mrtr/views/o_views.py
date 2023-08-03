@@ -2,13 +2,13 @@ from . import *
 from .singles import house
 from ..forms import *
 from ..tables import *
+from ..filters import *
 from custom_user.models import User
 from django.shortcuts import render, redirect
 from django.forms import modelformset_factory
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
-from django.contrib import messages
 from django.db.models import Sum, Value
 from django.db.models.functions import Concat
 from django_tables2 import RequestConfig
@@ -100,16 +100,14 @@ def portal(request):
             order_by='house', orderable=True, exclude=('id', 'resident', ))
         RequestConfig(request).configure(vacant_beds)
 
-        # TODO:
-        #  Distinguish between current and past residents
-        #  Add a limit to number of residents shown or a threshold balance
-        #  Maybe add a filter
-
-        res_balances = ShortResidentsTable(Resident.objects.annotate(
+        qs = Resident.objects.annotate(
             balance=Sum('transaction__amount'),
-            full_name=Concat('first_name', Value(' '), 'last_name')),
-            order_by='-balance',
-            exclude=('rent', 'bed', 'door_code'))
+            full_name=Concat('first_name', Value(' '), 'last_name'))
+
+        table_filter = ResidentBalanceFilter(request.GET, queryset=qs)
+
+        res_balances = ShortResidentsTable(table_filter.qs, order_by='-balance', orderable=True,
+                                           exclude=('rent', 'bed', 'door_code'))
 
         RequestConfig(request).configure(res_balances)
         return render(request, 'admin/admin_portal.html', locals())
@@ -124,7 +122,6 @@ def new_meeting(request):
         sub = ManagerMeetingForm(request.POST)
         if sub.is_valid():
             sub.save()
-            messages.success(request, 'Form submission successful')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -140,7 +137,6 @@ def edit_meeting(request, id):
             sub.save()
             meeting.last_update = timezone.now()
             meeting.save()
-            messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', locals())
         else:
             form = ManagerMeetingForm(instance=meeting)
@@ -160,7 +156,7 @@ def edit_meeting(request, id):
 #     button_link = '/portal/new_meeting'
 #     return render(request, 'admin/meetings.html', locals())
 
-# TODO standardize and move to single_views (or get rid of)
+# TODO (dean) standardize and move to single_views (or get rid of)
 def single_meeting(request, id):
     page = 'Individual Meeting'
     fullname = username(request)
@@ -177,7 +173,6 @@ def new_supply_request(request):
         sub = SupplyRequestForm(request.POST)
         if sub.is_valid():
             sub.save()
-            messages.success(request, 'Form submission successful')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -193,7 +188,6 @@ def edit_supply_request(request, id):
             sub.save()
             supply_request.last_update = timezone.now()
             supply_request.save()
-            messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', locals())
         else:
             form = SupplyRequestForm(instance=supply_request)
@@ -214,7 +208,7 @@ def edit_supply_request(request, id):
 #     button_link = '/portal/new_supply_request'
 #     return render(request, 'admin/supply_requests.html', locals())
 
-# TODO standardize and move to single_views (or get rid of)
+# TODO (dean) standardize and move to single_views (or get rid of)
 def single_supply_request(request, id):
     page = 'Individual Supply Meeting'
     fullname = username(request)
@@ -232,7 +226,6 @@ def new_shopping_trip(request):
         sub = ShoppingTripForm(request.POST)
         if sub.is_valid():
             sub.save()
-            messages.success(request, 'Form submission successful')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -248,7 +241,6 @@ def edit_shopping_trip(request, id):
             sub.save()
             shopping_trip.last_update = timezone.now()
             shopping_trip.save()
-            messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', locals())
         else:
             form = ShoppingTripForm(instance=shopping_trip)
@@ -271,7 +263,7 @@ def edit_shopping_trip(request, id):
 #     return render(request, 'admin/shopping_trips.html', locals())
 
 
-# TODO standardize and move to single_views (or get rid of)
+# TODO (dean) standardize and move to single_views (or get rid of)
 def single_shopping_trip(request, id):
     page = 'Individual Shopping Trip'
     fullname = username(request)

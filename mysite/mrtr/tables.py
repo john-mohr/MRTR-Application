@@ -46,6 +46,7 @@ class ResidentsTable(tables.Table):
 
 class ShortResidentsTable(tables.Table):
     full_name = tables.Column(linkify=True, verbose_name='Name')
+    discharge_date = tables.Column(empty_values=[], verbose_name='Status')
 
     class Meta:
         model = Resident
@@ -53,7 +54,7 @@ class ShortResidentsTable(tables.Table):
                   'balance',
                   'rent',
                   'bed',
-                  'door_code'
+                  'door_code',
                   )
         empty_text = 'None'
 
@@ -65,6 +66,12 @@ class ShortResidentsTable(tables.Table):
 
     def render_rent(self, value):
         return f"${value}"
+
+    def render_discharge_date(self, value):
+        if value is None:
+            return 'Current'
+        else:
+            return 'Past'
 
 
 class TransactionTable(tables.Table):

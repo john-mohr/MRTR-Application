@@ -2,15 +2,8 @@ from . import *
 from ..forms import *
 from ..tables import *
 from ..utils import prorate
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from dateutil.relativedelta import relativedelta
-
-# TODO improve or remove messages
-from django.contrib import messages
-
-
-# TODO Add proper redirects to each view (see new_trans and new_rent_pmt)
-
 
 # New Resident
 # @groups_only('House Manager')
@@ -19,6 +12,7 @@ def new_res(request):
     fullname = username(request)
     sidebar = admin_sidebar
     form = ResidentForm()
+    rdr = request.META.get('HTTP_REFERER')
 
     if request.method == 'POST':
         sub = ResidentForm(request.POST)
@@ -50,7 +44,11 @@ def new_res(request):
                                     submission_date=sub.instance.submission_date
                                     )
             second_mo.save()
-            messages.success(request, 'Form submission successful')
+
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -58,6 +56,7 @@ def edit_res(request, id):
     page = 'Edit Resident Information'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     resident = Resident.objects.get(id=id)
     old_rent = resident.rent
@@ -77,8 +76,10 @@ def edit_res(request, id):
             sub.save()
             resident.last_update = timezone.now()
             resident.save()
-            messages.success(request, 'Form submission successful')
-            return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'username': username(request)})
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             form = ResidentForm(instance=resident)
     return render(request, 'admin/forms.html', locals())
@@ -88,6 +89,7 @@ def discharge_res(request, id):
     page = 'Remove Resident'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     resident = Resident.objects.get(id=id)
     form = DischargeResForm()
@@ -99,10 +101,12 @@ def discharge_res(request, id):
             resident.last_update = timezone.now()
             if len(sub.cleaned_data['reason']) > 0:
                 resident.notes = str(resident.notes) + '\nReason Discharged (' + str(sub.cleaned_data['date']) + '): ' + sub.cleaned_data['reason']
-            # TODO Figure out if TC wants an option to refund rent
+            # TODO (wait) Figure out if TC wants an option to refund rent
             resident.save()
-            messages.success(request, 'Form submission successful')
-            return render(request, 'admin/forms.html', {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -111,6 +115,7 @@ def readmit_res(request, id):
     page = 'Readmit Resident'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     resident = Resident.objects.get(id=id)
     form = ResidentForm(instance=resident)
@@ -124,8 +129,19 @@ def readmit_res(request, id):
             sub.save()
             resident.save()
 
-            # TODO Figure out how to handle readmission balance
-            return render(request, 'admin/forms.html', locals())
+            current_month = Transaction(date=sub.instance.admit_date,
+                                        amount=prorate(sub.instance.rent, sub.instance.admit_date),
+                                        type='Rent charge',
+                                        resident=sub.instance,
+                                        notes=sub.instance.admit_date.strftime('%B') + ' (partial)',
+                                        submission_date=sub.instance.submission_date
+                                        )
+            current_month.save()
+
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             form = ResidentForm(instance=resident)
     return render(request, 'admin/forms.html', locals())
@@ -136,6 +152,7 @@ def new_trans(request, res_id=None):
     page = 'New Transaction'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     if res_id is not None:
         form = TransactionForm(initial={'resident': Resident.objects.get(pk=res_id)})
@@ -150,12 +167,11 @@ def new_trans(request, res_id=None):
             decrease = ['Rent payment', 'Bonus', 'Work/reimbursement', 'Sober support']
             if sub.instance.type in decrease:
                 sub.instance.amount *= -1
-            messages.success(request, 'Form submission successful')
             sub.save()
-            if res_id is not None:
-                return redirect('/portal/resident/' + str(res_id))
-            else:
-                return redirect('/portal')
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -163,6 +179,7 @@ def new_rent_pmt(request, res_id=None):
     page = 'New Rent Payment'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     if res_id is not None:
         form = RentPaymentForm(initial={'resident': Resident.objects.get(pk=res_id)})
@@ -176,10 +193,10 @@ def new_rent_pmt(request, res_id=None):
             sub.instance.amount *= -1
             sub.instance.type = 'Rent payment'
             sub.save()
-            if res_id is not None:
-                return redirect('/portal/resident/' + str(res_id))
-            else:
-                return redirect('/portal')
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -188,14 +205,20 @@ def edit_trans(request, id):
     page = 'Edit Transaction'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     trans = Transaction.objects.get(id=id)
-    form = TransactionForm(instance=trans)
+    if trans.type == 'Rent payment':
+        form = RentPaymentForm(instance=trans)
+    else:
+        form = TransactionForm(instance=trans)
     if request.method == 'POST':
         old_type = trans.type
-        sub = TransactionForm(request.POST, instance=trans)
+        if trans.type == 'Rent payment':
+            sub = RentPaymentForm(request.POST, instance=trans)
+        else:
+            sub = TransactionForm(request.POST, instance=trans)
         if sub.is_valid():
-
             # Make transaction amount negative for transactions that decrease a resident's balance
             # But also keep amount negative if it wasn't changed
             decrease = ['Rent payment', 'Bonus', 'Work/reimbursement', 'Sober support']
@@ -203,7 +226,10 @@ def edit_trans(request, id):
                 sub.instance.amount *= -1
             trans.last_update = timezone.now()
             sub.save()
-            return render(request, 'admin/forms.html', locals())
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             form = TransactionForm(instance=trans)
     return render(request, 'admin/forms.html', locals())
@@ -214,12 +240,17 @@ def new_house(request):
     page = 'Add New House'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
+
     form = HouseForm()
     if request.method == 'POST':
         sub = HouseForm(request.POST)
         if sub.is_valid():
             sub.save()
-            messages.success(request, 'Form submission successful')
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -227,6 +258,7 @@ def edit_house(request, id):
     page = 'Edit House'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     house = House.objects.get(id=id)
     prev_mngr = house.manager
@@ -237,7 +269,7 @@ def edit_house(request, id):
             sub.save()
             house.last_update = timezone.now()
             house.save()
-            # # TODO Handle multiple house managers for one house (replace House.manager with a relationship table)
+            # TODO (wait) Handle multiple house managers for one house (replace House.manager with a relationship table)
             if house.manager != prev_mngr:
                 current_datetime = timezone.now()
                 current_date = current_datetime.date()
@@ -268,8 +300,10 @@ def edit_house(request, id):
                     house.manager.rent = house.manager.rent / 2
                     house.manager.save()
 
-            messages.success(request, 'Form submission successful')
-            return render(request, 'admin/forms.html', locals())
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             form = HouseForm(instance=house)
     return render(request, 'admin/forms.html', locals())

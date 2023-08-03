@@ -8,6 +8,7 @@ from django.shortcuts import render
 def new_dtest(request):
     page = 'New Drug Test'
     fullname = username(request)
+    rdr = request.META.get('HTTP_REFERER')
 
     mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
@@ -21,6 +22,10 @@ def new_dtest(request):
         sub = DrugTestForm(request.POST)
         if sub.is_valid():
             sub.save()
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -29,6 +34,7 @@ def edit_dtest(request, test_id):
     page = 'Edit Drug Test'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     dtest = Drug_test.objects.get(id=test_id)
     dtest_subs = dtest.substances.split(', ')
@@ -40,7 +46,10 @@ def edit_dtest(request, test_id):
             sub.save()
             dtest.last_update = timezone.now()
             dtest.save()
-            return render(request, 'admin/forms.html', locals())
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             form = DrugTestForm(instance=dtest, initial={'substances': dtest_subs})
     return render(request, 'admin/forms.html', locals())
@@ -50,6 +59,7 @@ def edit_dtest(request, test_id):
 def new_check_in(request):
     page = 'New Check In'
     fullname = username(request)
+    rdr = request.META.get('HTTP_REFERER')
 
     mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
@@ -64,6 +74,10 @@ def new_check_in(request):
         sub = CheckInForm(request.POST)
         if sub.is_valid():
             sub.save()
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -71,6 +85,7 @@ def edit_check_in(request, ci_id):
     page = 'Edit Check In'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     ci = Check_in.objects.get(id=ci_id)
     form = CheckInForm(instance=ci)
@@ -80,7 +95,10 @@ def edit_check_in(request, ci_id):
             sub.save()
             ci.last_update = timezone.now()
             ci.save()
-            return render(request, 'admin/forms.html', locals())
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             form = CheckInForm(instance=ci)
     return render(request, 'admin/forms.html', locals())
@@ -89,6 +107,7 @@ def edit_check_in(request, ci_id):
 def new_site_visit(request):
     page = 'New Site Visit'
     fullname = username(request)
+    rdr = request.META.get('HTTP_REFERER')
 
     mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
@@ -100,10 +119,18 @@ def new_site_visit(request):
         sidebar = admin_sidebar
         form = SiteVisitForm(initial={'manager': mngr})
 
+    form.fields['manager'].required = False
+
     if request.method == 'POST':
         sub = SiteVisitForm(request.POST)
         if sub.is_valid():
             sub.save()
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
+        else:
+            print(sub.errors)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -111,6 +138,7 @@ def edit_site_visit(request, sv_id):
     page = 'Edit Site Visit'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     sv = Site_visit.objects.get(id=sv_id)
     sv_issues = sv.issues.split(', ')
@@ -122,7 +150,10 @@ def edit_site_visit(request, sv_id):
             sub.save()
             sv.last_update = timezone.now()
             sv.save()
-            return render(request, 'admin/forms.html', locals())
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             form = SiteVisitForm(instance=sv, initial={'issues': sv_issues})
     return render(request, 'admin/forms.html', locals())
@@ -131,6 +162,7 @@ def edit_site_visit(request, sv_id):
 def new_house_meeting(request):
     page = 'New House Meeting'
     fullname = username(request)
+    rdr = request.META.get('HTTP_REFERER')
 
     mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
@@ -143,6 +175,8 @@ def new_house_meeting(request):
         sidebar = admin_sidebar
         form = HouseMeetingForm(initial={'manager': None})
 
+    form.fields['manager'].required = False
+
     if request.method == 'POST':
         sub = HouseMeetingForm(request.POST)
         if sub.is_valid():
@@ -152,7 +186,10 @@ def new_house_meeting(request):
                 absentee = Absentee(resident=absentees[i],
                                     meeting=meeting_id)
                 absentee.save()
-
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -160,6 +197,7 @@ def edit_house_meeting(request, hm_id):
     page = 'Edit House Meeting'
     fullname = username(request)
     sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
 
     hm = House_meeting.objects.get(id=hm_id)
     hm_absentees_list = Absentee.objects.all().filter(meeting_id=hm_id).values_list('resident_id', flat=True)
@@ -182,7 +220,10 @@ def edit_house_meeting(request, hm_id):
 
             hm.last_update = timezone.now()
             hm.save()
-            return render(request, 'admin/forms.html', locals())
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
         else:
             print('invalid')
             form = HouseMeetingForm(instance=hm, initial={'absentees': hm_absentees})

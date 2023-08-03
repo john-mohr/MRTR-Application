@@ -378,7 +378,7 @@ class HouseMeetingForm(forms.ModelForm):
     #         self.fields['absentees'].queryset = Resident.objects.all()
 
 
-# TODO why another form for supply requests?
+# TODO (dean) why is there another form for supply requests
 class AddSupplyForm(forms.ModelForm):
     class Meta:
         model = Supply_request
