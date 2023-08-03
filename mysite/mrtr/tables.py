@@ -200,7 +200,7 @@ class SupplyRequestTable(tables.Table):
                     'quantity',
                     'notes',
                     'house',
-                    'trip',
+                    # 'trip',
                     )
 
 class ShoppingTripTable(tables.Table):

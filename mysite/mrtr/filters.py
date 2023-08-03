@@ -120,6 +120,50 @@ class SiteVisitFilter(MasterFilter):
         fields = ['search', 'date']
 
 
+class ManagerMeetingFilter(MasterFilter):
+    field_list = [
+            'title',
+            'date',
+            'location',
+            'submission_date',
+            'last_update',
+            'attendee',
+        ]
+
+    class Meta:
+        model = Manager_meeting
+        fields = ['search', 'date']
+
+
+class SupplyRequestFilter(MasterFilter):
+    field_list = [
+          'id',
+          'fulfilled',
+          'date',
+          'product',
+          'quantity',
+          'notes',
+          'house',
+          'trip',
+        ]
+
+    class Meta:
+        model = Supply_request
+        fields = ['search', 'date']
+
+
+class ShoppingTripFilter(MasterFilter):
+    field_list = [
+          'id',
+          'date',
+          'amount',
+        ]
+
+    class Meta:
+        model = Supply_request
+        fields = ['search', 'date']
+
+
 class HouseMeetingFilter(MasterFilter):
     field_list = [
         'manager__first_name',

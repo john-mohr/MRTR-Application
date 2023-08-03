@@ -4,6 +4,7 @@ from ..forms import *
 from ..tables import *
 from custom_user.models import User
 from django.shortcuts import render, redirect
+from django.forms import modelformset_factory
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
@@ -145,20 +146,19 @@ def edit_meeting(request, id):
             form = ManagerMeetingForm(instance=meeting)
     return render(request, 'admin/forms.html', locals())
 
-# TODO standardize and move to table_views
-def meetings(request):
-    page = 'All Meetings'
-    fullname = username(request)
-    try:
-        latest_meeting = Manager_meeting.objects.latest('submission_date')
-    except :
-        print("Empty Database")
-    table = ManagerMeetingTable(Manager_meeting.objects.all(), orderable=True)
-    RequestConfig(request).configure(table)
-    name = 'Meetings'
-    button_name = 'Add New Meeting'
-    button_link = '/portal/new_meeting'
-    return render(request, 'admin/meetings.html', locals())
+# def meetings(request):
+#     page = 'All Meetings'
+#     fullname = username(request)
+#     try:
+#         latest_meeting = Manager_meeting.objects.latest('submission_date')
+#     except :
+#         print("Empty Database")
+#     table = ManagerMeetingTable(Manager_meeting.objects.all(), orderable=True)
+#     RequestConfig(request).configure(table)
+#     name = 'Meetings'
+#     button_name = 'Add New Meeting'
+#     button_link = '/portal/new_meeting'
+#     return render(request, 'admin/meetings.html', locals())
 
 # TODO standardize and move to single_views (or get rid of)
 def single_meeting(request, id):
@@ -200,20 +200,19 @@ def edit_supply_request(request, id):
     return render(request, 'admin/forms.html', locals())
 
 
-# TODO standardize and move to table_views
-def supply_request(request):
-    page = 'All Supply Requests'
-    fullname = username(request)
-    try:
-        latest_supply_request = Supply_request.objects.latest('date')
-    except :
-        print("Empty Database")
-    table = SupplyRequestTable(Supply_request.objects.all(), orderable=True)
-    RequestConfig(request).configure(table)
-    name = 'Supply Request'
-    button_name = 'Add New Supply Request'
-    button_link = '/portal/new_supply_request'
-    return render(request, 'admin/supply_requests.html', locals())
+# def supply_request(request):
+#     page = 'All Supply Requests'
+#     fullname = username(request)
+#     try:
+#         latest_supply_request = Supply_request.objects.latest('date')
+#     except :
+#         print("Empty Database")
+#     table = SupplyRequestTable(Supply_request.objects.all(), orderable=True)
+#     RequestConfig(request).configure(table)
+#     name = 'Supply Request'
+#     button_name = 'Add New Supply Request'
+#     button_link = '/portal/new_supply_request'
+#     return render(request, 'admin/supply_requests.html', locals())
 
 # TODO standardize and move to single_views (or get rid of)
 def single_supply_request(request, id):
@@ -256,29 +255,42 @@ def edit_shopping_trip(request, id):
     return render(request, 'admin/forms.html', locals())
 
 
-# TODO standardize and move to table_views
-def shopping_trip(request):
-    page = 'All Shopping Trip'
-    fullname = username(request)
-    
-    try:
-        latest_shopping_trip = Shopping_trip.objects.latest('date')
-    except :
-        print("Empty Database")
-    table = ShoppingTripTable(Shopping_trip.objects.all(), orderable=True)
-    RequestConfig(request).configure(table)
-    name = 'Shopping Trip'
-    button_name = 'Add New Shopping Trip'
-    button_link = '/portal/new_shopping_trip'
-    return render(request, 'admin/shopping_trips.html', locals())
+# def shopping_trip(request):
+#     page = 'All Shopping Trip'
+#     fullname = username(request)
+#
+#     try:
+#         latest_shopping_trip = Shopping_trip.objects.latest('date')
+#     except :
+#         print("Empty Database")
+#     table = ShoppingTripTable(Shopping_trip.objects.all(), orderable=True)
+#     RequestConfig(request).configure(table)
+#     name = 'Shopping Trip'
+#     button_name = 'Add New Shopping Trip'
+#     button_link = '/portal/new_shopping_trip'
+#     return render(request, 'admin/shopping_trips.html', locals())
 
 
 # TODO standardize and move to single_views (or get rid of)
 def single_shopping_trip(request, id):
     page = 'Individual Shopping Trip'
     fullname = username(request)
-    shopping_trip = Shopping_trip.objects.get(id=id)
-    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id))]
+    trip = Shopping_trip.objects.get(id=id)
+    supplies = Supply_request.objects.filter(fulfilled=False)
+    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id)),
+               ('Add Supply Requests', '/portal/edit_shopping_trip/' + str(id))]
+    requests = []
+    for x in supplies:
+        form = AddSupplyForm(instance=x)
+        requests.append(form)
+    if request.method == "POST":
+        requests = []
+        for x in supplies:
+            sub = AddSupplyForm(request.POST, instance=x)
+            if sub.is_valid():
+                sub.save()
+                requests.append(sub)
+            return render(request, 'admin/single_shopping_trip.html', locals())
     return render(request, 'admin/single_shopping_trip.html', locals())
 
 

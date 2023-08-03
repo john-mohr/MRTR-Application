@@ -68,18 +68,19 @@
                 }
             }
         </style>
-    <body>
-        <div class="flex-container">
-            <section class="container">
-                <form method="get">
-                    {{ table_filter.form | crispy }}
-                    <input type="submit" />
-                </form>
-                <br>
-                {% render_table table %}
-            </section>
-        </div>
-    </body>
+        <body>
+            <div class="flex-container">
+                <section class="container">
+                    <form method="get">
+                        {{ table_filter.form | crispy }}
+                        <input type="submit" />
+                    </form>
+                </section>
+                <section class="container">
+                    {% render_table table %}
+                </section>
+            </div>
+        </body>
     </div>
 </html>
 {% endblock content %}
