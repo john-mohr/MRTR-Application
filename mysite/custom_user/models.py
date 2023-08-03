@@ -5,5 +5,4 @@ from mrtr.models import Resident
 
 class User(BaseUser):
     objects = BaseUserManager()
-    assoc_resident = models.ForeignKey(Resident, on_delete=models.CASCADE, null=True)
-
+    assoc_resident = models.ForeignKey(Resident, on_delete=models.CASCADE, blank=True, null=True)

@@ -1,15 +1,22 @@
-from .o_views import username, groups_only
+from . import *
 from ..forms import *
 from ..tables import *
 from custom_user.models import User
 from django.shortcuts import render
 
 
-@groups_only('House Manager')
 def new_dtest(request):
     page = 'New Drug Test'
     fullname = username(request)
-    form = DrugTestForm()
+
+    mngr = User.objects.get(pk=request.user.pk).assoc_resident
+
+    if user_is_hm(request):
+        sidebar = hm_sidebar
+        form = DrugTestForm(is_hm=True, house=House.objects.get(manager=mngr).pk)
+    else:
+        sidebar = admin_sidebar
+        form = DrugTestForm()
     if request.method == 'POST':
         sub = DrugTestForm(request.POST)
         if sub.is_valid():
@@ -21,6 +28,7 @@ def new_dtest(request):
 def edit_dtest(request, test_id):
     page = 'Edit Drug Test'
     fullname = username(request)
+    sidebar = admin_sidebar
 
     dtest = Drug_test.objects.get(id=test_id)
     dtest_subs = dtest.substances.split(', ')
@@ -39,14 +47,19 @@ def edit_dtest(request, test_id):
 
 
 # New Check-in
-# TODO Restrict residents to residents in the manager's house (do when we start building the house manager portal)
 def new_check_in(request):
     page = 'New Check In'
     fullname = username(request)
 
-    mngr = User.objects.get(pk=request.user.pk)
+    mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
-    form = CheckInForm(initial={'manager': mngr})
+    if user_is_hm(request):
+        sidebar = hm_sidebar
+        form = CheckInForm(initial={'manager': mngr}, is_hm=True, house=House.objects.get(manager=mngr).pk)
+    else:
+        sidebar = admin_sidebar
+        form = CheckInForm(initial={'manager': mngr})
+
     if request.method == 'POST':
         sub = CheckInForm(request.POST)
         if sub.is_valid():
@@ -57,6 +70,7 @@ def new_check_in(request):
 def edit_check_in(request, ci_id):
     page = 'Edit Check In'
     fullname = username(request)
+    sidebar = admin_sidebar
 
     ci = Check_in.objects.get(id=ci_id)
     form = CheckInForm(instance=ci)
@@ -76,9 +90,16 @@ def new_site_visit(request):
     page = 'New Site Visit'
     fullname = username(request)
 
-    mngr = User.objects.get(pk=request.user.pk)
+    mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
-    form = SiteVisitForm(initial={'manager': mngr})
+    if user_is_hm(request):
+        sidebar = hm_sidebar
+        form = SiteVisitForm(initial={'manager': mngr, 'house': House.objects.get(manager=mngr)})
+        form.fields['house'].widget = forms.HiddenInput()
+    else:
+        sidebar = admin_sidebar
+        form = SiteVisitForm(initial={'manager': mngr})
+
     if request.method == 'POST':
         sub = SiteVisitForm(request.POST)
         if sub.is_valid():
@@ -89,6 +110,7 @@ def new_site_visit(request):
 def edit_site_visit(request, sv_id):
     page = 'Edit Site Visit'
     fullname = username(request)
+    sidebar = admin_sidebar
 
     sv = Site_visit.objects.get(id=sv_id)
     sv_issues = sv.issues.split(', ')
@@ -110,9 +132,17 @@ def new_house_meeting(request):
     page = 'New House Meeting'
     fullname = username(request)
 
-    mngr = User.objects.get(pk=request.user.pk)
+    mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
-    form = HouseMeetingForm(initial={'manager': mngr})
+    if user_is_hm(request):
+        sidebar = hm_sidebar
+        form = HouseMeetingForm(initial={'manager': mngr, 'house': House.objects.get(manager=mngr)},
+                                is_hm=True, house=House.objects.get(manager=mngr).pk)
+        form.fields['house'].widget = forms.HiddenInput()
+    else:
+        sidebar = admin_sidebar
+        form = HouseMeetingForm(initial={'manager': None})
+
     if request.method == 'POST':
         sub = HouseMeetingForm(request.POST)
         if sub.is_valid():
@@ -129,6 +159,7 @@ def new_house_meeting(request):
 def edit_house_meeting(request, hm_id):
     page = 'Edit House Meeting'
     fullname = username(request)
+    sidebar = admin_sidebar
 
     hm = House_meeting.objects.get(id=hm_id)
     hm_absentees_list = Absentee.objects.all().filter(meeting_id=hm_id).values_list('resident_id', flat=True)

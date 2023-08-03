@@ -1,6 +1,6 @@
+from . import *
 from ..forms import *
 from ..tables import *
-from .o_views import username, groups_only
 from ..utils import prorate
 from django.shortcuts import render, redirect
 from dateutil.relativedelta import relativedelta
@@ -13,10 +13,13 @@ from django.contrib import messages
 
 
 # New Resident
-@groups_only('House Manager')
+# @groups_only('House Manager')
 def new_res(request):
-    form = ResidentForm()
     page = "Add New Resident"
+    fullname = username(request)
+    sidebar = admin_sidebar
+    form = ResidentForm()
+
     if request.method == 'POST':
         sub = ResidentForm(request.POST)
         if sub.is_valid():
@@ -52,6 +55,10 @@ def new_res(request):
 
 
 def edit_res(request, id):
+    page = 'Edit Resident Information'
+    fullname = username(request)
+    sidebar = admin_sidebar
+
     resident = Resident.objects.get(id=id)
     old_rent = resident.rent
     form = ResidentForm(instance=resident)
@@ -74,10 +81,14 @@ def edit_res(request, id):
             return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'username': username(request)})
         else:
             form = ResidentForm(instance=resident)
-    return render(request, 'admin/forms.html', {'form': form, 'page': 'Edit Resident Information', 'username': username(request)})
+    return render(request, 'admin/forms.html', locals())
 
 
 def discharge_res(request, id):
+    page = 'Remove Resident'
+    fullname = username(request)
+    sidebar = admin_sidebar
+
     resident = Resident.objects.get(id=id)
     form = DischargeResForm()
     if request.method == 'POST':
@@ -92,11 +103,15 @@ def discharge_res(request, id):
             resident.save()
             messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
-    return render(request, 'admin/forms.html', {'form': form, 'page': 'Remove Resident', 'fullname': username(request)})
+    return render(request, 'admin/forms.html', locals())
 
 
 # Readmit resident
 def readmit_res(request, id):
+    page = 'Readmit Resident'
+    fullname = username(request)
+    sidebar = admin_sidebar
+
     resident = Resident.objects.get(id=id)
     form = ResidentForm(instance=resident)
     if request.method == 'POST':
@@ -120,6 +135,7 @@ def readmit_res(request, id):
 def new_trans(request, res_id=None):
     page = 'New Transaction'
     fullname = username(request)
+    sidebar = admin_sidebar
 
     if res_id is not None:
         form = TransactionForm(initial={'resident': Resident.objects.get(pk=res_id)})
@@ -146,6 +162,7 @@ def new_trans(request, res_id=None):
 def new_rent_pmt(request, res_id=None):
     page = 'New Rent Payment'
     fullname = username(request)
+    sidebar = admin_sidebar
 
     if res_id is not None:
         form = RentPaymentForm(initial={'resident': Resident.objects.get(pk=res_id)})
@@ -168,8 +185,11 @@ def new_rent_pmt(request, res_id=None):
 
 # Edit transaction
 def edit_trans(request, id):
-    trans = Transaction.objects.get(id=id)
+    page = 'Edit Transaction'
     fullname = username(request)
+    sidebar = admin_sidebar
+
+    trans = Transaction.objects.get(id=id)
     form = TransactionForm(instance=trans)
     if request.method == 'POST':
         old_type = trans.type
@@ -183,17 +203,17 @@ def edit_trans(request, id):
                 sub.instance.amount *= -1
             trans.last_update = timezone.now()
             sub.save()
-            return render(request, 'admin/forms.html', {'form': form})
+            return render(request, 'admin/forms.html', locals())
         else:
             form = TransactionForm(instance=trans)
-    return render(request, 'admin/forms.html', {'form': form})
+    return render(request, 'admin/forms.html', locals())
 
 
 # New House
 def new_house(request):
     page = 'Add New House'
     fullname = username(request)
-
+    sidebar = admin_sidebar
     form = HouseForm()
     if request.method == 'POST':
         sub = HouseForm(request.POST)
@@ -206,6 +226,7 @@ def new_house(request):
 def edit_house(request, id):
     page = 'Edit House'
     fullname = username(request)
+    sidebar = admin_sidebar
 
     house = House.objects.get(id=id)
     prev_mngr = house.manager

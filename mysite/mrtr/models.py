@@ -89,7 +89,7 @@ class House(models.Model):
     last_update = models.DateTimeField(null=True)  # automatic
 
     def get_absolute_url(self):
-        return '/portal/house/%i' % self.id
+        return '/portal/house/' + self.name
 
     def __str__(self):
         return self.name

@@ -1,5 +1,8 @@
+from . import *
+from .singles import house
 from ..forms import *
 from ..tables import *
+from custom_user.models import User
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -8,23 +11,11 @@ from django.contrib import messages
 from django.db.models import Sum, Value
 from django.db.models.functions import Concat
 from django_tables2 import RequestConfig
-from functools import wraps
 
 
 def forbidden(request):
     return render(request, 'mrtr/forbidden.html')
 
-
-def groups_only(*groups):
-    def inner(view_func):
-        @wraps(view_func)
-        def wrapper_func(request, *args, **kwargs):
-            if request.user.groups.filter(name__in=groups).exists() or request.user.is_superuser:
-                return view_func(request, *args, **kwargs)
-            else:
-                return redirect('/forbidden')
-        return wrapper_func
-    return inner
 
 def home(request):
     if request.method == 'POST':
@@ -88,39 +79,39 @@ def contact(request):
 
 
 # Admin forms
-def username(request):
-    un = request.user.first_name + " " + request.user.last_name
-    return un
-
-
-@groups_only('House Manager')
 def portal(request):
-    page = 'Dashboard'
-    fullname = username(request)
+    if user_is_hm(request):
+        mngr = User.objects.get(pk=request.user.pk)
+        cur_house = House.objects.get(manager=mngr.assoc_resident)
+        return house(request, cur_house.name)
+    else:
+        page = 'Dashboard'
+        fullname = username(request)
+        sidebar = admin_sidebar
 
-    buttons = [('Add Resident', '/portal/new_res'),
-               ('Add Rent Payment', '/portal/new_rent_pmt'),
-               ('Adjust Balance', '/portal/new_trans')]
+        buttons = [('Add Resident', '/portal/new_res'),
+                   ('Add Rent Payment', '/portal/new_rent_pmt'),
+                   ('Adjust Balance', '/portal/new_trans')]
 
-    occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
-    vacant_beds = BedTable(
-        Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
-        order_by='house', orderable=True, exclude=('id', 'resident', ))
-    RequestConfig(request).configure(vacant_beds)
+        occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
+        vacant_beds = BedTable(
+            Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
+            order_by='house', orderable=True, exclude=('id', 'resident', ))
+        RequestConfig(request).configure(vacant_beds)
 
-    # TODO:
-    #  Distinguish between current and past residents
-    #  Add a limit to number of residents shown or a threshold balance
-    #  Maybe add a filter
+        # TODO:
+        #  Distinguish between current and past residents
+        #  Add a limit to number of residents shown or a threshold balance
+        #  Maybe add a filter
 
-    res_balances = ShortResidentsTable(Resident.objects.annotate(
-        balance=Sum('transaction__amount'),
-        full_name=Concat('first_name', Value(' '), 'last_name')),
-        order_by='-balance',
-        exclude=('rent', 'bed', 'door_code'))
+        res_balances = ShortResidentsTable(Resident.objects.annotate(
+            balance=Sum('transaction__amount'),
+            full_name=Concat('first_name', Value(' '), 'last_name')),
+            order_by='-balance',
+            exclude=('rent', 'bed', 'door_code'))
 
-    RequestConfig(request).configure(res_balances)
-    return render(request, 'admin/homepage.html', locals())
+        RequestConfig(request).configure(res_balances)
+        return render(request, 'admin/admin_portal.html', locals())
 
 
 def new_meeting(request):
@@ -291,11 +282,11 @@ def single_shopping_trip(request, id):
     return render(request, 'admin/single_shopping_trip.html', locals())
 
 
-# House Manager forms
-@groups_only('House Manager')
-def house_manager(request):
-    context = {
-        'page': 'Dashboard',
-        'fullname': username(request),
-    }
-    return render(request, 'house/house_generic.html', context)
+# # House Manager forms
+# # @groups_only('House Manager')
+# def house_manager(request):
+#
+#     mngr = User.objects.get(pk=request.user.pk)
+#     cur_house = House.objects.get(manager=mngr.assoc_resident)
+#     return house(request, cur_house.name)
+
