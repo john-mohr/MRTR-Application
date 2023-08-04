@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from mrtr.views import admin_forms, app_tables, hm_forms, o_views, singles
+from mrtr.views import admin_forms, tables, hm_forms, o_views, singles
 from custom_user import views as user_view
 from django.contrib.auth import views as auth
 
@@ -37,7 +37,7 @@ urlpatterns = [
     path('portal/edit_res/<int:id>', admin_forms.edit_res),
     path('portal/discharge_res/<int:id>', admin_forms.discharge_res),
     path('portal/readmit_res/<int:id>', admin_forms.readmit_res),
-    path('portal/residents', app_tables.residents),
+    path('portal/residents', tables.residents),
     path('portal/resident/<int:res_id>', singles.resident, name='resident'),
 
     # Transactions
@@ -46,54 +46,54 @@ urlpatterns = [
     path('portal/new_rent_pmt', admin_forms.new_rent_pmt),
     path('portal/new_rent_pmt/<int:res_id>', admin_forms.new_rent_pmt),
     path('portal/edit_trans/<int:id>', admin_forms.edit_trans),
-    path('portal/transactions', app_tables.transactions),
+    path('portal/transactions', tables.transactions),
 
     # Houses
     path('portal/new_house', admin_forms.new_house),
     path('portal/edit_house/<int:id>', admin_forms.edit_house),
-    path('portal/houses', app_tables.houses),
-    path('portal/house/<int:house_id>', singles.house),
-    path('portal/beds', app_tables.beds),
+    path('portal/houses', tables.houses),
+    path('portal/house/<str:house_id>', singles.house),
+    path('portal/beds', tables.beds),
 
     # Meetings
     path('portal/new_meeting', o_views.new_meeting),
     path('portal/edit_meeting/<int:id>', o_views.edit_meeting),
-    path('portal/meetings', app_tables.meetings),
+    path('portal/meetings', tables.meetings),
     path('portal/meeting/<int:id>', o_views.single_meeting),
 
     path('portal/new_house_meeting', hm_forms.new_house_meeting),
     path('portal/edit_house_meeting/<int:hm_id>', hm_forms.edit_house_meeting),
-    path('portal/house_meetings', app_tables.house_meetings),
+    path('portal/house_meetings', tables.house_meetings),
 
     # Drug tests
     path('portal/new_dtest', hm_forms.new_dtest),
     path('portal/edit_dtest/<int:test_id>', hm_forms.edit_dtest),
-    path('portal/dtests', app_tables.dtests),
+    path('portal/dtests', tables.dtests),
 
     # Check ins
     path('portal/new_check_in', hm_forms.new_check_in),
     path('portal/edit_check_in/<int:ci_id>', hm_forms.edit_check_in),
-    path('portal/check_ins', app_tables.check_ins),
+    path('portal/check_ins', tables.check_ins),
 
     # Site visits
     path('portal/new_site_visit', hm_forms.new_site_visit),
     path('portal/edit_site_visit/<int:sv_id>', hm_forms.edit_site_visit),
-    path('portal/site_visits', app_tables.site_visits),
+    path('portal/site_visits', tables.site_visits),
 
     # Supply Request
     path('portal/new_supply_request', o_views.new_supply_request),
     path('portal/edit_supply_request/<int:id>', o_views.edit_supply_request),
-    path('portal/supply_request', app_tables.supply_requests),
+    path('portal/supply_requests', tables.supply_requests),
     path('portal/supply_request/<int:id>', o_views.single_supply_request),
 
     # Shopping Trip
     path('portal/new_shopping_trip', o_views.new_shopping_trip),
     path('portal/edit_shopping_trip/<int:id>', o_views.edit_shopping_trip),
-    path('portal/shopping_trip', app_tables.shopping_trips),
+    path('portal/shopping_trips', tables.shopping_trips),
     path('portal/shopping_trip/<int:id>', o_views.single_shopping_trip),
 
-    # House Manager Page
-    path('portal/house_manager/', o_views.house_manager),
+    # # House Manager Page
+    # path('portal/house_manager/', o_views.house_manager),
 
 ]
 

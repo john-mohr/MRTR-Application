@@ -28,10 +28,25 @@ class ResidentsTable(tables.Table):
                     'discharge_date',
                     )
         exclude = ('id', )
+        empty_text = 'None'
+
+    def render_balance(self, value):
+        if value >= 0:
+            return f"${value}"
+        else:
+            return f"-${str(value)[1:]}"
+
+    def render_rent(self, value):
+        return f"${value}"
+
+    def render_phone(self, value):
+        num = str(value)
+        return '(' + num[:3] + ') ' + num[3:6] + '-' + num[6:]
 
 
 class ShortResidentsTable(tables.Table):
     full_name = tables.Column(linkify=True, verbose_name='Name')
+    discharge_date = tables.Column(empty_values=[], verbose_name='Status')
 
     class Meta:
         model = Resident
@@ -39,18 +54,44 @@ class ShortResidentsTable(tables.Table):
                   'balance',
                   'rent',
                   'bed',
-                  'door_code'
+                  'door_code',
                   )
+        empty_text = 'None'
+
+    def render_balance(self, value):
+        if value >= 0:
+            return f"${value}"
+        else:
+            return f"-${str(value)[1:]}"
+
+    def render_rent(self, value):
+        return f"${value}"
+
+    def render_discharge_date(self, value):
+        if value is None:
+            return 'Current'
+        else:
+            return 'Past'
 
 
 class TransactionTable(tables.Table):
-    id = tables.Column(verbose_name='Edit', linkify=True)
+    id = tables.Column(verbose_name='', linkify=True)
     submission_date = tables.Column(linkify=True)
     resident = tables.Column(linkify=True)
 
     class Meta:
         model = Transaction
-        sequence = ('id', 'submission_date', 'date', 'resident', 'amount', 'type', 'method')
+        sequence = ('id', 'date', 'resident', 'amount', 'type', 'method', 'notes', 'submission_date')
+        empty_text = 'None'
+
+    def render_id(self, value):
+        return f"Edit"
+
+    def render_amount(self, value):
+        if value >= 0:
+            return f"${value}"
+        else:
+            return f"-${str(value)[1:]}"
 
 
 class HouseTable(tables.Table):
@@ -61,6 +102,7 @@ class HouseTable(tables.Table):
         model = House
         sequence = ('name', 'manager')
         exclude = ('id',)
+        empty_text = 'None'
 
 
 class BedTable(tables.Table):
@@ -71,6 +113,7 @@ class BedTable(tables.Table):
     class Meta:
         model = Bed
         exclude = ('id', 'occupant')
+        empty_text = 'None'
 
 
 class ManagerMeetingTable(tables.Table):
@@ -89,36 +132,49 @@ class ManagerMeetingTable(tables.Table):
 
 
 class DrugTestTable(tables.Table):
-    id = tables.Column(verbose_name='Edit', linkify=True)
+    id = tables.Column(verbose_name='', linkify=True)
     resident = tables.Column(linkify=True)
 
     class Meta:
         model = Drug_test
         sequence = ('id', 'resident',)
+        empty_text = 'None'
+
+    def render_id(self, value):
+        return f"Edit"
 
 
 class CheckInTable(tables.Table):
-    id = tables.Column(verbose_name='Edit', linkify=True)
+    id = tables.Column(verbose_name='', linkify=True)
     resident = tables.Column(linkify=True)
     manager = tables.Column(linkify=True)
+    # manager2 = tables.Column(accessor=manager.value())
 
     class Meta:
         model = Check_in
         sequence = ('id', 'resident', 'manager')
+        empty_text = 'None'
+
+    def render_id(self, value):
+        return f"Edit"
 
 
 class SiteVisitTable(tables.Table):
-    id = tables.Column(verbose_name='Edit', linkify=True)
+    id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
     manager = tables.Column(linkify=True)
 
     class Meta:
         model = Site_visit
         sequence = ('id', 'date', 'manager', 'house')
+        empty_text = 'None'
+
+    def render_id(self, value):
+        return f"Edit"
 
 
 class HouseMeetingTable(tables.Table):
-    id = tables.Column(verbose_name='Edit', linkify=True)
+    id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
     manager = tables.Column(linkify=True)
     absentees = tables.Column(empty_values=())
@@ -126,12 +182,17 @@ class HouseMeetingTable(tables.Table):
     class Meta:
         model = House_meeting
         sequence = ('id', 'date', 'manager', 'house', 'issues', 'absentees')
+        empty_text = 'None'
 
     @staticmethod
     def render_absentees(record):
         absentees = list(Absentee.objects.all().filter(meeting_id=record.pk).select_related('resident').annotate(
             full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')).values_list('full_name', flat=True))
         return ', '.join(absentees)
+
+
+    def render_id(self, value):
+        return f"Edit"
 
 
 class SupplyRequestTable(tables.Table):
@@ -146,6 +207,7 @@ class SupplyRequestTable(tables.Table):
                     'quantity',
                     'notes',
                     'house',
+                    # 'trip',
                     )
 
 class ShoppingTripTable(tables.Table):

@@ -7,9 +7,6 @@ import datetime
 import django_filters as filters
 
 
-# TODO Make filters for supply requests, shopping trips, and manager meetings when ready
-
-
 class MasterFilter(filters.FilterSet):
     field_list = []
     search = filters.CharFilter(method='search_fields',
@@ -61,6 +58,50 @@ class ResidentFilter(MasterFilter):
     @staticmethod
     def status_filter(queryset, name, value):
         return queryset.filter(discharge_date__isnull=bool(int(value)))
+
+
+# TODO This filter needs some work
+class ResidentBalanceFilter(MasterFilter):
+    date = None
+    search = None
+    balance = filters.RangeFilter(method='balance_filter',
+                                  label='Filter by balance')
+
+    status = filters.ChoiceFilter(method='status_filter',
+                                  choices=((1, 'Current'), (0, 'Past')),
+                                  empty_label='All',
+                                  label='Filter by residency status')
+    exclude_zero = filters.BooleanFilter(method='zero_filter',
+                                         label='Exclude zero balance')
+
+    class Meta:
+        model = Resident
+        fields = ['balance', 'status']
+
+    @staticmethod
+    def status_filter(queryset, name, value):
+        return queryset.filter(discharge_date__isnull=bool(int(value)))
+
+    @staticmethod
+    def balance_filter(queryset, name, value):
+        start = value.start
+        if start is None:
+            start = -10000
+
+        stop = value.stop
+        if stop is None:
+            stop = 10000
+
+        return queryset.filter(balance__range=[start, stop])
+
+    @staticmethod
+    def zero_filter(queryset, name, value):
+        if value is True:
+            return queryset.exclude(balance=0)
+        else:
+            return queryset
+
+
 
 
 class TransactionFilter(MasterFilter):
@@ -125,7 +166,7 @@ class ManagerMeetingFilter(MasterFilter):
             'title',
             'date',
             'location',
-            'submission_date',  
+            'submission_date',
             'last_update',
             'attendee',
         ]

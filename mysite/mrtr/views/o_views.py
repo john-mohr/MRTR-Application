@@ -1,31 +1,22 @@
+from . import *
+from .singles import house
 from ..forms import *
 from ..tables import *
+from ..filters import *
+from custom_user.models import User
 from django.shortcuts import render, redirect
 from django.forms import modelformset_factory
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
-from django.contrib import messages
 from django.db.models import Sum, Value
 from django.db.models.functions import Concat
 from django_tables2 import RequestConfig
-from functools import wraps
 
 
 def forbidden(request):
     return render(request, 'mrtr/forbidden.html')
 
-
-def groups_only(*groups):
-    def inner(view_func):
-        @wraps(view_func)
-        def wrapper_func(request, *args, **kwargs):
-            if request.user.groups.filter(name__in=groups).exists() or request.user.is_superuser:
-                return view_func(request, *args, **kwargs)
-            else:
-                return redirect('/forbidden')
-        return wrapper_func
-    return inner
 
 def home(request):
     if request.method == 'POST':
@@ -89,39 +80,37 @@ def contact(request):
 
 
 # Admin forms
-def username(request):
-    un = request.user.first_name + " " + request.user.last_name
-    return un
-
-
-@groups_only('House Manager')
 def portal(request):
-    page = 'Dashboard'
-    fullname = username(request)
+    if user_is_hm(request):
+        mngr = User.objects.get(pk=request.user.pk)
+        cur_house = House.objects.get(manager=mngr.assoc_resident)
+        return house(request, cur_house.name)
+    else:
+        page = 'Dashboard'
+        fullname = username(request)
+        sidebar = admin_sidebar
 
-    buttons = [('Add Resident', '/portal/new_res'),
-               ('Add Rent Payment', '/portal/new_rent_pmt'),
-               ('Adjust Balance', '/portal/new_trans')]
+        buttons = [('Add Resident', '/portal/new_res'),
+                   ('Add Rent Payment', '/portal/new_rent_pmt'),
+                   ('Adjust Balance', '/portal/new_trans')]
 
-    occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
-    vacant_beds = BedTable(
-        Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
-        order_by='house', orderable=True, exclude=('id', 'resident', ))
-    RequestConfig(request).configure(vacant_beds)
+        occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
+        vacant_beds = BedTable(
+            Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
+            order_by='house', orderable=True, exclude=('id', 'resident', ))
+        RequestConfig(request).configure(vacant_beds)
 
-    # TODO:
-    #  Distinguish between current and past residents
-    #  Add a limit to number of residents shown or a threshold balance
-    #  Maybe add a filter
+        qs = Resident.objects.annotate(
+            balance=Sum('transaction__amount'),
+            full_name=Concat('first_name', Value(' '), 'last_name'))
 
-    res_balances = ShortResidentsTable(Resident.objects.annotate(
-        balance=Sum('transaction__amount'),
-        full_name=Concat('first_name', Value(' '), 'last_name')),
-        order_by='-balance',
-        exclude=('rent', 'bed', 'door_code'))
+        table_filter = ResidentBalanceFilter(request.GET, queryset=qs)
 
-    RequestConfig(request).configure(res_balances)
-    return render(request, 'admin/homepage.html', locals())
+        res_balances = ShortResidentsTable(table_filter.qs, order_by='-balance', orderable=True,
+                                           exclude=('rent', 'bed', 'door_code'))
+
+        RequestConfig(request).configure(res_balances)
+        return render(request, 'admin/admin_portal.html', locals())
 
 
 def new_meeting(request):
@@ -133,7 +122,6 @@ def new_meeting(request):
         sub = ManagerMeetingForm(request.POST)
         if sub.is_valid():
             sub.save()
-            messages.success(request, 'Form submission successful')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -149,28 +137,26 @@ def edit_meeting(request, id):
             sub.save()
             meeting.last_update = timezone.now()
             meeting.save()
-            messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', locals())
         else:
             form = ManagerMeetingForm(instance=meeting)
     return render(request, 'admin/forms.html', locals())
 
-# TODO standardize and move to table_views
-def meetings(request):
-    page = 'All Meetings'
-    fullname = username(request)
-    try:
-        latest_meeting = Manager_meeting.objects.latest('submission_date')
-    except :
-        print("Empty Database")
-    table = ManagerMeetingTable(Manager_meeting.objects.all(), orderable=True)
-    RequestConfig(request).configure(table)
-    name = 'Meetings'
-    button_name = 'Add New Meeting'
-    button_link = '/portal/new_meeting'
-    return render(request, 'admin/meetings.html', locals())
+# def meetings(request):
+#     page = 'All Meetings'
+#     fullname = username(request)
+#     try:
+#         latest_meeting = Manager_meeting.objects.latest('submission_date')
+#     except :
+#         print("Empty Database")
+#     table = ManagerMeetingTable(Manager_meeting.objects.all(), orderable=True)
+#     RequestConfig(request).configure(table)
+#     name = 'Meetings'
+#     button_name = 'Add New Meeting'
+#     button_link = '/portal/new_meeting'
+#     return render(request, 'admin/meetings.html', locals())
 
-# TODO standardize and move to single_views (or get rid of)
+# TODO (dean) standardize and move to single_views (or get rid of)
 def single_meeting(request, id):
     page = 'Individual Meeting'
     fullname = username(request)
@@ -187,7 +173,6 @@ def new_supply_request(request):
         sub = SupplyRequestForm(request.POST)
         if sub.is_valid():
             sub.save()
-            messages.success(request, 'Form submission successful')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -203,29 +188,27 @@ def edit_supply_request(request, id):
             sub.save()
             supply_request.last_update = timezone.now()
             supply_request.save()
-            messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', locals())
         else:
             form = SupplyRequestForm(instance=supply_request)
     return render(request, 'admin/forms.html', locals())
 
 
-# TODO standardize and move to table_views
-def supply_request(request):
-    page = 'All Supply Requests'
-    fullname = username(request)
-    try:
-        latest_supply_request = Supply_request.objects.latest('date')
-    except :
-        print("Empty Database")
-    table = SupplyRequestTable(Supply_request.objects.all(), orderable=True)
-    RequestConfig(request).configure(table)
-    name = 'Supply Request'
-    button_name = 'Add New Supply Request'
-    button_link = '/portal/new_supply_request'
-    return render(request, 'admin/supply_requests.html', locals())
+# def supply_request(request):
+#     page = 'All Supply Requests'
+#     fullname = username(request)
+#     try:
+#         latest_supply_request = Supply_request.objects.latest('date')
+#     except :
+#         print("Empty Database")
+#     table = SupplyRequestTable(Supply_request.objects.all(), orderable=True)
+#     RequestConfig(request).configure(table)
+#     name = 'Supply Request'
+#     button_name = 'Add New Supply Request'
+#     button_link = '/portal/new_supply_request'
+#     return render(request, 'admin/supply_requests.html', locals())
 
-# TODO standardize and move to single_views (or get rid of)
+# TODO (dean) standardize and move to single_views (or get rid of)
 def single_supply_request(request, id):
     page = 'Individual Supply Meeting'
     fullname = username(request)
@@ -243,7 +226,6 @@ def new_shopping_trip(request):
         sub = ShoppingTripForm(request.POST)
         if sub.is_valid():
             sub.save()
-            messages.success(request, 'Form submission successful')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -259,57 +241,56 @@ def edit_shopping_trip(request, id):
             sub.save()
             shopping_trip.last_update = timezone.now()
             shopping_trip.save()
-            messages.success(request, 'Form submission successful')
             return render(request, 'admin/forms.html', locals())
         else:
             form = ShoppingTripForm(instance=shopping_trip)
     return render(request, 'admin/forms.html', locals())
 
 
-# TODO standardize and move to table_views
-def shopping_trip(request):
-    page = 'All Shopping Trip'
-    fullname = username(request)
-    
-    try:
-        latest_shopping_trip = Shopping_trip.objects.latest('date')
-    except :
-        print("Empty Database")
-    table = ShoppingTripTable(Shopping_trip.objects.all(), orderable=True)
-    RequestConfig(request).configure(table)
-    name = 'Shopping Trip'
-    button_name = 'Add New Shopping Trip'
-    button_link = '/portal/new_shopping_trip'
-    return render(request, 'admin/shopping_trips.html', locals())
+# def shopping_trip(request):
+#     page = 'All Shopping Trip'
+#     fullname = username(request)
+#
+#     try:
+#         latest_shopping_trip = Shopping_trip.objects.latest('date')
+#     except :
+#         print("Empty Database")
+#     table = ShoppingTripTable(Shopping_trip.objects.all(), orderable=True)
+#     RequestConfig(request).configure(table)
+#     name = 'Shopping Trip'
+#     button_name = 'Add New Shopping Trip'
+#     button_link = '/portal/new_shopping_trip'
+#     return render(request, 'admin/shopping_trips.html', locals())
 
 
-# TODO standardize and move to single_views (or get rid of)
+# TODO (dean) standardize and move to single_views (or get rid of)
 def single_shopping_trip(request, id):
     page = 'Individual Shopping Trip'
     fullname = username(request)
-    shopping_trip = Shopping_trip.objects.get(id=id)
+    trip = Shopping_trip.objects.get(id=id)
     supplies = Supply_request.objects.filter(fulfilled=False)
-    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id)),('Add Supply Requests', '/portal/edit_shopping_trip/' + str(id))]
-    forms = []
+    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id)),
+               ('Add Supply Requests', '/portal/edit_shopping_trip/' + str(id))]
+    requests = []
     for x in supplies:
         form = AddSupplyForm(instance=x)
-        forms.append(form)
-    if request.method == "POST":    
-        forms = []
+        requests.append(form)
+    if request.method == "POST":
+        requests = []
         for x in supplies:
             sub = AddSupplyForm(request.POST, instance=x)
             if sub.is_valid():
                 sub.save()
-                forms.append(sub)
+                requests.append(sub)
             return render(request, 'admin/single_shopping_trip.html', locals())
     return render(request, 'admin/single_shopping_trip.html', locals())
 
 
-# House Manager forms
-@groups_only('House Manager')
-def house_manager(request):
-    context = {
-        'page': 'Dashboard',
-        'fullname': username(request),
-    }
-    return render(request, 'house/house_generic.html', context)
+# # House Manager forms
+# # @groups_only('House Manager')
+# def house_manager(request):
+#
+#     mngr = User.objects.get(pk=request.user.pk)
+#     cur_house = House.objects.get(manager=mngr.assoc_resident)
+#     return house(request, cur_house.name)
+

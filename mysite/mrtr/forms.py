@@ -229,11 +229,6 @@ class DrugTestForm(forms.ModelForm):
                                            required=False,
                                            label='Substances (if positive)')
 
-    def clean_substances(self):
-        data = self.cleaned_data['substances']
-        data = ', '.join(data)
-        return data
-
     class Meta:
         model = Drug_test
         fields = ['resident',
@@ -252,6 +247,19 @@ class DrugTestForm(forms.ModelForm):
         widgets = {
             'date': DateInput(),
         }
+
+    def clean_substances(self):
+        data = self.cleaned_data['substances']
+        data = ', '.join(data)
+        return data
+
+    def __init__(self, *args, **kwargs):
+        is_hm = kwargs.pop('is_hm', None)
+        hm_house = kwargs.pop('house', None)
+        super(DrugTestForm, self).__init__(*args, **kwargs)
+        if is_hm:
+            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house)
+            self.fields['resident'].queryset = house_res
 
 
 class CheckInForm(forms.ModelForm):
@@ -273,6 +281,14 @@ class CheckInForm(forms.ModelForm):
             'date': DateInput(),
             'manager': forms.HiddenInput()
         }
+
+    def __init__(self, *args, **kwargs):
+        is_hm = kwargs.pop('is_hm', None)
+        hm_house = kwargs.pop('house', None)
+        super(CheckInForm, self).__init__(*args, **kwargs)
+        if is_hm:
+            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house)
+            self.fields['resident'].queryset = house_res
 
 
 class SiteVisitForm(forms.ModelForm):
@@ -336,7 +352,33 @@ class HouseMeetingForm(forms.ModelForm):
             'manager': forms.HiddenInput()
         }
 
+    def __init__(self, *args, **kwargs):
+        is_hm = kwargs.pop('is_hm', None)
+        hm_house = kwargs.pop('house', None)
+        super(HouseMeetingForm, self).__init__(*args, **kwargs)
+        if is_hm:
+            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house)
+            self.fields['absentees'].queryset = house_res
 
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields['absentees'].queryset = Resident.objects.none()
+    #
+    #     if 'house' in self.data:
+    #         print(int(self.data.get('house')))
+    #         try:
+    #             l_house = int(self.data.get('house'))
+    #             print(l_house)
+    #             print(list(Resident.objects.filter(bed__house_id=l_house).values_list()))
+    #             self.fields['absentees'].queryset = Resident.objects.filter(bed__house_id=l_house).order_by('first_name')
+    #         except (ValueError, TypeError):
+    #             pass
+    #     elif self.instance.pk:
+    #         self.fields['absentees'].queryset = Resident.objects.all()
+
+
+# TODO (dean) why is there another form for supply requests
 class AddSupplyForm(forms.ModelForm):
     class Meta:
         model = Supply_request
@@ -345,6 +387,8 @@ class AddSupplyForm(forms.ModelForm):
                   'quantity',
                   'trip',
                   ]
+
+
 # # May be unnecessary, could add/edit/delete from console instead
 # class BedForm:
 #     x = ''

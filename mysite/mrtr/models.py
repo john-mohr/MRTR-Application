@@ -35,7 +35,7 @@ class Resident(models.Model):
 class Transaction(models.Model):
     date = models.DateField(default=timezone.now)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
-    # TODO Cut down on the amount of transaction types
+    # TODO (wait) Cut down on the amount of transaction types
     TYPE_CHOICES = [
         # Auto apply
         ('Rent charge', 'Rent charge'),                 # 0
@@ -89,7 +89,7 @@ class House(models.Model):
     last_update = models.DateTimeField(null=True)  # automatic
 
     def get_absolute_url(self):
-        return '/portal/house/%i' % self.id
+        return '/portal/house/' + self.name
 
     def __str__(self):
         return self.name
@@ -191,12 +191,12 @@ class Supply_request(models.Model):
         ('oth', 'Other (specify')
     ]
     product = models.CharField(max_length=3, choices=PRODUCT_CHOICES, null=True)
-    other = models.CharField(max_length=50, null=True, blank= True)
-    quantity = models.IntegerField(validators=[MaxValueValidator(10)])  # blank=True, null=True)
-    notes = models.TextField(null= True, blank= True)
-    fulfilled = models.BooleanField()  #blank=True, null=True)  # automatic
-    house = models.ForeignKey('House', on_delete=models.CASCADE)  #, blank=True, null=True)
-    trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE, null = True, blank = True)  #, blank=True, null=True)  # might be unnecessary
+    other = models.CharField(max_length=50, null=True, blank=True)
+    quantity = models.IntegerField(validators=[MaxValueValidator(10)])
+    notes = models.TextField(null=True, blank=True)
+    fulfilled = models.BooleanField()  # automatic
+    house = models.ForeignKey('House', on_delete=models.CASCADE)
+    trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE, null=True, blank=True)
 
     def get_absolute_url(self):
         return '/portal/supply_request/%i' % self.id
@@ -206,7 +206,7 @@ class Site_visit(models.Model):
     date = models.DateField(default=timezone.now)
     issues = models.TextField(null=True)
     explanation = models.TextField(null=True)
-    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  # maybe add limit_to() argument
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
     house = models.ForeignKey('House', on_delete=models.CASCADE)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
@@ -219,7 +219,7 @@ class House_meeting(models.Model):
     date = models.DateField(default=timezone.now)
     issues = models.TextField(null=True)
     house = models.ForeignKey('House', on_delete=models.CASCADE)
-    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id')  # maybe add limit_to() argument
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
     last_update = models.DateTimeField(null=True)  # automatic
 
@@ -232,7 +232,7 @@ class Absentee(models.Model):
     meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  # automatic
 
 
-# TODO ask TC if she's still doing manager meetings
+# TODO (wait) ask TC if she's still doing manager meetings
 class Manager_meeting(models.Model):
     title = models.CharField(max_length=150)
     issues = models.TextField(null=True)

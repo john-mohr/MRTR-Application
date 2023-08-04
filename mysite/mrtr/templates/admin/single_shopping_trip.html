@@ -2,7 +2,6 @@
 {% load render_table from django_tables2 %}
 {% load static %}
 {% load crispy_forms_tags %}
-
 {% block content %}
 <!doctype html>
 <html>
@@ -58,35 +57,35 @@
                 margin-top: 50px;
                 }
             }
-            
-           
+
+
         </style>
     <body>
         <div class="flex-container">
             <section class="container">
-                <h2><a href="/portal/shopping_trip/{{ shopping_trip.id }}">{{ shopping_trip.id }}</a></h2>
-                <p>Date: {{ shopping_trip.date }}</p>
-                <p>Amount: {{ shopping_trip.amount }}</p>
-                <p>Notes :{{ shopping_trip.notes }}</p>
+                <h2><a href="/portal/shopping_trip/{{ trip.id }}">{{ trip.id }}</a></h2>
+                <p>Date: {{ trip.date }}</p>
+                <p>Amount: {{ trip.amount }}</p>
+                <p>Notes :{{ trip.notes }}</p>
             </section>
             <section class="container">
                 <h2>Unfulfilled Supply Requests</h2>
             </section>
-  
 
-            
-            
-                    {% for x in forms %}
+
+
+
+                    {% for x in requests %}
                     <section class="container">
                     <form action="" method="post">{% csrf_token %}
-                        
+
                         {{ x | crispy}}
-            
+
                     </section>
                     {% endfor %}
                     <input type="submit">
             </form>
-                    
+
 
             {% if messages %}
                 <ul class="messages">
@@ -95,11 +94,11 @@
             {% endfor %}
                 </ul>
             {% endif %}
-                    
-                
-            
+
+
+
         </div>
-        
+
     </body>
     </div>
 </html>
