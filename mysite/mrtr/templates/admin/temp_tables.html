@@ -1,0 +1,86 @@
+{% extends "admin/administrative.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!doctype html>
+<html>
+    <section class="edit-box">
+        <form action="{{ button_link }}">
+            <button type="submit">{{ button_name }}</button>
+         </form>
+    </section>
+    <div style="overflow-x:auto;">
+        <style>
+            table{
+                margin-left: auto;
+                margin-right: auto;
+            }
+            table, th, td {
+                text-align: center;
+                border:1px solid black;
+                border-collapse: collapse;
+            }
+            input[type=checkbox] {
+                width: auto;
+            }
+            .form-group {
+                padding-bottom: 10px;
+            }
+            .form-check, .checkbox {
+                padding-top: 5px;
+                padding-left: 20px;
+            }
+            .flex-container{
+                padding-top: 25px;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 15px;
+            }
+            .container{
+                padding: 16px 16px 16px 16px;
+                width: 100%;
+                border-style: solid;
+                background-color: white;
+                border-color: white;
+                border-radius: 5px;
+                overflow-y: auto;
+            }
+            .container h2{
+                text-align: left;
+            }
+            .edit-box{
+                padding: 16px 16px 16px 16px;
+                border-style: solid;
+                border-radius: 5px;
+                background-color: white;
+                border-color: white;
+                text-align: left;
+                justify-content: left;
+                overflow-y: auto;
+            }
+            @media screen and (max-width: 1500px) {
+                .edit-box{
+                margin-top: 50px;
+                }
+            }
+        </style>
+    <body>
+        <div class="flex-container">
+            <section class="container">
+                <form method="get">
+                    {{ table_filter.form | crispy }}
+                    <input type="submit" />
+                </form>
+            </section>
+            <section class="container">
+                {% render_table table %}
+            </section>
+        </div>
+    </body>
+    </div>
+</html>
+{% endblock content %}

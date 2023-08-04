@@ -1,0 +1,64 @@
+{% extends "admin/administrative.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+    <div style="overflow-x:auto; padding:50px;" >
+    <style>
+        table, th, td {
+            text-align: left;
+            border:1px solid black;
+            border-collapse: collapse;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 36px;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+    </style>
+    <body>
+        <section>
+            <h1>{{ name }}</h1>
+            {% for x in headers %}
+                <h2>{{ x }}</h2>
+            {% endfor %}
+        </section>
+        <section>
+            <form>
+                {% for x in buttons %}
+                    <button type="submit" formaction="{{ x.1 }}">{{ x.0 }}</button>
+                {% endfor %}
+            </form>
+        </section>
+        {% for x in sections %}
+            <section>
+                <h2>{{ x.0 }}</h2>
+                {% if x.1 %}
+                    {% render_table x.2 %}
+                {% else %}
+                    <table>
+                        {% for y in x.2 %}
+                            <tr>
+                                <th>{{y.0}}</th>
+                                <td>
+                                    <a{{ y.2 }}>
+                                        {{y.1}}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </section>
+        {% endfor %}
+    </body>
+</div>
+</html>
+{% endblock content %}
