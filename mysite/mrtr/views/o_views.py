@@ -156,95 +156,94 @@ def edit_meeting(request, id):
 #     button_link = '/portal/new_meeting'
 #     return render(request, 'admin/meetings.html', locals())
 
-# TODO (dean) standardize and move to single_views (or get rid of)
-def single_meeting(request, id):
-    page = 'Individual Meeting'
-    fullname = username(request)
-    meeting = Manager_meeting.objects.get(id=id)
-    buttons = [('Edit info', '/portal/edit_meeting/' + str(id))]
-    return render(request, 'admin/single_meeting.html', locals())
-
-# New Supply Request
-def new_supply_request(request):
-    page = 'Add New Supply Request'
-    fullname = username(request)
-    form = SupplyRequestForm()
-    if request.method == 'POST':
-        sub = SupplyRequestForm(request.POST)
-        if sub.is_valid():
-            sub.save()
-    return render(request, 'admin/forms.html', locals())
-
-
-def edit_supply_request(request, id):
-    page = 'Edit Supply_Request'
-    fullname = username(request)
-
-    supply_request = Supply_request.objects.get(id=id)
-    form = SupplyRequestForm(instance=supply_request)
-    if request.method == 'POST':
-        sub = SupplyRequestForm(request.POST, instance=supply_request)
-        if sub.is_valid():
-            sub.save()
-            supply_request.last_update = timezone.now()
-            supply_request.save()
-            return render(request, 'admin/forms.html', locals())
-        else:
-            form = SupplyRequestForm(instance=supply_request)
-    return render(request, 'admin/forms.html', locals())
-
-
-# def supply_request(request):
-#     page = 'All Supply Requests'
+# # TODO (dean) standardize and move to single_views (or get rid of)
+# def single_meeting(request, id):
+#     page = 'Individual Meeting'
 #     fullname = username(request)
-#     try:
-#         latest_supply_request = Supply_request.objects.latest('date')
-#     except :
-#         print("Empty Database")
-#     table = SupplyRequestTable(Supply_request.objects.all(), orderable=True)
-#     RequestConfig(request).configure(table)
-#     name = 'Supply Request'
-#     button_name = 'Add New Supply Request'
-#     button_link = '/portal/new_supply_request'
-#     return render(request, 'admin/supply_requests.html', locals())
+#     meeting = Manager_meeting.objects.get(id=id)
+#     buttons = [('Edit info', '/portal/edit_meeting/' + str(id))]
+#     return render(request, 'admin/single_meeting.html', locals())
 
-# TODO (dean) standardize and move to single_views (or get rid of)
-def single_supply_request(request, id):
-    page = 'Individual Supply Meeting'
-    fullname = username(request)
-    supply_request = Supply_request.objects.get(id=id)
-    buttons = [('Edit info', '/portal/edit_supply_request/' + str(id))]
-    return render(request, 'admin/single_supply_request.html', locals())
-
-#New Shopping Trip 
-
-def new_shopping_trip(request):
-    page = 'Add New Shopping Trip'
-    fullname = username(request)
-    form = ShoppingTripForm()
-    if request.method == 'POST':
-        sub = ShoppingTripForm(request.POST)
-        if sub.is_valid():
-            sub.save()
-    return render(request, 'admin/forms.html', locals())
+# # New Supply Request
+# def new_supply_request(request):
+#     page = 'Add New Supply Request'
+#     fullname = username(request)
+#     form = SupplyRequestForm()
+#     if request.method == 'POST':
+#         sub = SupplyRequestForm(request.POST)
+#         if sub.is_valid():
+#             sub.save()
+#     return render(request, 'admin/forms.html', locals())
 
 
-def edit_shopping_trip(request, id):
-    page = 'Edit Shopping Trip'
-    fullname = username(request)
+# def edit_supply_request(request, id):
+#     page = 'Edit Supply_Request'
+#     fullname = username(request)
 
-    shopping_trip = Shopping_trip.objects.get(id=id)
-    form = ShoppingTripForm(instance=shopping_trip)
-    if request.method == 'POST':
-        sub = ShoppingTripForm(request.POST, instance=shopping_trip)
-        if sub.is_valid():
-            sub.save()
-            shopping_trip.last_update = timezone.now()
-            shopping_trip.save()
-            return render(request, 'admin/forms.html', locals())
-        else:
-            form = ShoppingTripForm(instance=shopping_trip)
-    return render(request, 'admin/forms.html', locals())
+#     supply_request = Supply_request.objects.get(id=id)
+#     form = SupplyRequestForm(instance=supply_request)
+#     if request.method == 'POST':
+#         sub = SupplyRequestForm(request.POST, instance=supply_request)
+#         if sub.is_valid():
+#             sub.save()
+#             supply_request.last_update = timezone.now()
+#             supply_request.save()
+#             return render(request, 'admin/forms.html', locals())
+#         else:
+#             form = SupplyRequestForm(instance=supply_request)
+#     return render(request, 'admin/forms.html', locals())
+
+
+# # def supply_request(request):
+# #     page = 'All Supply Requests'
+# #     fullname = username(request)
+# #     try:
+# #         latest_supply_request = Supply_request.objects.latest('date')
+# #     except :
+# #         print("Empty Database")
+# #     table = SupplyRequestTable(Supply_request.objects.all(), orderable=True)
+# #     RequestConfig(request).configure(table)
+# #     name = 'Supply Request'
+# #     button_name = 'Add New Supply Request'
+# #     button_link = '/portal/new_supply_request'
+# #     return render(request, 'admin/supply_requests.html', locals())
+
+
+
+# #New Shopping Trip 
+
+# def new_shopping_trip(request):
+#     page = 'Add New Shopping Trip'
+#     fullname = username(request)
+#     form = ShoppingTripForm()
+#     if request.method == 'POST':
+#         sub = ShoppingTripForm(request.POST)
+#         if sub.is_valid():
+#             sub.save()
+#             currentTrip = Shopping_trip.objects.latest('id')
+#             supplies = Supply_request.objects.filter(fulfilled= False)
+#             for supply in supplies:
+#                 supply.trip = currentTrip
+#                 supply.fulfilled= True
+#     return render(request, 'admin/forms.html', locals())
+
+
+# def edit_shopping_trip(request, id):
+#     page = 'Edit Shopping Trip'
+#     fullname = username(request)
+
+#     shopping_trip = Shopping_trip.objects.get(id=id)
+#     form = ShoppingTripForm(instance=shopping_trip)
+#     if request.method == 'POST':
+#         sub = ShoppingTripForm(request.POST, instance=shopping_trip)
+#         if sub.is_valid():
+#             sub.save()
+#             shopping_trip.last_update = timezone.now()
+#             shopping_trip.save()
+#             return render(request, 'admin/forms.html', locals())
+#         else:
+#             form = ShoppingTripForm(instance=shopping_trip)
+#     return render(request, 'admin/forms.html', locals())
 
 
 # def shopping_trip(request):
@@ -261,29 +260,6 @@ def edit_shopping_trip(request, id):
 #     button_name = 'Add New Shopping Trip'
 #     button_link = '/portal/new_shopping_trip'
 #     return render(request, 'admin/shopping_trips.html', locals())
-
-
-# TODO (dean) standardize and move to single_views (or get rid of)
-def single_shopping_trip(request, id):
-    page = 'Individual Shopping Trip'
-    fullname = username(request)
-    trip = Shopping_trip.objects.get(id=id)
-    supplies = Supply_request.objects.filter(fulfilled=False)
-    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id)),
-               ('Add Supply Requests', '/portal/edit_shopping_trip/' + str(id))]
-    requests = []
-    for x in supplies:
-        form = AddSupplyForm(instance=x)
-        requests.append(form)
-    if request.method == "POST":
-        requests = []
-        for x in supplies:
-            sub = AddSupplyForm(request.POST, instance=x)
-            if sub.is_valid():
-                sub.save()
-                requests.append(sub)
-            return render(request, 'admin/single_shopping_trip.html', locals())
-    return render(request, 'admin/single_shopping_trip.html', locals())
 
 
 # # House Manager forms

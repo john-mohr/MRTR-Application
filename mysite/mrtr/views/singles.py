@@ -3,6 +3,7 @@ from ..tables import *
 from django.shortcuts import render
 from django.db.models.functions import Concat
 from django.db.models import Value, Sum
+from ..filters import *
 from django_tables2 import RequestConfig
 
 def resident(request, res_id):
@@ -189,3 +190,30 @@ def house(request, house_id):
     ]
 
     return render(request, 'admin/singles.html', locals())
+
+# TODO (dean) standardize and move to single_views (or get rid of)
+def single_supply_request(request, id):
+    page = 'Individual Supply Meeting'
+    fullname = username(request)
+    supply_request = Supply_request.objects.get(id=id)
+    buttons = [('Edit info', '/portal/edit_supply_request/' + str(id))]
+    return render(request, 'admin/single_supply_request.html', locals())
+
+# TODO (dean) standardize and move to single_views (or get rid of)
+def single_shopping_trip(request, id):
+    page = 'Individual Shopping Trip'
+    fullname = username(request)
+    shoppingtrip = Shopping_trip.objects.get(id=id)
+    qs = Supply_request.objects.filter(trip=shoppingtrip)
+    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id))]
+    table_filter = SupplyRequestFilter(request.GET, queryset=qs)
+    table = SupplyRequestTable(table_filter.qs)
+    return render(request, 'admin/singles.html', locals())
+
+# TODO (dean) standardize and move to single_views (or get rid of)
+def single_meeting(request, id):
+    page = 'Individual Meeting'
+    fullname = username(request)
+    meeting = Manager_meeting.objects.get(id=id)
+    buttons = [('Edit info', '/portal/edit_meeting/' + str(id))]
+    return render(request, 'admin/single_meeting.html', locals())

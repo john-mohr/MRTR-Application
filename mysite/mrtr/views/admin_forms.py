@@ -308,4 +308,68 @@ def edit_house(request, id):
             form = HouseForm(instance=house)
     return render(request, 'admin/forms.html', locals())
 
+# New Supply Request
+def new_supply_request(request):
+    page = 'Add New Supply Request'
+    fullname = username(request)
+    form = SupplyRequestForm()
+    if request.method == 'POST':
+        sub = SupplyRequestForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_supply_request(request, id):
+    page = 'Edit Supply_Request'
+    fullname = username(request)
+
+    supply_request = Supply_request.objects.get(id=id)
+    form = SupplyRequestForm(instance=supply_request)
+    if request.method == 'POST':
+        sub = SupplyRequestForm(request.POST, instance=supply_request)
+        if sub.is_valid():
+            sub.save()
+            supply_request.last_update = timezone.now()
+            supply_request.save()
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = SupplyRequestForm(instance=supply_request)
+    return render(request, 'admin/forms.html', locals())
+
+#New Shopping Trip 
+
+def new_shopping_trip(request):
+    page = 'Add New Shopping Trip'
+    fullname = username(request)
+    form = ShoppingTripForm()
+    if request.method == 'POST':
+        sub = ShoppingTripForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+            currentTrip = Shopping_trip.objects.latest('id')
+            supplies = Supply_request.objects.filter(fulfilled= False)
+            for supply in supplies:
+                supply.trip = currentTrip
+                supply.fulfilled= True
+    return render(request, 'admin/forms.html', locals())
+
+
+def edit_shopping_trip(request, id):
+    page = 'Edit Shopping Trip'
+    fullname = username(request)
+
+    shopping_trip = Shopping_trip.objects.get(id=id)
+    form = ShoppingTripForm(instance=shopping_trip)
+    if request.method == 'POST':
+        sub = ShoppingTripForm(request.POST, instance=shopping_trip)
+        if sub.is_valid():
+            sub.save()
+            shopping_trip.last_update = timezone.now()
+            shopping_trip.save()
+            return render(request, 'admin/forms.html', locals())
+        else:
+            form = ShoppingTripForm(instance=shopping_trip)
+    return render(request, 'admin/forms.html', locals())
+
 

@@ -6,11 +6,9 @@
 <!doctype html>
 <html>
     <section class="edit-box">
-        <form>
-            {% for x in buttons %}
-                <button type="submit" formaction="{{ x.1 }}">{{ x.0 }}</button>
-            {% endfor %}
-        </form>
+        <form action="{{ button_link }}">
+            <button type="submit">{{ button_name }}</button>
+         </form>
     </section>
     <div style="overflow-x:auto;">
         <style>
@@ -23,6 +21,16 @@
                 border:1px solid black;
                 border-collapse: collapse;
             }
+            input[type=checkbox] {
+                width: auto;
+            }
+            .form-group {
+                padding-bottom: 10px;
+            }
+            .form-check, .checkbox {
+                padding-top: 5px;
+                padding-left: 20px;
+            }
             .flex-container{
                 padding-top: 25px;
                 display: flex;
@@ -33,11 +41,12 @@
             }
             .container{
                 padding: 16px 16px 16px 16px;
-                min-width: 100%;
+                width: 100%;
                 border-style: solid;
                 background-color: white;
                 border-color: white;
                 border-radius: 5px;
+                overflow-y: auto;
             }
             .container h2{
                 text-align: left;
@@ -69,31 +78,19 @@
                 <p>Notes :{{ trip.notes }}</p>
             </section>
             <section class="container">
-                <h2>Unfulfilled Supply Requests</h2>
+                <h2>Supply Requests</h2>
+            </section>
+            <section class="container">
+                <form method="get">
+                    {{ table_filter.form | crispy }}
+                    <input type="submit" />
+                </form>
+            </section>
+            <section class="container">
+                {% render_table table %}
             </section>
 
-
-
-
-                    {% for x in requests %}
-                    <section class="container">
-                    <form action="" method="post">{% csrf_token %}
-
-                        {{ x | crispy}}
-
-                    </section>
-                    {% endfor %}
-                    <input type="submit">
-            </form>
-
-
-            {% if messages %}
-                <ul class="messages">
-            {% for message in messages %}
-                <li  {% if message.tags %} class=" {{ message.tags }} " {% endif %}> {{ message }} </li>
-            {% endfor %}
-                </ul>
-            {% endif %}
+    
 
 
 

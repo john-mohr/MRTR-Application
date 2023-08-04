@@ -379,14 +379,7 @@ class HouseMeetingForm(forms.ModelForm):
 
 
 # TODO (dean) why is there another form for supply requests
-class AddSupplyForm(forms.ModelForm):
-    class Meta:
-        model = Supply_request
-        fields = ['date',
-                  'product',
-                  'quantity',
-                  'trip',
-                  ]
+# TODO (tj) stop leaving me commment random places if ur not gunna tell me irl
 
 
 # # May be unnecessary, could add/edit/delete from console instead

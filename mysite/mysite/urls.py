@@ -59,7 +59,7 @@ urlpatterns = [
     path('portal/new_meeting', o_views.new_meeting),
     path('portal/edit_meeting/<int:id>', o_views.edit_meeting),
     path('portal/meetings', tables.meetings),
-    path('portal/meeting/<int:id>', o_views.single_meeting),
+    path('portal/meeting/<int:id>', singles.single_meeting),
 
     path('portal/new_house_meeting', hm_forms.new_house_meeting),
     path('portal/edit_house_meeting/<int:hm_id>', hm_forms.edit_house_meeting),
@@ -81,16 +81,16 @@ urlpatterns = [
     path('portal/site_visits', tables.site_visits),
 
     # Supply Request
-    path('portal/new_supply_request', o_views.new_supply_request),
-    path('portal/edit_supply_request/<int:id>', o_views.edit_supply_request),
+    path('portal/new_supply_request', admin_forms.new_supply_request),
+    path('portal/edit_supply_request/<int:id>', admin_forms.edit_supply_request),
     path('portal/supply_requests', tables.supply_requests),
-    path('portal/supply_request/<int:id>', o_views.single_supply_request),
+    path('portal/supply_request/<int:id>', singles.single_supply_request),
 
     # Shopping Trip
-    path('portal/new_shopping_trip', o_views.new_shopping_trip),
-    path('portal/edit_shopping_trip/<int:id>', o_views.edit_shopping_trip),
+    path('portal/new_shopping_trip', admin_forms.new_shopping_trip),
+    path('portal/edit_shopping_trip/<int:id>', admin_forms.edit_shopping_trip),
     path('portal/shopping_trips', tables.shopping_trips),
-    path('portal/shopping_trip/<int:id>', o_views.single_shopping_trip),
+    path('portal/shopping_trip/<int:id>', singles.single_shopping_trip),
 
     # # House Manager Page
     # path('portal/house_manager/', o_views.house_manager),
