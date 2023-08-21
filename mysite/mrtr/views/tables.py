@@ -25,6 +25,7 @@ def table_view(request, page_name, button_name, button_link, table_filter, table
     return render(request, 'admin/tables.html', locals())
 
 
+@groups_only('Admin')
 def residents(request):
     qs = Resident.objects.annotate(
         balance=Sum('transaction__amount'))
@@ -35,46 +36,17 @@ def residents(request):
     return table_view(request, 'View All Residents', 'Add New Resident', 'new_res', table_filter, table)
 
 
+@groups_only('Admin')
 def transactions(request):
     qs = Transaction.objects.all().select_related('resident')
 
     table_filter = TransactionFilter(request.GET, queryset=qs)
 
-    table = TransactionTable(table_filter.qs, order_by='-submission_date', orderable=True)
+    table = TransactionTable(table_filter.qs, order_by='-date', orderable=True)
     return table_view(request, 'View All Transactions', 'Add New Transaction', 'new_trans', table_filter, table)
 
 
-def dtests(request):
-
-    if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = Drug_test.objects.filter(resident__house=House.objects.get(manager=mngr))
-        hm_exc = ('id', )
-    else:
-        qs = Drug_test.objects.all()
-        hm_exc = ''
-
-    table_filter = DrugTestFilter(request.GET, queryset=qs)
-
-    table = DrugTestTable(table_filter.qs, order_by='-submission_date', orderable=True, exclude=hm_exc)
-    return table_view(request, 'View All Drug Tests', 'Add New Drug Test', 'new_dtest', table_filter, table)
-
-
-def check_ins(request):
-    if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = Check_in.objects.filter(resident__house=House.objects.get(manager=mngr))
-        hm_exc = ('id', )
-    else:
-        qs = Check_in.objects.all()
-        hm_exc = ''
-
-    table_filter = CheckInFilter(request.GET, queryset=qs)
-
-    table = CheckInTable(table_filter.qs, order_by='-submission_date', orderable=True, exclude=hm_exc)
-    return table_view(request, 'View All Check Ins', 'Add New Check In', 'new_check_in', table_filter, table)
-
-
+@groups_only('Admin')
 def houses(request):
     qs = House.objects.all()
 
@@ -84,6 +56,7 @@ def houses(request):
     return table_view(request, 'View All Houses', 'Add New House', 'new_house', table_filter, table)
 
 
+@groups_only('Admin')
 def beds(request):
     qs = Bed.objects.all()
 
@@ -93,11 +66,41 @@ def beds(request):
     return table_view(request, 'View All Beds', 'Add New Bed', 'beds#', table_filter, table)
 
 
+def dtests(request):
+    if user_is_hm(request):
+        mngr = User.objects.get(pk=request.user.pk).assoc_resident
+        qs = Drug_test.objects.filter(resident__bed__house=House.objects.get(manager=mngr))
+        hm_exc = ('id', )
+    else:
+        qs = Drug_test.objects.all()
+        hm_exc = ''
+
+    table_filter = DrugTestFilter(request.GET, queryset=qs)
+
+    table = DrugTestTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    return table_view(request, 'View All Drug Tests', 'Add New Drug Test', 'new_dtest', table_filter, table)
+
+
+def check_ins(request):
+    if user_is_hm(request):
+        mngr = User.objects.get(pk=request.user.pk).assoc_resident
+        qs = Check_in.objects.filter(resident__bed__house=House.objects.get(manager=mngr))
+        hm_exc = ('id', )
+    else:
+        qs = Check_in.objects.all()
+        hm_exc = ''
+
+    table_filter = CheckInFilter(request.GET, queryset=qs)
+
+    table = CheckInTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    return table_view(request, 'View All Check Ins', 'Add New Check In', 'new_check_in', table_filter, table)
+
+
 def site_visits(request):
     if user_is_hm(request):
         mngr = User.objects.get(pk=request.user.pk).assoc_resident
         qs = Site_visit.objects.filter(house=House.objects.get(manager=mngr))
-        hm_exc = ('id', )
+        hm_exc = ('id', 'house')
     else:
         qs = Site_visit.objects.all()
         hm_exc = ''
@@ -112,7 +115,7 @@ def house_meetings(request):
     if user_is_hm(request):
         mngr = User.objects.get(pk=request.user.pk).assoc_resident
         qs = House_meeting.objects.filter(house=House.objects.get(manager=mngr))
-        hm_exc = ('id', )
+        hm_exc = ('id', 'house')
     else:
         qs = House_meeting.objects.all()
         hm_exc = ''

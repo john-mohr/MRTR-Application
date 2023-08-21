@@ -7,12 +7,12 @@ from django.db.models import CharField, Model
 class Resident(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    phone = models.BigIntegerField(validators=[MaxValueValidator(9999999999)], null=True)
+    phone = models.CharField(max_length=10, null=True, blank=True)
     email = models.EmailField(max_length=62, null=True)
     admit_date = models.DateField(default=timezone.now)
     rent = models.IntegerField(validators=[MaxValueValidator(1000)])
     bed = models.OneToOneField('Bed', on_delete=models.CASCADE, blank=True, null=True)
-    door_code = models.IntegerField(validators=[MaxValueValidator(9999)], null=True)
+    door_code = models.CharField(max_length=4, null=True, blank=True)
     referral_info = models.TextField(null=True)
     notes = models.TextField(null=True)
     discharge_date = models.DateField(null=True)
@@ -64,13 +64,13 @@ class Transaction(models.Model):
         ('Cash', 'Cash'),
         ('Cash App', 'Cash App'),
         ('Check', 'Check'),
-        ('Money order', 'Money order'),
+        ('Money Order', 'Money Order'),
         ('PayPal', 'PayPal'),
         ('Venmo', 'Venmo'),
         ('Zelle', 'Zelle'),
         ('Other (specify)', 'Other (specify)')
     ]
-    method = models.CharField(max_length=15, blank=True)
+    method = models.CharField(max_length=15, blank=True, null=True)
     notes = models.TextField(null=True)
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
@@ -108,9 +108,9 @@ class Drug_test(models.Model):
     RESULT_CHOICES = [
         ('Negative', 'Negative'),
         ('Positive', 'Positive'),
-        ('Positive (meds)', 'Positive (meds)'),
+        ('Positive (Meds)', 'Positive (Meds)'),
         ('Invalid', 'Invalid'),
-        ('Other (specify)', 'Other (specify)')
+        ('Other (Specify)', 'Other (Specify)')
     ]
     result = models.CharField(max_length=17, choices=RESULT_CHOICES)
 

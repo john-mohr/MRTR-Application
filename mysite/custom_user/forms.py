@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
  
 
 class UserRegisterForm(UserCreationForm):
-    myfield = forms.CharField(widget=forms.TextInput(attrs={'class': 'myfieldclass'}))
+    # myfield = forms.CharField(widget=forms.TextInput(attrs={'class': 'myfieldclass'}))
     email = forms.EmailField()
     first_name = forms.CharField(label= 'First Name', max_length = 20)
     last_name = forms.CharField(label= 'Last Name', max_length = 20)

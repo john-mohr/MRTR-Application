@@ -6,7 +6,7 @@ from django.shortcuts import render
 from dateutil.relativedelta import relativedelta
 
 # New Resident
-# @groups_only('House Manager')
+@groups_only('Admin')
 def new_res(request):
     page = "Add New Resident"
     fullname = username(request)
@@ -21,7 +21,7 @@ def new_res(request):
 
             # Add beginning balance transactions
             intake = Transaction(date=sub.instance.admit_date,
-                                 amount=75,
+                                 amount=100,
                                  type='Fee',
                                  resident=sub.instance,
                                  notes='Intake Fee',
@@ -52,6 +52,7 @@ def new_res(request):
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def edit_res(request, id):
     page = 'Edit Resident Information'
     fullname = username(request)
@@ -85,6 +86,7 @@ def edit_res(request, id):
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def discharge_res(request, id):
     page = 'Remove Resident'
     fullname = username(request)
@@ -111,6 +113,7 @@ def discharge_res(request, id):
 
 
 # Readmit resident
+@groups_only('Admin')
 def readmit_res(request, id):
     page = 'Readmit Resident'
     fullname = username(request)
@@ -148,6 +151,7 @@ def readmit_res(request, id):
 
 
 # New transaction
+@groups_only('Admin')
 def new_trans(request, res_id=None):
     page = 'New Transaction'
     fullname = username(request)
@@ -175,6 +179,7 @@ def new_trans(request, res_id=None):
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def new_rent_pmt(request, res_id=None):
     page = 'New Rent Payment'
     fullname = username(request)
@@ -201,6 +206,7 @@ def new_rent_pmt(request, res_id=None):
 
 
 # Edit transaction
+@groups_only('Admin')
 def edit_trans(request, id):
     page = 'Edit Transaction'
     fullname = username(request)
@@ -236,6 +242,7 @@ def edit_trans(request, id):
 
 
 # New House
+@groups_only('Admin')
 def new_house(request):
     page = 'Add New House'
     fullname = username(request)
@@ -254,6 +261,7 @@ def new_house(request):
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def edit_house(request, id):
     page = 'Edit House'
     fullname = username(request)

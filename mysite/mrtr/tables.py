@@ -147,7 +147,7 @@ class DrugTestTable(tables.Table):
 class CheckInTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     resident = tables.Column(linkify=True)
-    manager = tables.Column(linkify=True)
+    manager = tables.Column(verbose_name='Submitter', linkify=True, empty_values=[])
     # manager2 = tables.Column(accessor=manager.value())
 
     class Meta:
@@ -158,11 +158,16 @@ class CheckInTable(tables.Table):
     def render_id(self, value):
         return f"Edit"
 
+    def render_manager(self, value):
+        if value is None:
+            value = 'Admin'
+        return value
+
 
 class SiteVisitTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
-    manager = tables.Column(linkify=True)
+    manager = tables.Column(verbose_name='Submitter', linkify=True, empty_values=[])
 
     class Meta:
         model = Site_visit
@@ -172,11 +177,16 @@ class SiteVisitTable(tables.Table):
     def render_id(self, value):
         return f"Edit"
 
+    def render_manager(self, value):
+        if value is None:
+            value = 'Admin'
+        return value
+
 
 class HouseMeetingTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
-    manager = tables.Column(linkify=True)
+    manager = tables.Column(verbose_name='Submitter', linkify=True, empty_values=[])
     absentees = tables.Column(empty_values=())
 
     class Meta:
@@ -190,9 +200,13 @@ class HouseMeetingTable(tables.Table):
             full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')).values_list('full_name', flat=True))
         return ', '.join(absentees)
 
-
     def render_id(self, value):
         return f"Edit"
+
+    def render_manager(self, value):
+        if value is None:
+            value = 'Admin'
+        return value
 
 
 class SupplyRequestTable(tables.Table):

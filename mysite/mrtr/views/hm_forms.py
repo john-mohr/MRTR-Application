@@ -37,7 +37,10 @@ def edit_dtest(request, test_id):
     rdr = request.META.get('HTTP_REFERER')
 
     dtest = Drug_test.objects.get(id=test_id)
-    dtest_subs = dtest.substances.split(', ')
+    if dtest.substances is not None:
+        dtest_subs = dtest.substances.split(', ')
+    else:
+        dtest_subs = None
 
     form = DrugTestForm(instance=dtest, initial={'substances': dtest_subs})
     if request.method == 'POST':
@@ -81,6 +84,7 @@ def new_check_in(request):
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def edit_check_in(request, ci_id):
     page = 'Edit Check In'
     fullname = username(request)
@@ -129,11 +133,10 @@ def new_site_visit(request):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
-        else:
-            print(sub.errors)
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def edit_site_visit(request, sv_id):
     page = 'Edit Site Visit'
     fullname = username(request)
@@ -193,6 +196,7 @@ def new_house_meeting(request):
     return render(request, 'admin/forms.html', locals())
 
 
+@groups_only('Admin')
 def edit_house_meeting(request, hm_id):
     page = 'Edit House Meeting'
     fullname = username(request)

@@ -1,5 +1,6 @@
 from . import *
 from ..tables import *
+from custom_user.models import User
 from django.shortcuts import render
 from django.db.models.functions import Concat
 from django.db.models import Value, Sum
@@ -76,6 +77,13 @@ def resident(request, res_id):
         ('Check-ins', True, check_ins)
     ]
 
+    if hm:
+        mngr = User.objects.get(pk=request.user.pk).assoc_resident
+        if res.bed is None:
+            return redirect('/forbidden')
+        elif res.bed.house != mngr.bed.house:
+            return redirect('/forbidden')
+
     return render(request, 'admin/singles.html', locals())
 
 
@@ -144,17 +152,24 @@ def house(request, house_id):
         latest_sv = house_sv.latest('date')
         sv_list = list(latest_sv.__dict__.items())
         sv_list = [(item[0].replace('_', ' ').title(), item[1]) for item in sv_list]
+
+        if latest_sv.issues == '':
+            sv_list[3] = ('Issues', 'None reported')
+        if latest_sv.explanation == '':
+            sv_list[4] = ('Explanation', 'None provided')
         if latest_sv.manager is None:
-            sv_list.append(('Manager', latest_sv.manager))
+            sv_list.append(('Submitter', 'Admin'))
         else:
-            sv_list.append(('Manager', latest_sv.manager, ' href=' + latest_sv.manager.get_absolute_url()))
+            sv_list.append(('Submitter', latest_sv.manager, ' href=' + latest_sv.manager.get_absolute_url()))
+
         sv_list.append(('Edit link', 'Click here', ' href=' + latest_sv.get_absolute_url()))
+
         visit = [sv_list[i] for i in [2, 3, 4, 9, 7, 8, 10]]
         if user_is_hm(request):
             visit[3] = (visit[3][0], visit[3][1], '')
             visit = visit[:-1]
     else:
-        visit = [('None', )]
+        visit = [('None', '(so far)')]
 
     # Latest house meeting info tables
     house_m = House_meeting.objects.filter(house=house_id)
@@ -163,9 +178,9 @@ def house(request, house_id):
         m_list = list(latest_m.__dict__.items())
         m_list = [(item[0].replace('_', ' ').title(), item[1]) for item in m_list]
         if latest_m.manager is None:
-            m_list.append(('Manager', latest_m.manager))
+            m_list.append(('Submitter', 'Admin'))
         else:
-            m_list.append(('Manager', latest_m.manager, ' href=' + latest_m.manager.get_absolute_url()))
+            m_list.append(('Submitter', latest_m.manager, ' href=' + latest_m.manager.get_absolute_url()))
         m_list.append(('Edit link', 'Click here', ' href=' + latest_m.get_absolute_url()))
         absentees = ', '.join(list(Absentee.objects.all()
                                    .filter(meeting_id=latest_m.pk)
@@ -178,7 +193,7 @@ def house(request, house_id):
             meeting[3] = (meeting[3][0], meeting[3][1], '')
             meeting = meeting[:-1]
     else:
-        meeting = [('None', )]
+        meeting = [('None', '(so far)')]
 
     sections = [
         ('Residents', True, house_res),
@@ -191,15 +206,7 @@ def house(request, house_id):
 
     return render(request, 'admin/singles.html', locals())
 
-# TODO (dean) standardize and move to single_views (or get rid of)
-def single_supply_request(request, id):
-    page = 'Individual Supply Meeting'
-    fullname = username(request)
-    supply_request = Supply_request.objects.get(id=id)
-    buttons = [('Edit info', '/portal/edit_supply_request/' + str(id))]
-    return render(request, 'admin/single_supply_request.html', locals())
-
-# TODO (dean) standardize and move to single_views (or get rid of)
+# TODO finish implementing
 def single_shopping_trip(request, id):
     page = 'Individual Shopping Trip'
     fullname = username(request)
@@ -209,11 +216,3 @@ def single_shopping_trip(request, id):
     table_filter = SupplyRequestFilter(request.GET, queryset=qs)
     table = SupplyRequestTable(table_filter.qs)
     return render(request, 'admin/singles.html', locals())
-
-# TODO (dean) standardize and move to single_views (or get rid of)
-def single_meeting(request, id):
-    page = 'Individual Meeting'
-    fullname = username(request)
-    meeting = Manager_meeting.objects.get(id=id)
-    buttons = [('Edit info', '/portal/edit_meeting/' + str(id))]
-    return render(request, 'admin/single_meeting.html', locals())

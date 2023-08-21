@@ -156,14 +156,6 @@ def edit_meeting(request, id):
 #     button_link = '/portal/new_meeting'
 #     return render(request, 'admin/meetings.html', locals())
 
-# # TODO (dean) standardize and move to single_views (or get rid of)
-# def single_meeting(request, id):
-#     page = 'Individual Meeting'
-#     fullname = username(request)
-#     meeting = Manager_meeting.objects.get(id=id)
-#     buttons = [('Edit info', '/portal/edit_meeting/' + str(id))]
-#     return render(request, 'admin/single_meeting.html', locals())
-
 # # New Supply Request
 # def new_supply_request(request):
 #     page = 'Add New Supply Request'
@@ -208,9 +200,7 @@ def edit_meeting(request, id):
 # #     button_link = '/portal/new_supply_request'
 # #     return render(request, 'admin/supply_requests.html', locals())
 
-
-
-# #New Shopping Trip 
+# #New Shopping Trip
 
 # def new_shopping_trip(request):
 #     page = 'Add New Shopping Trip'
@@ -260,13 +250,3 @@ def edit_meeting(request, id):
 #     button_name = 'Add New Shopping Trip'
 #     button_link = '/portal/new_shopping_trip'
 #     return render(request, 'admin/shopping_trips.html', locals())
-
-
-# # House Manager forms
-# # @groups_only('House Manager')
-# def house_manager(request):
-#
-#     mngr = User.objects.get(pk=request.user.pk)
-#     cur_house = House.objects.get(manager=mngr.assoc_resident)
-#     return house(request, cur_house.name)
-

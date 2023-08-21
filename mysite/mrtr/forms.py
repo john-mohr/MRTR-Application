@@ -378,10 +378,6 @@ class HouseMeetingForm(forms.ModelForm):
     #         self.fields['absentees'].queryset = Resident.objects.all()
 
 
-# TODO (dean) why is there another form for supply requests
-# TODO (tj) stop leaving me commment random places if ur not gunna tell me irl
-
-
 # # May be unnecessary, could add/edit/delete from console instead
 # class BedForm:
 #     x = ''
