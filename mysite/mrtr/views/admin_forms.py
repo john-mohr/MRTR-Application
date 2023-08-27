@@ -40,7 +40,7 @@ def new_res(request):
                                     amount=sub.instance.rent,
                                     type='Rent charge',
                                     resident=sub.instance,
-                                    notes=(sub.instance.admit_date + relativedelta(months=1)).strftime('%B'),
+                                    notes=(sub.instance.admit_date + relativedelta(months=1)).strftime('%B') + ' (advance)',
                                     submission_date=sub.instance.submission_date
                                     )
             second_mo.save()
@@ -53,13 +53,13 @@ def new_res(request):
 
 
 @groups_only('Admin')
-def edit_res(request, id):
+def edit_res(request, res_id):
     page = 'Edit Resident Information'
     fullname = username(request)
     sidebar = admin_sidebar
     rdr = request.META.get('HTTP_REFERER')
 
-    resident = Resident.objects.get(id=id)
+    resident = Resident.objects.get(id=res_id)
     old_rent = resident.rent
     form = ResidentForm(instance=resident)
     if request.method == 'POST':
@@ -71,7 +71,7 @@ def edit_res(request, id):
                                         amount=prorate(new_rent - old_rent, sub.cleaned_data['effective_date']),
                                         type='Rent adjustment',
                                         resident=resident,
-                                        notes='$' + str(old_rent) + ' > $' + str(new_rent) + ' (manual edit)'
+                                        notes='$' + str(old_rent) + ' > $' + str(new_rent) + ' (automatic)'
                                         )
                 adj_trans.save()
             sub.save()
@@ -87,13 +87,13 @@ def edit_res(request, id):
 
 
 @groups_only('Admin')
-def discharge_res(request, id):
+def discharge_res(request, res_id):
     page = 'Remove Resident'
     fullname = username(request)
     sidebar = admin_sidebar
     rdr = request.META.get('HTTP_REFERER')
 
-    resident = Resident.objects.get(id=id)
+    resident = Resident.objects.get(id=res_id)
     form = DischargeResForm()
     if request.method == 'POST':
         sub = DischargeResForm(request.POST)
@@ -114,19 +114,20 @@ def discharge_res(request, id):
 
 # Readmit resident
 @groups_only('Admin')
-def readmit_res(request, id):
+def readmit_res(request, res_id):
     page = 'Readmit Resident'
     fullname = username(request)
     sidebar = admin_sidebar
     rdr = request.META.get('HTTP_REFERER')
 
-    resident = Resident.objects.get(id=id)
+    resident = Resident.objects.get(id=res_id)
     form = ResidentForm(instance=resident)
     if request.method == 'POST':
         sub = ResidentForm(request.POST, instance=resident)
         if sub.is_valid():
             resident.notes = resident.notes + '\n Previous residency: ' + \
                              str(resident.admit_date) + ' to ' + str(resident.discharge_date)
+            resident.admit_date = sub.cleaned_data['effective_date']
             resident.discharge_date = None
             resident.last_update = timezone.now()
             sub.save()
@@ -167,11 +168,15 @@ def new_trans(request, res_id=None):
     if request.method == 'POST':
         sub = TransactionForm(request.POST)
         if sub.is_valid():
+            if sub.instance.type != 'Fix' and sub.instance.type != 'Other (specify)':
+                sub.instance.amount = abs(sub.instance.amount)
+
             # Make transaction amount negative for transactions that decrease a resident's balance
             decrease = ['Rent payment', 'Bonus', 'Work/reimbursement', 'Sober support']
             if sub.instance.type in decrease:
                 sub.instance.amount *= -1
             sub.save()
+
             rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
@@ -195,6 +200,7 @@ def new_rent_pmt(request, res_id=None):
     if request.method == 'POST':
         sub = RentPaymentForm(request.POST)
         if sub.is_valid():
+            sub.instance.amount = abs(sub.instance.amount)
             sub.instance.amount *= -1
             sub.instance.type = 'Rent payment'
             sub.save()
@@ -207,29 +213,36 @@ def new_rent_pmt(request, res_id=None):
 
 # Edit transaction
 @groups_only('Admin')
-def edit_trans(request, id):
+def edit_trans(request, trans_id):
     page = 'Edit Transaction'
     fullname = username(request)
     sidebar = admin_sidebar
     rdr = request.META.get('HTTP_REFERER')
 
-    trans = Transaction.objects.get(id=id)
+    trans = Transaction.objects.get(id=trans_id)
+
+    if trans.type != 'Fix' and trans.type != 'Other (specify)':
+        trans.amount = abs(trans.amount)
+
     if trans.type == 'Rent payment':
         form = RentPaymentForm(instance=trans)
     else:
         form = TransactionForm(instance=trans)
+
     if request.method == 'POST':
-        old_type = trans.type
         if trans.type == 'Rent payment':
             sub = RentPaymentForm(request.POST, instance=trans)
         else:
             sub = TransactionForm(request.POST, instance=trans)
         if sub.is_valid():
+            if sub.instance.type != 'Fix' and sub.instance.type != 'Other (specify)':
+                sub.instance.amount = abs(sub.instance.amount)
+
             # Make transaction amount negative for transactions that decrease a resident's balance
-            # But also keep amount negative if it wasn't changed
             decrease = ['Rent payment', 'Bonus', 'Work/reimbursement', 'Sober support']
-            if old_type not in decrease and sub.instance.type in decrease:
+            if sub.instance.type in decrease:
                 sub.instance.amount *= -1
+
             trans.last_update = timezone.now()
             sub.save()
             rdr = request.POST.get('rdr')
@@ -262,17 +275,17 @@ def new_house(request):
 
 
 @groups_only('Admin')
-def edit_house(request, id):
+def edit_house(request, house_id):
     page = 'Edit House'
     fullname = username(request)
     sidebar = admin_sidebar
     rdr = request.META.get('HTTP_REFERER')
 
-    house = House.objects.get(id=id)
+    house = House.objects.get(id=house_id)
     prev_mngr = house.manager
-    form = HouseForm(instance=house)
+    form = HouseForm(instance=house, house=house)
     if request.method == 'POST':
-        sub = HouseForm(request.POST, instance=house)
+        sub = HouseForm(request.POST, instance=house, house=house)
         if sub.is_valid():
             sub.save()
             house.last_update = timezone.now()
@@ -312,8 +325,6 @@ def edit_house(request, id):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
-        else:
-            form = HouseForm(instance=house)
     return render(request, 'admin/forms.html', locals())
 
 # New Supply Request

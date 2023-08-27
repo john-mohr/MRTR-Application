@@ -34,9 +34,9 @@ urlpatterns = [
 
     # Resident
     path('portal/new_res', admin_forms.new_res),
-    path('portal/edit_res/<int:id>', admin_forms.edit_res),
-    path('portal/discharge_res/<int:id>', admin_forms.discharge_res),
-    path('portal/readmit_res/<int:id>', admin_forms.readmit_res),
+    path('portal/edit_res/<int:res_id>', admin_forms.edit_res),
+    path('portal/discharge_res/<int:res_id>', admin_forms.discharge_res),
+    path('portal/readmit_res/<int:res_id>', admin_forms.readmit_res),
     path('portal/residents', tables.residents),
     path('portal/resident/<int:res_id>', singles.resident, name='resident'),
 
@@ -45,12 +45,12 @@ urlpatterns = [
     path('portal/new_trans/<int:res_id>', admin_forms.new_trans),
     path('portal/new_rent_pmt', admin_forms.new_rent_pmt),
     path('portal/new_rent_pmt/<int:res_id>', admin_forms.new_rent_pmt),
-    path('portal/edit_trans/<int:id>', admin_forms.edit_trans),
+    path('portal/edit_trans/<int:trans_id>', admin_forms.edit_trans),
     path('portal/transactions', tables.transactions),
 
     # Houses
     path('portal/new_house', admin_forms.new_house),
-    path('portal/edit_house/<int:id>', admin_forms.edit_house),
+    path('portal/edit_house/<int:house_id>', admin_forms.edit_house),
     path('portal/houses', tables.houses),
     path('portal/house/<str:house_id>', singles.house),
     path('portal/beds', tables.beds),

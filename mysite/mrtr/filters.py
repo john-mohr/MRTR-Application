@@ -1,5 +1,6 @@
 from .models import *
-from django_filters.widgets import RangeWidget
+from django_filters.widgets import RangeWidget, SuffixedMultiWidget
+from django import forms
 from django.db.models import Q
 from functools import reduce
 from operator import or_
@@ -60,19 +61,24 @@ class ResidentFilter(MasterFilter):
         return queryset.filter(discharge_date__isnull=bool(int(value)))
 
 
-# TODO This filter needs some work
+class BalanceWidget(SuffixedMultiWidget):
+    suffixes = ['min', 'max']
+
 class ResidentBalanceFilter(MasterFilter):
     date = None
     search = None
     balance = filters.RangeFilter(method='balance_filter',
-                                  label='Filter by balance')
-
+                                  label='Filter by amount',
+                                  widget=BalanceWidget(widgets=[forms.NumberInput(attrs={'placeholder': 'Balances above this amount'}),
+                                                                forms.NumberInput(attrs={'placeholder': 'Balances below this amount'})
+                                                                ]))
     status = filters.ChoiceFilter(method='status_filter',
                                   choices=((1, 'Current'), (0, 'Past')),
                                   empty_label='All',
                                   label='Filter by residency status')
     exclude_zero = filters.BooleanFilter(method='zero_filter',
-                                         label='Exclude zero balance')
+                                         label='Exclude zero balance',
+                                         widget=forms.CheckboxInput)
 
     class Meta:
         model = Resident
@@ -86,22 +92,20 @@ class ResidentBalanceFilter(MasterFilter):
     def balance_filter(queryset, name, value):
         start = value.start
         if start is None:
-            start = -10000
+            start = -999999
 
         stop = value.stop
         if stop is None:
-            stop = 10000
+            stop = 999999
 
         return queryset.filter(balance__range=[start, stop])
 
     @staticmethod
     def zero_filter(queryset, name, value):
-        if value is True:
+        if value:
             return queryset.exclude(balance=0)
         else:
             return queryset
-
-
 
 
 class TransactionFilter(MasterFilter):
@@ -153,7 +157,8 @@ class SiteVisitFilter(MasterFilter):
         'manager__first_name',
         'manager__last_name',
         'house__name',
-        'issues'
+        'issues',
+        'explanation'
     ]
 
     class Meta:

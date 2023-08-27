@@ -37,10 +37,7 @@ def edit_dtest(request, test_id):
     rdr = request.META.get('HTTP_REFERER')
 
     dtest = Drug_test.objects.get(id=test_id)
-    if dtest.substances is not None:
-        dtest_subs = dtest.substances.split(', ')
-    else:
-        dtest_subs = None
+    dtest_subs = dtest.substances.split(', ')
 
     form = DrugTestForm(instance=dtest, initial={'substances': dtest_subs})
     if request.method == 'POST':
@@ -165,23 +162,25 @@ def edit_site_visit(request, sv_id):
 def new_house_meeting(request):
     page = 'New House Meeting'
     fullname = username(request)
-    rdr = request.META.get('HTTP_REFERER')
+    if request.method == 'GET':
+        rdr = request.META.get('HTTP_REFERER')
+        mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
-    mngr = User.objects.get(pk=request.user.pk).assoc_resident
-
-    if user_is_hm(request):
-        sidebar = hm_sidebar
-        form = HouseMeetingForm(initial={'manager': mngr, 'house': House.objects.get(manager=mngr)},
-                                is_hm=True, house=House.objects.get(manager=mngr).pk)
-        form.fields['house'].widget = forms.HiddenInput()
+        if user_is_hm(request):
+            sidebar = hm_sidebar
+            form = HouseMeetingForm(initial={'manager': mngr, 'house': House.objects.get(manager=mngr)},
+                                    house=House.objects.get(manager=mngr).pk)
+        else:
+            sidebar = admin_sidebar
+            form = HouseSelectForm()
     else:
         sidebar = admin_sidebar
-        form = HouseMeetingForm(initial={'manager': None})
-
-    form.fields['manager'].required = False
-
-    if request.method == 'POST':
-        sub = HouseMeetingForm(request.POST)
+        rdr = request.POST.get('rdr')
+        house_id = request.POST.get('house')
+        house = House.objects.get(id=int(house_id))
+        form = HouseMeetingForm(initial={'house': house},
+                                house=house)
+        sub = HouseMeetingForm(request.POST, house=house)
         if sub.is_valid():
             meeting_id = sub.save()
             absentees = sub.cleaned_data['absentees']
@@ -189,7 +188,6 @@ def new_house_meeting(request):
                 absentee = Absentee(resident=absentees[i],
                                     meeting=meeting_id)
                 absentee.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -207,9 +205,9 @@ def edit_house_meeting(request, hm_id):
     hm_absentees_list = Absentee.objects.all().filter(meeting_id=hm_id).values_list('resident_id', flat=True)
     hm_absentees = Resident.objects.filter(id__in=hm_absentees_list)
 
-    form = HouseMeetingForm(instance=hm, initial={'absentees': hm_absentees})
+    form = HouseMeetingForm(instance=hm, initial={'absentees': hm_absentees}, house=hm.house)
     if request.method == 'POST':
-        sub = HouseMeetingForm(request.POST, instance=hm, initial={'absentees': hm_absentees})
+        sub = HouseMeetingForm(request.POST, instance=hm, initial={'absentees': hm_absentees}, house=hm.house)
         if sub.is_valid():
             x = sub.save()
 
@@ -228,7 +226,4 @@ def edit_house_meeting(request, hm_id):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
-        else:
-            print('invalid')
-            form = HouseMeetingForm(instance=hm, initial={'absentees': hm_absentees})
     return render(request, 'admin/forms.html', locals())

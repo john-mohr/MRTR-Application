@@ -8,20 +8,24 @@ from django.db.models import Value, Sum, Q
 from django_tables2 import RequestConfig
 
 
-def table_view(request, page_name, button_name, button_link, table_filter, table):
+def table_view(request, page_link, page_name, table_filter, table, button_name=None, button_link=None):
     fullname = username(request)
+    link = page_link
     page = page_name
     if user_is_hm(request):
         sidebar = hm_sidebar
         table.columns[1].link = None
-
     else:
         sidebar = admin_sidebar
     table_filter = table_filter
     table = table
-    RequestConfig(request, paginate=True).configure(table)
-    button_name = button_name
-    button_link = '/portal/' + button_link
+    RequestConfig(request, paginate=False).configure(table)
+    if button_name is None or button_link is None:
+        buttons = False
+    else:
+        buttons = True
+        button_name = button_name
+        button_link = '/portal/' + button_link
     return render(request, 'admin/tables.html', locals())
 
 
@@ -31,9 +35,9 @@ def residents(request):
         balance=Sum('transaction__amount'))
 
     table_filter = ResidentFilter(request.GET, queryset=qs)
-
-    table = ResidentsTable(table_filter.qs, order_by='-submission_date', orderable=True, exclude='full_name')
-    return table_view(request, 'View All Residents', 'Add New Resident', 'new_res', table_filter, table)
+    
+    table = ResidentsTable(table_filter.qs, order_by='-admit_date', orderable=True, exclude='full_name')
+    return table_view(request, 'residents', 'View All Residents', table_filter, table, 'Add New Resident', 'new_res')
 
 
 @groups_only('Admin')
@@ -43,7 +47,7 @@ def transactions(request):
     table_filter = TransactionFilter(request.GET, queryset=qs)
 
     table = TransactionTable(table_filter.qs, order_by='-date', orderable=True)
-    return table_view(request, 'View All Transactions', 'Add New Transaction', 'new_trans', table_filter, table)
+    return table_view(request, 'transactions', 'View All Transactions', table_filter, table, 'Add New Transaction', 'new_trans')
 
 
 @groups_only('Admin')
@@ -53,7 +57,7 @@ def houses(request):
     table_filter = HouseFilter(request.GET, queryset=qs)
 
     table = HouseTable(table_filter.qs, orderable=True)
-    return table_view(request, 'View All Houses', 'Add New House', 'new_house', table_filter, table)
+    return table_view(request, 'houses', 'View All Houses', table_filter, table)
 
 
 @groups_only('Admin')
@@ -63,7 +67,7 @@ def beds(request):
     table_filter = BedFilter(request.GET, queryset=qs)
 
     table = BedTable(table_filter.qs, exclude=('id',))
-    return table_view(request, 'View All Beds', 'Add New Bed', 'beds#', table_filter, table)
+    return table_view(request, 'beds', 'View All Beds', table_filter, table)
 
 
 def dtests(request):
@@ -78,7 +82,7 @@ def dtests(request):
     table_filter = DrugTestFilter(request.GET, queryset=qs)
 
     table = DrugTestTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
-    return table_view(request, 'View All Drug Tests', 'Add New Drug Test', 'new_dtest', table_filter, table)
+    return table_view(request, 'dtests', 'View All Drug Tests', table_filter, table, 'Add New Drug Test', 'new_dtest')
 
 
 def check_ins(request):
@@ -93,7 +97,7 @@ def check_ins(request):
     table_filter = CheckInFilter(request.GET, queryset=qs)
 
     table = CheckInTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
-    return table_view(request, 'View All Check Ins', 'Add New Check In', 'new_check_in', table_filter, table)
+    return table_view(request, 'check_ins', 'View All Check Ins', table_filter, table, 'Add New Check In', 'new_check_in')
 
 
 def site_visits(request):
@@ -107,8 +111,8 @@ def site_visits(request):
 
     table_filter = SiteVisitFilter(request.GET, queryset=qs)
 
-    table = SiteVisitTable(table_filter.qs, exclude=hm_exc)
-    return table_view(request, 'View All Site Visits', 'Add New Site Visit', 'new_site_visit', table_filter, table)
+    table = SiteVisitTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    return table_view(request, 'site_visits', 'View All Site Visits', table_filter, table, 'Add New Site Visit', 'new_site_visit')
 
 
 def house_meetings(request):
@@ -122,8 +126,8 @@ def house_meetings(request):
 
     table_filter = HouseMeetingFilter(request.GET, queryset=qs)
 
-    table = HouseMeetingTable(table_filter.qs, exclude=hm_exc)
-    return table_view(request, 'View All House Meetings', 'Add New House Meeting', 'new_house_meeting', table_filter, table)
+    table = HouseMeetingTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    return table_view(request, 'house_meetings', 'View All House Meetings', table_filter, table, 'Add New House Meeting', 'new_house_meeting')
 
 
 def meetings(request):
@@ -131,8 +135,8 @@ def meetings(request):
 
     table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
 
-    table = ManagerMeetingTable(table_filter.qs)
-    return table_view(request, 'View All Meetings', 'Add New Meeting', 'new_meeting', table_filter, table)
+    table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True)
+    return table_view(request, 'View All Meetings', table_filter, table, 'Add New Meeting', 'new_meeting')
 
 
 def supply_requests(request):
@@ -140,8 +144,8 @@ def supply_requests(request):
 
     table_filter = SupplyRequestFilter(request.GET, queryset=qs)
 
-    table = SupplyRequestTable(table_filter.qs)
-    return table_view(request, 'View All Supply Requests', 'Add New Supply Request', 'new_supply_request', table_filter, table)
+    table = SupplyRequestTable(table_filter.qs, order_by='-date', orderable=True)
+    return table_view(request, 'View All Supply Requests', table_filter, table, 'Add New Supply Request', 'new_supply_request')
 
 
 def shopping_trips(request):
@@ -149,6 +153,6 @@ def shopping_trips(request):
 
     table_filter = ShoppingTripFilter(request.GET, queryset=qs)
 
-    table = ShoppingTripTable(table_filter.qs)
-    return table_view(request, 'View All Shopping Trips', 'Add New Shopping Trip', 'new_shopping_trip', table_filter, table)
+    table = ShoppingTripTable(table_filter.qs, order_by='-date', orderable=True)
+    return table_view(request, 'View All Shopping Trips', table_filter, table, 'Add New Shopping Trip', 'new_shopping_trip')
 

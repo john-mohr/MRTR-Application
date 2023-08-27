@@ -3,18 +3,19 @@ from .models import *
 from django.db.models.functions import Concat
 from django.db.models import Value, Sum
 
+# TODO change datetime format to .strftime('%m/%d/%Y %I:%M %p')
 
 class ResidentsTable(tables.Table):
     first_name = tables.Column(linkify=True)
     last_name = tables.Column(linkify=True)
-    house = tables.Column(accessor='bed.house', verbose_name='House')
+    house = tables.Column(linkify=True, accessor='bed.house', verbose_name='House')
     balance = tables.Column(accessor=tables.A('balance'))
     full_name = tables.Column(linkify=True, verbose_name='Name')
+    notes = tables.Column(attrs={'td': {'style': 'min-width: 250px; white-space: pre-wrap'}})
 
     class Meta:
         model = Resident
-        sequence = ('submission_date',
-                    'full_name',
+        sequence = ('full_name',
                     'first_name',
                     'last_name',
                     'balance',
@@ -26,6 +27,8 @@ class ResidentsTable(tables.Table):
                     'door_code',
                     'admit_date',
                     'discharge_date',
+                    'referral_info',
+                    'notes',
                     )
         exclude = ('id', )
         empty_text = 'None'
@@ -76,8 +79,8 @@ class ShortResidentsTable(tables.Table):
 
 class TransactionTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
-    submission_date = tables.Column(linkify=True)
     resident = tables.Column(linkify=True)
+    notes = tables.Column(attrs={'td': {'style': 'min-width: 200px; white-space: pre-wrap'}})
 
     class Meta:
         model = Transaction
@@ -107,7 +110,7 @@ class HouseTable(tables.Table):
 
 class BedTable(tables.Table):
     resident = tables.Column(linkify=True, verbose_name='Occupant')
-    house = tables.Column(accessor='house.name', verbose_name='House')
+    house = tables.Column(linkify=True, verbose_name='House')
     name = tables.Column(verbose_name='Bed')
 
     class Meta:
@@ -134,6 +137,7 @@ class ManagerMeetingTable(tables.Table):
 class DrugTestTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     resident = tables.Column(linkify=True)
+    substances = tables.Column(attrs={'td': {'style': 'min-width: 200px; white-space: pre-wrap'}})
 
     class Meta:
         model = Drug_test
@@ -144,11 +148,18 @@ class DrugTestTable(tables.Table):
         return f"Edit"
 
 
+def get_url(record):
+    if record.manager is None:
+        return None
+    else:
+        return record.manager.get_absolute_url()
+
 class CheckInTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     resident = tables.Column(linkify=True)
-    manager = tables.Column(verbose_name='Submitter', linkify=True, empty_values=[])
-    # manager2 = tables.Column(accessor=manager.value())
+    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_url(record), empty_values=[])
+    notes = tables.Column(attrs={'td': {'style': 'min-width: 200px; white-space: pre-wrap'}})
+
 
     class Meta:
         model = Check_in
@@ -167,7 +178,9 @@ class CheckInTable(tables.Table):
 class SiteVisitTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
-    manager = tables.Column(verbose_name='Submitter', linkify=True, empty_values=[])
+    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_url(record), empty_values=[])
+    issues = tables.Column(attrs={'td': {'style': 'min-width: 300px; white-space: pre-wrap'}})
+    explanation = tables.Column(attrs={'td': {'style': 'min-width: 300px; white-space: pre-wrap; text-align: left'}})
 
     class Meta:
         model = Site_visit
@@ -186,12 +199,13 @@ class SiteVisitTable(tables.Table):
 class HouseMeetingTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
-    manager = tables.Column(verbose_name='Submitter', linkify=True, empty_values=[])
-    absentees = tables.Column(empty_values=())
+    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_url(record), empty_values=[])
+    absentees = tables.Column(empty_values=(), orderable=False, attrs={'td': {'style': 'min-width: 200px; white-space: pre-wrap'}})
+    issues = tables.Column(attrs={'td': {'style': 'min-width: 600px; white-space: pre-wrap; text-align: left;'}})
 
     class Meta:
         model = House_meeting
-        sequence = ('id', 'date', 'manager', 'house', 'issues', 'absentees')
+        sequence = ('id', 'date', 'manager', 'house', 'absentees', 'issues')
         empty_text = 'None'
 
     @staticmethod
@@ -233,3 +247,20 @@ class ShoppingTripTable(tables.Table):
                     'date',
                     'amount',
                     )
+
+def RowTableLink(value):
+    if str(value)[1:7] == 'portal':
+        return value
+    elif type(value) == Resident or type(value) == House:
+        return value.get_absolute_url()
+
+
+class RowTable(tables.Table):
+    name = tables.Column()
+    value = tables.Column(linkify=lambda value: RowTableLink(value))
+
+    def render_value(self, value):
+        if str(value)[1:7] == 'portal':
+            value = 'Click here'
+        return value
+

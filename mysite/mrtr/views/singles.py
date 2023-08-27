@@ -13,7 +13,12 @@ def resident(request, res_id):
     fullname = username(request)
     page = 'View Single Resident'
     name = res.full_name()
-    headers = ['Balance: $' + str(res.balance())]
+
+    if res.balance() >= 0:
+        bal = '$' + str(res.balance())
+    else:
+        bal = '-$' + str(res.balance())[1:]
+    headers = ['Balance: ' + bal]
     sidebar = admin_sidebar
     buttons = [('Add Rent Payment', '/portal/new_rent_pmt/' + str(res_id)),
                ('Adjust Balance', '/portal/new_trans/' + str(res_id)),
@@ -28,8 +33,8 @@ def resident(request, res_id):
     else:
         headers.insert(0, '(Past Resident)')
         buttons.append(('Readmit', '/portal/readmit_res/' + str(res_id)))
-        bed_name = None
-        res_house = None
+        bed_name = ''
+        res_house = ''
         house_link = ''
 
     hm = user_is_hm(request)
@@ -41,14 +46,27 @@ def resident(request, res_id):
     else:
         hm_exc = ()
 
-    res_info = list(res.__dict__.items())
-    res_info = [(item[0].replace('_', ' ').title(), item[1]) for item in res_info]
-    res_info.append(('Bed Name', bed_name))
-    res_info.append(('House Name', res_house, house_link))
+    contact_info_data = [{'name': 'Phone', 'value': '(' + res.phone[:3] + ') ' + res.phone[3:6] + '-' + res.phone[6:]},
+                         {'name': 'Email', 'value': res.email}]
+    contact_info = RowTable(contact_info_data, show_header=False)
+    RequestConfig(request).configure(contact_info)
 
-    contact_info = res_info[4:6]
-
-    res_details = [res_info[i] for i in [6, 12, 7, 16, 15, 9, 10, 11]]
+    if res.discharge_date is None:
+        dd = '—'
+    else:
+        dd = res.discharge_date.strftime('%m/%d/%Y')
+    res_details_data = [{'name': 'Admit date', 'value': res.admit_date.strftime('%m/%d/%Y')},
+                        {'name': 'Discharge date', 'value': dd},
+                        {'name': 'Rent', 'value': '$' + str(res.rent)},
+                        {'name': 'House', 'value': res.bed.house},
+                        {'name': 'Bed', 'value': res.bed.name},
+                        {'name': 'Door code', 'value': res.door_code},
+                        {'name': 'Referral info', 'value': res.referral_info},
+                        {'name': 'Notes', 'value': res.notes}]
+    if hm:
+        res_details_data[3]['value'] = res_details_data[3].get('value').name
+    res_details = RowTable(res_details_data, show_header=False)
+    RequestConfig(request).configure(res_details)
 
     # TODO (dean) allow users to show/hide the ledger, dtests, and check_ins tables
     ledger = TransactionTable(Transaction.objects.filter(resident=res_id),
@@ -70,11 +88,11 @@ def resident(request, res_id):
         check_ins.columns[0].link = None
 
     sections = [
-        ('Contact Info', False, contact_info),
-        ('Resident Details', False, res_details),
-        ('Ledger', True, ledger),
-        ('Drug Tests', True, dtests),
-        ('Check-ins', True, check_ins)
+        ('Contact Info', contact_info),
+        ('Resident Details', res_details),
+        ('Ledger', ledger),
+        ('Drug Tests', dtests),
+        ('Check-ins', check_ins)
     ]
 
     if hm:
@@ -150,58 +168,81 @@ def house(request, house_id):
     house_sv = Site_visit.objects.filter(house=house_id)
     if house_sv.exists():
         latest_sv = house_sv.latest('date')
-        sv_list = list(latest_sv.__dict__.items())
-        sv_list = [(item[0].replace('_', ' ').title(), item[1]) for item in sv_list]
 
-        if latest_sv.issues == '':
-            sv_list[3] = ('Issues', 'None reported')
-        if latest_sv.explanation == '':
-            sv_list[4] = ('Explanation', 'None provided')
         if latest_sv.manager is None:
-            sv_list.append(('Submitter', 'Admin'))
+            mngr = 'Admin'
         else:
-            sv_list.append(('Submitter', latest_sv.manager, ' href=' + latest_sv.manager.get_absolute_url()))
+            mngr = latest_sv.manager
 
-        sv_list.append(('Edit link', 'Click here', ' href=' + latest_sv.get_absolute_url()))
+        if latest_sv.last_update is None:
+            lu = '—'
+        else:
+            lu = latest_sv.last_update.strftime('%m/%d/%Y %I:%M %p')
 
-        visit = [sv_list[i] for i in [2, 3, 4, 9, 7, 8, 10]]
+        visit_data = [{'name': 'Date', 'value': latest_sv.date.strftime('%m/%d/%Y')},
+                      {'name': 'Issues', 'value': latest_sv.issues},
+                      {'name': 'Explanation', 'value': latest_sv.explanation},
+                      {'name': 'Submitter', 'value': mngr},
+                      {'name': 'Submission date', 'value': latest_sv.submission_date.strftime('%m/%d/%Y %I:%M %p')},
+                      {'name': 'Last update', 'value': lu},
+                      {'name': 'Edit', 'value': latest_sv.get_absolute_url()}]
+
         if user_is_hm(request):
-            visit[3] = (visit[3][0], visit[3][1], '')
-            visit = visit[:-1]
+            visit_data = visit_data[:-1]
+            visit_data[3]['value'] = visit_data[3].get('value').__str__()
+
     else:
-        visit = [('None', '(so far)')]
+        visit_data = [{'name': 'None', 'value': '(so far)'}]
+
+    visit = RowTable(visit_data, show_header=False)
+    RequestConfig(request).configure(visit)
 
     # Latest house meeting info tables
     house_m = House_meeting.objects.filter(house=house_id)
     if house_m.exists():
         latest_m = house_m.latest('date')
-        m_list = list(latest_m.__dict__.items())
-        m_list = [(item[0].replace('_', ' ').title(), item[1]) for item in m_list]
+
         if latest_m.manager is None:
-            m_list.append(('Submitter', 'Admin'))
+            mngr = 'Admin'
         else:
-            m_list.append(('Submitter', latest_m.manager, ' href=' + latest_m.manager.get_absolute_url()))
-        m_list.append(('Edit link', 'Click here', ' href=' + latest_m.get_absolute_url()))
+            mngr = latest_m.manager
+
+        if latest_m.last_update is None:
+            lu = '—'
+        else:
+            lu = latest_m.last_update.strftime('%m/%d/%Y %I:%M %p')
+
         absentees = ', '.join(list(Absentee.objects.all()
                                    .filter(meeting_id=latest_m.pk)
                                    .select_related('resident')
                                    .annotate(full_name=Concat('resident__first_name', Value(' '), 'resident__last_name'))
                                    .values_list('full_name', flat=True)))
-        m_list.append(('Absentees', absentees, ''))
-        meeting = [m_list[i] for i in [2, 3, 10, 8, 6, 7, 9]]
+
+        meeting_data = [{'name': 'Date', 'value': latest_m.date.strftime('%m/%d/%Y')},
+                        {'name': 'Issues', 'value': latest_m.issues},
+                        {'name': 'Absentees', 'value': absentees},
+                        {'name': 'Submitter', 'value': mngr},
+                        {'name': 'Submission date', 'value': latest_m.submission_date.strftime('%m/%d/%Y %I:%M %p')},
+                        {'name': 'Last update', 'value': lu},
+                        {'name': 'Edit', 'value': latest_m.get_absolute_url()}]
+
         if user_is_hm(request):
-            meeting[3] = (meeting[3][0], meeting[3][1], '')
-            meeting = meeting[:-1]
+            meeting_data = meeting_data[:-1]
+            meeting_data[3]['value'] = meeting_data[3].get('value').__str__()
+
     else:
-        meeting = [('None', '(so far)')]
+        meeting_data = [{'name': 'None', 'value': '(so far)'}]
+
+    meeting = RowTable(meeting_data, show_header=False)
+    RequestConfig(request).configure(meeting)
 
     sections = [
-        ('Residents', True, house_res),
-        ('Vacant Beds', True, vacant_beds),
-        ('Latest Drug Tests', True, recent_dtests),
-        ('Latest Check-ins', True, recent_check_ins),
-        ('Latest Site Visit', False, visit),
-        ('Latest House Meeting', False, meeting)
+        ('Residents', house_res),
+        ('Vacant Beds', vacant_beds),
+        ('Latest Drug Tests', recent_dtests),
+        ('Latest Check-ins', recent_check_ins),
+        ('Latest Site Visit', visit),
+        ('Latest House Meeting', meeting)
     ]
 
     return render(request, 'admin/singles.html', locals())

@@ -4,20 +4,21 @@ from django.utils import timezone
 from django.db.models import Sum
 from django.db.models import CharField, Model
 
+# TODO add validations (ex. phone number is 10 digits long)
 class Resident(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=10, null=True, blank=True)
-    email = models.EmailField(max_length=62, null=True)
+    phone = models.CharField(max_length=10, blank=True)
+    email = models.EmailField(max_length=62, blank=True)
     admit_date = models.DateField(default=timezone.now)
     rent = models.IntegerField(validators=[MaxValueValidator(1000)])
     bed = models.OneToOneField('Bed', on_delete=models.CASCADE, blank=True, null=True)
-    door_code = models.CharField(max_length=4, null=True, blank=True)
-    referral_info = models.TextField(null=True)
-    notes = models.TextField(null=True)
-    discharge_date = models.DateField(null=True)
+    door_code = models.CharField(max_length=4, blank=True)
+    referral_info = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    discharge_date = models.DateField(blank=True, null=True)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/resident/%i' % self.id
@@ -46,12 +47,12 @@ class Transaction(models.Model):
         # Decrease balance
         ('Rent payment', 'Rent payment'),               # 4
         ('Bonus', 'Bonus'),                             # 5
-        ('Work/reimbursement', 'Work/reimbursement'),   # 6
-        ('Sober support', "Sober support"),             # 7
+        # ('Work/reimbursement', 'Work/reimbursement'),   # 6
+        # ('Sober support', "Sober support"),             # 7
 
         # Increase balance
         ('Fee', 'Fee'),                                 # 8
-        ('Loan', 'Loan'),                               # 9
+        # ('Loan', 'Loan'),                               # 9
 
         # Other
         ('Fix', 'Fix'),                                 # 10
@@ -59,7 +60,7 @@ class Transaction(models.Model):
     ]
     type = models.CharField(max_length=30, blank=True)
     METHOD_CHOICES = [
-        ('', ''),
+        # ('', ''),
         ('ACH', 'ACH'),
         ('Cash', 'Cash'),
         ('Cash App', 'Cash App'),
@@ -70,11 +71,11 @@ class Transaction(models.Model):
         ('Zelle', 'Zelle'),
         ('Other (specify)', 'Other (specify)')
     ]
-    method = models.CharField(max_length=15, blank=True, null=True)
-    notes = models.TextField(null=True)
+    method = models.CharField(max_length=15, blank=True)
+    notes = models.TextField(blank=True)
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/edit_trans/%i' % self.id
@@ -82,11 +83,11 @@ class Transaction(models.Model):
 
 class House(models.Model):
     name = models.CharField(max_length=25)
-    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', null=True)
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', blank=True, null=True)
     address = models.CharField(max_length=50)
     city = models.CharField(max_length=25)
     state = models.CharField(max_length=2)
-    last_update = models.DateTimeField(null=True)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/house/' + self.name
@@ -104,7 +105,7 @@ class Bed(models.Model):
 
 
 class Drug_test(models.Model):
-    date = models.DateField(default=timezone.now, blank=True)
+    date = models.DateField(default=timezone.now, blank=True, null=True)
     RESULT_CHOICES = [
         ('Negative', 'Negative'),
         ('Positive', 'Positive'),
@@ -113,21 +114,11 @@ class Drug_test(models.Model):
         ('Other (Specify)', 'Other (Specify)')
     ]
     result = models.CharField(max_length=17, choices=RESULT_CHOICES)
-
-    substances = models.TextField(null=True)
-
-    # amphetamines = models.BooleanField()
-    # barbiturates = models.BooleanField()
-    # benzodiazepines = models.BooleanField()
-    # cocaine = models.BooleanField()
-    # marijuana = models.BooleanField()
-    # opiates = models.BooleanField()
-    # phencyclidine = models.BooleanField()
-
-    notes = models.CharField(max_length=50, null=True)
+    substances = models.TextField(blank=True)
+    notes = models.CharField(max_length=50, blank=True)
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+    last_update = models.DateTimeField(blank=True,  null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/edit_dtest/%i' % self.id
@@ -141,28 +132,28 @@ class Check_in(models.Model):
         ('Text', 'Text')
     ]
     method = models.CharField(max_length=12, choices=METHOD_CHOICES)
-    notes = models.TextField(null=True)
+    notes = models.TextField(blank=True)
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
     manager = models.ForeignKey('Resident', on_delete=models.CASCADE,
                                 db_column='manager_id', related_name='manager', blank=True, null=True)  # maybe add limit_to() argument
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/edit_check_in/%i' % self.id
 
 
 class Shopping_trip(models.Model):
-    date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
-    amount = models.DecimalField(max_digits=6, decimal_places=2)  #, blank=True, null=True)
-    notes = models.TextField(null=True)
+    date = models.DateTimeField(default=timezone.now)  # automatic
+    amount = models.DecimalField(max_digits=6, decimal_places=2)
+    notes = models.TextField(blank=True)
     
     def get_absolute_url(self):
         return '/portal/shopping_trip/%i' % self.id
 
 
 class Supply_request(models.Model):
-    date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
+    date = models.DateTimeField(default=timezone.now)  # automatic
     PRODUCT_CHOICES = [
         ('ppt', 'Paper towels'),
         ('tpp', 'Toilet paper'),
@@ -190,13 +181,13 @@ class Supply_request(models.Model):
         ('uak', 'UA kits'),
         ('oth', 'Other (specify')
     ]
-    product = models.CharField(max_length=3, choices=PRODUCT_CHOICES, null=True)
-    other = models.CharField(max_length=50, null=True, blank=True)
+    product = models.CharField(max_length=3, choices=PRODUCT_CHOICES, blank=True)
+    other = models.CharField(max_length=50, blank=True)
     quantity = models.IntegerField(validators=[MaxValueValidator(10)])
-    notes = models.TextField(null=True, blank=True)
+    notes = models.TextField(blank=True)
     fulfilled = models.BooleanField()  # automatic
     house = models.ForeignKey('House', on_delete=models.CASCADE)
-    trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE, null=True, blank=True)
+    trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE, blank=True, null=True)
 
     def get_absolute_url(self):
         return '/portal/supply_request/%i' % self.id
@@ -204,12 +195,12 @@ class Supply_request(models.Model):
 
 class Site_visit(models.Model):
     date = models.DateField(default=timezone.now)
-    issues = models.TextField(null=True)
-    explanation = models.TextField(null=True)
+    issues = models.TextField(blank=True)
+    explanation = models.TextField(blank=True)
     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
     house = models.ForeignKey('House', on_delete=models.CASCADE)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/edit_site_visit/%i' % self.id
@@ -217,11 +208,11 @@ class Site_visit(models.Model):
 
 class House_meeting(models.Model):
     date = models.DateField(default=timezone.now)
-    issues = models.TextField(null=True)
+    issues = models.TextField(blank=True)
     house = models.ForeignKey('House', on_delete=models.CASCADE)
     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/edit_house_meeting/%i' % self.id
@@ -232,16 +223,16 @@ class Absentee(models.Model):
     meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  # automatic
 
 
-# TODO (wait) ask TC if she's still doing manager meetings
+# TODO (wait) ask TC if the app needs a section for manager meetings
 class Manager_meeting(models.Model):
     title = models.CharField(max_length=150)
-    issues = models.TextField(null=True)
-    date = models.DateField(default=timezone.now)  #blank=True, null=True)
+    issues = models.TextField(blank=True)
+    date = models.DateField(default=timezone.now)
     location = models.CharField(max_length=50)
-    attendee = models.TextField(null=True)
+    attendee = models.TextField(blank=True)
     minutes_discussed = models.BooleanField()
-    submission_date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
-    last_update = models.DateTimeField(null=True)  # automatic
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
         return '/portal/meeting/%i' % self.id

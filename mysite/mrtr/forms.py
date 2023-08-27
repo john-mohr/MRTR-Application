@@ -22,9 +22,9 @@ class BedField(forms.ModelChoiceField):
 
 
 class ResidentForm(forms.ModelForm):
-    phone = forms.IntegerField(validators=[MaxValueValidator(9999999999)], required=False)
+    phone = forms.CharField(widget=forms.NumberInput, required=False)
     email = forms.EmailField(max_length=62, required=False)
-    door_code = forms.IntegerField(validators=[MaxValueValidator(9999)], required=False)
+    door_code = forms.CharField(widget=forms.NumberInput, required=False)
     referral_info = forms.CharField(required=False)
     notes = forms.CharField(widget=forms.Textarea, required=False)
     occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
@@ -34,14 +34,14 @@ class ResidentForm(forms.ModelForm):
     # Allows selection of resident's current bed and removes rent field for editing
     def __init__(self, *args, **kwargs):
         super(ResidentForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:  # edit and readmit
+        if 'instance' in kwargs:  # edit or readmit
             res = kwargs.pop('instance')
             if res.discharge_date is None:  # edit
                 edit_beds = self.occupied_beds.exclude(pk=res.pk)
                 self.fields['bed'].queryset = Bed.objects.exclude(id__in=edit_beds.values_list('bed_id', flat=True))
             else:  # readmit
-                self.fields['admit_date'].label = 'Readmission date'
-                del self.fields['effective_date']
+                self.fields['effective_date'].label = 'Readmission date'
+                del self.fields['admit_date']
         else:  # new
             del self.fields['effective_date']
 
@@ -77,7 +77,7 @@ class ResidentField(forms.ModelChoiceField):
 
 class TransactionForm(forms.ModelForm):
     type = forms.ChoiceField(choices=Transaction.TYPE_CHOICES[5:])
-    resident = ResidentField(queryset=Resident.objects.all())
+    resident = ResidentField(queryset=Resident.objects.all().order_by('first_name'))
     notes = forms.CharField(widget=forms.Textarea, required=False)
 
     class Meta:
@@ -94,8 +94,8 @@ class TransactionForm(forms.ModelForm):
 
 
 class RentPaymentForm(forms.ModelForm):
-    method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
-    resident = ResidentField(queryset=Resident.objects.all())
+    method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=True)
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'))
     notes = forms.CharField(widget=forms.Textarea, required=False)
 
     class Meta:
@@ -113,7 +113,7 @@ class RentPaymentForm(forms.ModelForm):
 
 class AdjustBalanceForm(forms.ModelForm):
     # method = forms.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
-    resident = ResidentField(queryset=Resident.objects.all())
+    resident = ResidentField(queryset=Resident.objects.all().order_by('first_name'))
     notes = forms.CharField(widget=forms.Textarea, required=False)
 
     class Meta:
@@ -136,10 +136,8 @@ class HouseField(forms.ModelChoiceField):
 
 
 class HouseForm(forms.ModelForm):
-    current_HMs = House.objects.all().filter(manager_id__isnull=False).distinct()
     manager = ResidentField(
-        # queryset=Resident.objects.exclude(id__in=current_HMs.values_list('manager_id', flat=True)), required=False)
-        queryset=Resident.objects.all(), required=False)
+        queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'), required=False)
 
     class Meta:
         model = House
@@ -149,6 +147,12 @@ class HouseForm(forms.ModelForm):
                   'city',
                   'state',
                   ]
+
+    def __init__(self, *args, **kwargs):
+        house = kwargs.pop('house', None)
+        super(HouseForm, self).__init__(*args, **kwargs)
+        house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=house).order_by('first_name')
+        self.fields['manager'].queryset = house_res
 
 
 class ManagerMeetingForm(forms.ModelForm):
@@ -190,7 +194,7 @@ class SupplyRequestForm(forms.ModelForm):
 #     type = forms.ChoiceField(choices=TYPE_CHOICES)
 #     method = forms.ChoiceField(choices=METHOD_CHOICES, required=False)
 #     notes = forms.CharField(widget=forms.Textarea, required=False)
-#     resident = ResidentField(queryset=Resident.objects.all())
+#     resident = ResidentField(queryset=Resident.objects.all().order_by('first_name'))
 #
 #     def get_form_class(self):
 #         if self.object.type != 'pmt':
@@ -211,7 +215,7 @@ class SupplyRequestForm(forms.ModelForm):
 #
 #
 class DrugTestForm(forms.ModelForm):
-    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'))
     notes = forms.CharField(required=False)
 
     SUBSTANCES = (
@@ -236,13 +240,6 @@ class DrugTestForm(forms.ModelForm):
                   'result',
                   'substances',
                   'notes',
-                  # 'amphetamines',
-                  # 'barbiturates',
-                  # 'benzodiazepines',
-                  # 'cocaine',
-                  # 'marijuana',
-                  # 'opiates',
-                  # 'phencyclidine',
                   ]
         widgets = {
             'date': DateInput(),
@@ -258,14 +255,12 @@ class DrugTestForm(forms.ModelForm):
         hm_house = kwargs.pop('house', None)
         super(DrugTestForm, self).__init__(*args, **kwargs)
         if is_hm:
-            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house)
+            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house).order_by('first_name')
             self.fields['resident'].queryset = house_res
 
 
 class CheckInForm(forms.ModelForm):
-    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True))
-    # house_managers = House.objects.all().filter(manager_id__isnull=False).distinct()
-    # manager = ResidentField(queryset=Resident.objects.filter(id__in=house_managers.values_list('manager_id', flat=True)))
+    resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'))
     method = forms.ChoiceField(choices=Check_in.METHOD_CHOICES)
     notes = forms.CharField(widget=forms.Textarea, required=False)
 
@@ -287,7 +282,7 @@ class CheckInForm(forms.ModelForm):
         hm_house = kwargs.pop('house', None)
         super(CheckInForm, self).__init__(*args, **kwargs)
         if is_hm:
-            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house)
+            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house).order_by('first_name')
             self.fields['resident'].queryset = house_res
 
 
@@ -331,12 +326,16 @@ class AbsenteeField(forms.ModelMultipleChoiceField):
         return obj.full_name()
 
 
+class HouseSelectForm(forms.Form):
+    name = 'house select'
+    house = HouseField(queryset=House.objects.all())
+
 class HouseMeetingForm(forms.ModelForm):
+    name = 'house meeting'
     absentees = AbsenteeField(widget=forms.CheckboxSelectMultiple,
+                              # queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'),
                               queryset=Resident.objects.all(),
                               required=False)
-
-    house = HouseField(queryset=House.objects.all())
     issues = forms.CharField(widget=forms.Textarea, required=False, label='Issues discussed')
 
     class Meta:
@@ -349,37 +348,14 @@ class HouseMeetingForm(forms.ModelForm):
                   ]
         widgets = {
             'date': DateInput(),
-            'manager': forms.HiddenInput()
+            'manager': forms.HiddenInput(),
+            'house': forms.HiddenInput()
+
         }
 
     def __init__(self, *args, **kwargs):
-        is_hm = kwargs.pop('is_hm', None)
         hm_house = kwargs.pop('house', None)
         super(HouseMeetingForm, self).__init__(*args, **kwargs)
-        if is_hm:
-            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house)
-            self.fields['absentees'].queryset = house_res
+        house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house).order_by('first_name')
+        self.fields['absentees'].queryset = house_res
 
-
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.fields['absentees'].queryset = Resident.objects.none()
-    #
-    #     if 'house' in self.data:
-    #         print(int(self.data.get('house')))
-    #         try:
-    #             l_house = int(self.data.get('house'))
-    #             print(l_house)
-    #             print(list(Resident.objects.filter(bed__house_id=l_house).values_list()))
-    #             self.fields['absentees'].queryset = Resident.objects.filter(bed__house_id=l_house).order_by('first_name')
-    #         except (ValueError, TypeError):
-    #             pass
-    #     elif self.instance.pk:
-    #         self.fields['absentees'].queryset = Resident.objects.all()
-
-
-# # May be unnecessary, could add/edit/delete from console instead
-# class BedForm:
-#     x = ''
-#
-#

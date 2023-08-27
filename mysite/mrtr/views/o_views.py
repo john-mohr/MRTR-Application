@@ -95,21 +95,19 @@ def portal(request):
                    ('Adjust Balance', '/portal/new_trans')]
 
         occupied_beds = Resident.objects.all().filter(bed_id__isnull=False).distinct()
-        vacant_beds = BedTable(
-            Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True)),
-            order_by='house', orderable=True, exclude=('id', 'resident', ))
-        RequestConfig(request).configure(vacant_beds)
+        beds_qs = Bed.objects.exclude(id__in=occupied_beds.values_list('bed_id', flat=True))
+        vacant_beds = BedTable(beds_qs, order_by='house', orderable=True,
+                               exclude=('id', 'resident', ))
+        RequestConfig(request, paginate=False).configure(vacant_beds)
 
-        qs = Resident.objects.annotate(
+        balances_qs = Resident.objects.annotate(
             balance=Sum('transaction__amount'),
             full_name=Concat('first_name', Value(' '), 'last_name'))
-
-        table_filter = ResidentBalanceFilter(request.GET, queryset=qs)
-
+        table_filter = ResidentBalanceFilter(request.GET, queryset=balances_qs)
         res_balances = ShortResidentsTable(table_filter.qs, order_by='-balance', orderable=True,
                                            exclude=('rent', 'bed', 'door_code'))
+        RequestConfig(request, paginate=False).configure(res_balances)
 
-        RequestConfig(request).configure(res_balances)
         return render(request, 'admin/admin_portal.html', locals())
 
 

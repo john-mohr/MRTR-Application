@@ -40,22 +40,7 @@
         {% for x in sections %}
             <section>
                 <h2>{{ x.0 }}</h2>
-                {% if x.1 %}
-                    {% render_table x.2 %}
-                {% else %}
-                    <table>
-                        {% for y in x.2 %}
-                            <tr>
-                                <th>{{y.0}}</th>
-                                <td>
-                                    <a{{ y.2 }}>
-                                        {{y.1}}
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                {% endif %}
+                {% render_table x.1 %}
             </section>
         {% endfor %}
     </body>
