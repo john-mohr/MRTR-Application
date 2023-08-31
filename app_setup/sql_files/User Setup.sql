@@ -13,8 +13,8 @@ SET manager_id = 7
 WHERE name = '277';
 
 UPDATE custom_user_user
-SET first_name = 'Tracy', last_name = 'DeHaas', assoc_resident_id = 3
-WHERE email = 't.dehaas@mrtr.com';
+SET first_name = 'Fritz', last_name = 'Schuppe', assoc_resident_id = 3
+WHERE email = 'test@gmail.com';
 
 UPDATE mrtr_house
 SET manager_id = 3
