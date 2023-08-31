@@ -1,0 +1,44 @@
+|First Name|Last Name|Phone Number|Email|Admission Date|Monthly Rent|Referral Info|Notes|Door Code|Discharge Date|bed_id|submission_date
+1|Johnathon|Heller||test@gmail.com|2023-06-04|700.0||"Sync Error
+Last bed: 620-UE"||2023-07-07 00:00:00|\N|2023-08-13 12:00:00
+2|Porter|Smith||test@gmail.com|2023-03-02|700.0|Journey |"SF 800
+S2H 120 
+Last bed: 278-D2"|1234|2023-05-12 00:00:00|\N|2023-08-13 12:00:00
+3|Fritz|Schuppe|8015555555|test@gmail.com|2021-09-19|350.0||rent $650 > $350 not sure when|1234|\N|10.0|2023-08-13 12:00:00
+4|Tavares|Eichmann|8015555555|test@gmail.com|2022-08-25|700.0|Courtney|Old phone number: 444|1234|\N|11.0|2023-08-13 12:00:00
+5|Dariana|Prohaska||test@gmail.com|2023-04-25|700.0|Journey|"Old bed: 620-UE
+6/7/23 rent $900 > $700
+Last bed: 620-D1"|1234|2023-08-01 00:00:00|\N|2023-08-13 12:00:00
+6|Sharon|Balistreri|8015555555|test@gmail.com|2023-02-19|700.0||Old bed: 620-D3|1234|\N|15.0|2023-08-13 12:00:00
+7|Lamont|Breitenberg|8015555555|test@gmail.com|2022-08-07|450.0||"Old bed: 512-U
+Rent $700 > $450 not sure when
+Old door code(?): 5432"|1234|\N|2.0|2023-08-13 12:00:00
+8|Rylee|Windler||test@gmail.com|2022-10-14|700.0|SLBH|Old bed: 512-DW2|1234|\N|3.0|2023-08-13 12:00:00
+9|Domenico|Von||test@gmail.com|2022-09-17|900.0|Tina|Old bed: 278-US|1234|\N|8.0|2023-08-13 12:00:00
+10|Chaya|Cummerata|8015555555|test@gmail.com|2022-12-06|800.0|Journey|Old bed: 278-D2|1234|\N|9.0|2023-08-13 12:00:00
+11|Eulah|Douglas||test@gmail.com|2022-11-25|700.0||Old bed: 277-U2|1234|2023-05-06 00:00:00|\N|2023-08-13 12:00:00
+12|Maverick|Hintz||test@gmail.com|2023-01-29|700.0||Last bed: 620-D2|1234|2023-07-07 00:00:00|\N|2023-08-13 12:00:00
+13|Lottie|Lockman||test@gmail.com|2023-06-08|700.0||Last bed: 620-D1|1234|2023-06-11 00:00:00|\N|2023-08-13 12:00:00
+14|Roberta|Sipes|8015555555|test@gmail.com|2022-06-13|450.0|Dustin W|"Last bed: 514-DW2
+Discharged 8/6/22, readmitted 11/23/22
+Rent $700 > $450 not sure when"|1234|\N|19.0|2023-08-13 12:00:00
+15|Ellsworth|Grady|8015555555|test@gmail.com|2023-02-14|700.0|Cirque|Last bed: 278-D1||2023-06-10 00:00:00|\N|2023-08-13 12:00:00
+16|Shirley|Treutel|8015555555|test@gmail.com|2023-05-03|900.0||Last bed: 277-U2|1234|2023-06-22 00:00:00|\N|2023-08-13 12:00:00
+17|Keaton|Smitham|8015555555|test@gmail.com|2023-04-16|700.0||Last bed: 277-U2|1234|2023-05-03 00:00:00|\N|2023-08-13 12:00:00
+18|Kattie|Kreiger|8015555555|test@gmail.com|2022-04-24|700.0|FSH|Discharged 6/8/22, readmitted 5/3/23|1234|\N|6.0|2023-08-13 12:00:00
+19|Theodore|Stokes|8015555555|test@gmail.com|2021-08-20|900.0||"Discharged 12-31-21 w/ rent = $750
+Readmitted 1-17-23 w/ rent = $900
+Never showed
+Readmitted 6-22-23 w/ rent = $900"|1234|\N|4.0|2023-08-13 12:00:00
+20|Robbie|Hammes|8015555555|test@gmail.com|2023-01-23|700.0||"Bishop McDougal
+Last bed: 620-D1"|1234|2023-05-12 00:00:00|\N|2023-08-13 12:00:00
+21|Markus|Adams|8015555555|test@gmail.com|2022-01-01|900.0|Turning Point|"12/13/22:
+New bed 278-D2 > 278-D
+New rent $700 > $900"|1234|\N|12.0|2023-08-13 12:00:00
+22|Ricky|Abbott|8015555555|test@gmail.com|2023-07-12|700.0|||1234|\N|16.0|2023-08-13 12:00:00
+23|Prudence|Boyer|8015555555|test@gmail.com|2023-03-30|900.0|||1234|\N|5.0|2023-08-13 12:00:00
+24|Holden|Lueilwitz|8015555555|test@gmail.com|2023-04-25|900.0|Journey||1234|\N|18.0|2023-08-13 12:00:00
+25|Hassan|Johnston|8015555555|test@gmail.com|2023-05-03|700.0|Moroni||1234|\N|7.0|2023-08-13 12:00:00
+26|Scottie|Goyette|8015555555|test@gmail.com|2023-05-17|700.0|Journey ||1234|\N|14.0|2023-08-13 12:00:00
+27|Marielle|Olson|8015555555|test@gmail.com|2023-06-08|900.0|||1234|\N|17.0|2023-08-13 12:00:00
+28|Dallas|Quigley|8015555555|test@gmail.com|2023-03-29|700.0|DBH - Meia||1234|\N|22.0|2023-08-13 12:00:00
