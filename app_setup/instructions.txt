@@ -6,7 +6,7 @@
 
 	Email addresses:
 		e.gray@mrtr.com
-		t.dehaas@mrtr.com
+		test@gmail.com
 		b.chesley@mrtr.com
 
 	Password:
