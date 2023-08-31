@@ -12,7 +12,7 @@ LINES TERMINATED BY '\r\n'
 IGNORE 1 LINES
 (id, name, house_id);
 
-LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/residents.csv"
+LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/residents_fake.csv"
 INTO TABLE mrtr_resident
 FIELDS TERMINATED BY '|'
 LINES TERMINATED BY '\r\n'
@@ -47,7 +47,7 @@ LINES TERMINATED BY '\r\n'
 IGNORE 1 LINES
 (id, date, issues, explanation, manager_id, house_id, submission_date);
 
-LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/house_meetings.csv"
+LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/house_meetings_fake.csv"
 INTO TABLE mrtr_house_meeting
 FIELDS TERMINATED BY '|'
 LINES TERMINATED BY '\r\n'
