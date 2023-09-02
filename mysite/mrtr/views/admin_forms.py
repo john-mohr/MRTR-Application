@@ -327,37 +327,7 @@ def edit_house(request, house_id):
             return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
-# New Supply Request
-def new_supply_request(request):
-    page = 'Add New Supply Request'
-    fullname = username(request)
-    form = SupplyRequestForm()
-    if request.method == 'POST':
-        sub = SupplyRequestForm(request.POST)
-        if sub.is_valid():
-            sub.save()
-    return render(request, 'admin/forms.html', locals())
-
-
-def edit_supply_request(request, id):
-    page = 'Edit Supply_Request'
-    fullname = username(request)
-
-    supply_request = Supply_request.objects.get(id=id)
-    form = SupplyRequestForm(instance=supply_request)
-    if request.method == 'POST':
-        sub = SupplyRequestForm(request.POST, instance=supply_request)
-        if sub.is_valid():
-            sub.save()
-            supply_request.last_update = timezone.now()
-            supply_request.save()
-            return render(request, 'admin/forms.html', locals())
-        else:
-            form = SupplyRequestForm(instance=supply_request)
-    return render(request, 'admin/forms.html', locals())
-
-#New Shopping Trip 
-
+#New Shopping Trip
 def new_shopping_trip(request):
     page = 'Add New Shopping Trip'
     fullname = username(request)
@@ -367,7 +337,7 @@ def new_shopping_trip(request):
         if sub.is_valid():
             sub.save()
             currentTrip = Shopping_trip.objects.latest('id')
-            supplies = Supply_request.objects.filter(fulfilled= False)
+            supplies = Supply_request.objects.filter(fulfilled=False)
             for supply in supplies:
                 supply.trip = currentTrip
                 supply.fulfilled= True
@@ -391,4 +361,29 @@ def edit_shopping_trip(request, id):
             form = ShoppingTripForm(instance=shopping_trip)
     return render(request, 'admin/forms.html', locals())
 
+
+def complete_shopping_trip(request):
+    page = 'Complete shopping trip'
+    fullname = username(request)
+    sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
+    latest_st = Shopping_trip.objects.get(date__isnull=True)
+
+    form = ShoppingTripForm(instance=latest_st, initial={'date': timezone.now()})
+
+    if request.method == 'POST':
+        sub = ShoppingTripForm(request.POST, instance=latest_st)
+        if sub.is_valid():
+            sub.save()
+            latest_st.last_update = timezone.now()
+            latest_st.save()
+
+            new_st = Shopping_trip()
+            new_st.save()
+
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
+    return render(request, 'admin/forms.html', locals())
 

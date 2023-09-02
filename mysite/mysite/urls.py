@@ -80,15 +80,17 @@ urlpatterns = [
     path('portal/site_visits', tables.site_visits),
 
     # Supply Request
-    path('portal/new_supply_request', admin_forms.new_supply_request),
-    path('portal/edit_supply_request/<int:id>', admin_forms.edit_supply_request),
+    path('portal/new_supply_request', hm_forms.new_supply_request),
+    path('portal/edit_supply_request/<int:sr_id>', hm_forms.edit_supply_request),
     path('portal/supply_requests', tables.supply_requests),
 
     # Shopping Trip
     path('portal/new_shopping_trip', admin_forms.new_shopping_trip),
-    path('portal/edit_shopping_trip/<int:id>', admin_forms.edit_shopping_trip),
+    path('portal/edit_shopping_trip/<int:trip_id>', admin_forms.edit_shopping_trip),
+    path('portal/complete_shopping_trip', admin_forms.complete_shopping_trip),
     path('portal/shopping_trips', tables.shopping_trips),
-    path('portal/shopping_trip/<int:id>', singles.single_shopping_trip),
+    path('portal/current_shopping_trip', singles.single_shopping_trip),
+    path('portal/shopping_trip/<int:trip_id>', singles.single_shopping_trip),
 
     # # House Manager Page
     # path('portal/house_manager/', o_views.house_manager),

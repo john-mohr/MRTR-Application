@@ -43,7 +43,10 @@ class ResidentFilter(MasterFilter):
         'phone',
         'email',
         'bed__name',
-        'bed__house__name'
+        'bed__house__name',
+        'door_code',
+        'referral_info',
+        'notes'
     ]
 
     date = None
@@ -181,16 +184,13 @@ class ManagerMeetingFilter(MasterFilter):
         fields = ['search', 'date']
 
 
+# TODO add boolean filter for fulfilled
 class SupplyRequestFilter(MasterFilter):
     field_list = [
-          'id',
-          'fulfilled',
-          'date',
-          'product',
-          'quantity',
-          'notes',
-          'house',
-          'trip',
+        'house__name',
+        'products',
+        'other',
+        'trip',
         ]
 
     class Meta:
@@ -199,6 +199,7 @@ class SupplyRequestFilter(MasterFilter):
 
 
 class ShoppingTripFilter(MasterFilter):
+    product = filters
     field_list = [
           'id',
           'date',

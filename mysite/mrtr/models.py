@@ -144,53 +144,54 @@ class Check_in(models.Model):
 
 
 class Shopping_trip(models.Model):
-    date = models.DateTimeField(default=timezone.now)  # automatic
-    amount = models.DecimalField(max_digits=6, decimal_places=2)
+    date = models.DateTimeField(null=True)  # automatic
+    amount = models.DecimalField(max_digits=6, decimal_places=2, null=True)
     notes = models.TextField(blank=True)
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
     
     def get_absolute_url(self):
         return '/portal/shopping_trip/%i' % self.id
 
 
+# TODO Maybe add manager field
 class Supply_request(models.Model):
-    date = models.DateTimeField(default=timezone.now)  # automatic
     PRODUCT_CHOICES = [
-        ('ppt', 'Paper towels'),
-        ('tpp', 'Toilet paper'),
-        ('ldt', 'Laundry detergent'),
-        ('diw', 'Disinfectant wipes'),
-        ('kgb', 'Garbage bags - kitchen'),
-        ('ygb', 'Garbage bags - yard'),
-        ('dso', 'Dish soap'),
-        ('dwd', 'Dishwashing detergent'),
-        ('dsp', 'Dish sponges'),
-        ('glc', 'Glass cleaner'),
-        ('apc', 'All-purpose cleaner'),
-        ('spb', 'Spray bottle'),
-        ('swp', 'Swiffer pads'),
-        ('sst', 'Sheet set - twin'),
-        ('ssf', 'Sheet set - full'),
-        ('cmt', 'Comforter - twin'),
-        ('cmf', 'Comforter - full'),
-        ('plw', 'Pillow'),
-        ('sol', 'Sign-out logs'),
-        ('vil', 'Visitor logs'),
-        ('ilr', 'Itinerary/leave request forms'),
-        ('bmd', 'B Mod Forms'),
-        ('ech', 'Meds/emergency contact sheets'),
-        ('uak', 'UA kits'),
-        ('oth', 'Other (specify')
+        ('Paper towels', 'Paper towels'),
+        ('Toilet paper', 'Toilet paper'),
+        ('Laundry detergent', 'Laundry detergent'),
+        ('Disinfectant wipes', 'Disinfectant wipes'),
+        ('Garbage bags - kitchen', 'Garbage bags - kitchen'),
+        ('Garbage bags - yard', 'Garbage bags - yard'),
+        ('Dish soap', 'Dish soap'),
+        ('Dishwashing detergent', 'Dishwashing detergent'),
+        ('Dish sponges', 'Dish sponges'),
+        ('Glass cleaner', 'Glass cleaner'),
+        ('All-purpose cleaner', 'All-purpose cleaner'),
+        ('Spray bottle', 'Spray bottle'),
+        ('Swiffer pads', 'Swiffer pads'),
+        ('Sheet set - twin', 'Sheet set - twin'),
+        ('Sheet set - full', 'Sheet set - full'),
+        ('Comforter - twin', 'Comforter - twin'),
+        ('Comforter - full', 'Comforter - full'),
+        ('Pillow', 'Pillow'),
+        ('Sign-out logs', 'Sign-out logs'),
+        ('Visitor logs', 'Visitor logs'),
+        ('Itinerary/leave request forms', 'Itinerary/leave request forms'),
+        ('B Mod Forms', 'B Mod Forms'),
+        ('Meds/emergency contact sheets', 'Meds/emergency contact sheets'),
+        ('UA kits', 'UA kits'),
+        ('Other', 'Other')
     ]
-    product = models.CharField(max_length=3, choices=PRODUCT_CHOICES, blank=True)
+    products = models.TextField(blank=True)
     other = models.CharField(max_length=50, blank=True)
-    quantity = models.IntegerField(validators=[MaxValueValidator(10)])
-    notes = models.TextField(blank=True)
     fulfilled = models.BooleanField()  # automatic
     house = models.ForeignKey('House', on_delete=models.CASCADE)
     trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE, blank=True, null=True)
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
 
     def get_absolute_url(self):
-        return '/portal/supply_request/%i' % self.id
+        return '/portal/edit_supply_request/%i' % self.id
 
 
 class Site_visit(models.Model):

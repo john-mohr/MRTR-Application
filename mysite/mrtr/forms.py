@@ -155,65 +155,6 @@ class HouseForm(forms.ModelForm):
         self.fields['manager'].queryset = house_res
 
 
-class ManagerMeetingForm(forms.ModelForm):
-    class Meta:
-        model = Manager_meeting
-        fields = ['title',
-                  'date',
-                  'minutes_discussed',
-                  'location',
-                  'attendee',
-                  'issues',
-                 ]
-        widgets = {
-            'date': DateInput(),
-        }
-
-class ShoppingTripForm(forms.ModelForm):
-    class Meta:
-        model = Shopping_trip
-        fields = ['date',
-                  'amount',
-                  'notes',
-                  ]
-        
-class SupplyRequestForm(forms.ModelForm):
-    class Meta:
-        model = Supply_request
-        fields = ['date',
-                  'product',
-                  'quantity',
-                  'notes',
-                  'fulfilled',
-                  'house',
-                  'trip',
-                  ]
-
-# class NewPaymentForm(forms.ModelForm):
-#
-#     type = forms.ChoiceField(choices=TYPE_CHOICES)
-#     method = forms.ChoiceField(choices=METHOD_CHOICES, required=False)
-#     notes = forms.CharField(widget=forms.Textarea, required=False)
-#     resident = ResidentField(queryset=Resident.objects.all().order_by('first_name'))
-#
-#     def get_form_class(self):
-#         if self.object.type != 'pmt':
-#             return TransactionForm
-#
-#     class Meta:
-#         model = Transaction
-#         fields = ['resident',
-#                   'date',
-#                   'type',
-#                   'amount',
-#                   'method',
-#                   'notes',
-#                   ]
-#         widgets = {
-#             'date': DateInput(),
-#         }
-#
-#
 class DrugTestForm(forms.ModelForm):
     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'))
     notes = forms.CharField(required=False)
@@ -350,7 +291,6 @@ class HouseMeetingForm(forms.ModelForm):
             'date': DateInput(),
             'manager': forms.HiddenInput(),
             'house': forms.HiddenInput()
-
         }
 
     def __init__(self, *args, **kwargs):
@@ -358,4 +298,84 @@ class HouseMeetingForm(forms.ModelForm):
         super(HouseMeetingForm, self).__init__(*args, **kwargs)
         house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house).order_by('first_name')
         self.fields['absentees'].queryset = house_res
+
+
+class ShoppingTripForm(forms.ModelForm):
+    class Meta:
+        model = Shopping_trip
+        fields = ['date',
+                  'amount',
+                  'notes',
+                  ]
+        widgets = {
+            'date': DateInput()
+        }
+
+
+class SupplyRequestForm(forms.ModelForm):
+    products = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                         choices=Supply_request.PRODUCT_CHOICES,
+                                         required=False)
+
+    class Meta:
+        model = Supply_request
+        fields = ['house',
+                  'products',
+                  'fulfilled',
+                  'trip'
+                  ]
+        widgets = {
+            'fulfilled': forms.HiddenInput,
+            'trip': forms.HiddenInput
+        }
+
+
+class ProductForm(forms.Form):
+    temp1 = forms.IntegerField(widget=forms.HiddenInput,
+                               required=False)
+    temp2 = forms.CharField(widget=forms.HiddenInput,
+                            required=False)
+
+    def __init__(self, *args, **kwargs):
+        products = kwargs.pop('products', None)
+        if 'quants' in kwargs:
+            quants = kwargs.pop('quants', None)
+        else:
+            quants = None
+        super(ProductForm, self).__init__(*args, **kwargs)
+        amounts = [
+            ('1', 1),
+            ('2', 2)
+        ]
+        for i in range(len(products)):
+            if quants is not None:
+                if products[i] == 'Other':
+                    self.fields['other'] = forms.CharField(label='Other (explain & give quantity)',
+                                                           initial=quants[i])
+                else:
+                    self.fields[products[i]] = forms.ChoiceField(label='Quantity of ' + str(products[i]).lower(),
+                                                                 choices=amounts,
+                                                                 initial=quants[i])
+
+            else:
+                if products[i] == 'Other':
+                    self.fields['other'] = forms.CharField(label='Other (explain & give quantity)')
+                else:
+                    self.fields[products[i]] = forms.ChoiceField(label='Quantity of ' + str(products[i]).lower(),
+                                                                 choices=amounts)
+
+
+class ManagerMeetingForm(forms.ModelForm):
+    class Meta:
+        model = Manager_meeting
+        fields = ['title',
+                  'date',
+                  'minutes_discussed',
+                  'location',
+                  'attendee',
+                  'issues',
+                 ]
+        widgets = {
+            'date': DateInput(),
+        }
 

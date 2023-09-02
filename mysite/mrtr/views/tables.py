@@ -130,22 +130,19 @@ def house_meetings(request):
     return table_view(request, 'house_meetings', 'View All House Meetings', table_filter, table, 'Add New House Meeting', 'new_house_meeting')
 
 
-def meetings(request):
-    qs = Manager_meeting.objects.all()
-
-    table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
-
-    table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True)
-    return table_view(request, 'View All Meetings', table_filter, table, 'Add New Meeting', 'new_meeting')
-
-
 def supply_requests(request):
-    qs = Supply_request.objects.all()
+    if user_is_hm(request):
+        mngr = User.objects.get(pk=request.user.pk).assoc_resident
+        qs = Supply_request.objects.filter(house=House.objects.get(manager=mngr))
+        hm_exc = ('id', 'house', 'trip')
+    else:
+        qs = Supply_request.objects.all()
+        hm_exc = ''
 
     table_filter = SupplyRequestFilter(request.GET, queryset=qs)
 
-    table = SupplyRequestTable(table_filter.qs, order_by='-date', orderable=True)
-    return table_view(request, 'View All Supply Requests', table_filter, table, 'Add New Supply Request', 'new_supply_request')
+    table = SupplyRequestTable(table_filter.qs, order_by='-submission_date', orderable=True, exclude=hm_exc)
+    return table_view(request, 'supply_requests', 'View All Supply Requests', table_filter, table, 'Add New Supply Request', 'new_supply_request')
 
 
 def shopping_trips(request):
@@ -154,5 +151,14 @@ def shopping_trips(request):
     table_filter = ShoppingTripFilter(request.GET, queryset=qs)
 
     table = ShoppingTripTable(table_filter.qs, order_by='-date', orderable=True)
-    return table_view(request, 'View All Shopping Trips', table_filter, table, 'Add New Shopping Trip', 'new_shopping_trip')
+    return table_view(request, 'shopping_trips', 'View All Shopping Trips', table_filter, table, 'Add New Shopping Trip', 'new_shopping_trip')
+
+def meetings(request):
+    qs = Manager_meeting.objects.all()
+
+    table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
+
+    table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True)
+    return table_view(request, 'View All Meetings', table_filter, table, 'Add New Meeting', 'new_meeting')
+
 

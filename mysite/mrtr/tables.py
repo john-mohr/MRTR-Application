@@ -224,19 +224,32 @@ class HouseMeetingTable(tables.Table):
 
 
 class SupplyRequestTable(tables.Table):
-    id = tables.Column(linkify=True)
+    id = tables.Column(verbose_name='', linkify=True)
+    house = tables.Column(linkify=True)
+    products = tables.Column(verbose_name='Products requested')
+    other = tables.Column(verbose_name='Other requests')
+    # TODO linkify trip column
+    trip = tables.Column(verbose_name='Shopping trip')
 
     class Meta:
         model = Supply_request
         sequence = ('id',
                     'fulfilled',
-                    'date',
-                    'product',
-                    'quantity',
-                    'notes',
-                    'house',
-                    # 'trip',
+                    'house'
                     )
+
+    def render_id(self, value):
+        return f"Edit"
+
+    def render_products(self, value):
+        value = value[2:-1].replace("', ", " (Qty: ").replace(", (", ", ").replace("'", "")
+        return value
+
+
+class ShoppingListTable(tables.Table):
+    product = tables.Column()
+    quantity = tables.Column()
+
 
 class ShoppingTripTable(tables.Table):
     id = tables.Column(linkify=True)

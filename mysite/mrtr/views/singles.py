@@ -7,6 +7,11 @@ from django.db.models import Value, Sum
 from ..filters import *
 from django_tables2 import RequestConfig
 
+import collections, functools, operator
+
+from collections import Counter
+from itertools import groupby
+
 def resident(request, res_id):
     res = Resident.objects.get(id=res_id)
 
@@ -248,12 +253,42 @@ def house(request, house_id):
     return render(request, 'admin/singles.html', locals())
 
 # TODO finish implementing
-def single_shopping_trip(request, id):
-    page = 'Individual Shopping Trip'
+def single_shopping_trip(request):
+    latest_st = Shopping_trip.objects.get(date__isnull=True)
+
+    name = 'Upcoming Shopping Trip'
+    page = 'View Single Shopping Trip'
     fullname = username(request)
-    shoppingtrip = Shopping_trip.objects.get(id=id)
-    qs = Supply_request.objects.filter(trip=shoppingtrip)
-    buttons = [('Edit info', '/portal/edit_shopping_trip/' + str(id))]
-    table_filter = SupplyRequestFilter(request.GET, queryset=qs)
-    table = SupplyRequestTable(table_filter.qs)
+    sidebar = admin_sidebar
+
+    buttons = [('Complete shopping trip', '/portal/complete_shopping_trip')]
+
+    re_qs = Supply_request.objects.filter(trip=latest_st)
+
+    # TODO collect request house to create a delivery list (sum quantity group by product and house)
+    if len(re_qs) > 0:
+        sr_data = []
+        for i in Supply_request.objects.filter(trip=latest_st):
+            for j in list(eval(i.products)):
+                ele = {j[0]: j[1]}
+                sr_data.append(ele)
+        prod_quant = dict(functools.reduce(operator.add, map(collections.Counter, sr_data)))
+
+        table_data = []
+        keys = list(prod_quant.keys())
+        values = list(prod_quant.values())
+        for i in range(len(prod_quant)):
+            ele = {'product': keys[i], 'quantity': values[i]}
+            table_data.append(ele)
+    else:
+        table_data = [{'product': None, 'quantity': None}]
+
+    sl_table = ShoppingListTable(table_data)
+
+    sr_table = SupplyRequestTable(re_qs, exclude=['trip', 'fulfilled'])
+
+    sections = [
+        ('Shopping list', sl_table),
+        ('Supply requests', sr_table)
+    ]
     return render(request, 'admin/singles.html', locals())
