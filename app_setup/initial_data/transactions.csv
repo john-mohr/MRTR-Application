@@ -1,0 +1,218 @@
+|Date of Transaction|amount|Select Type|Method|Notes|res_id|submission_date
+1|2023-08-08|-500.0|Rent payment|Cash||4|2023-08-13 12:00:00
+2|2023-07-18|-350.0|Rent payment|Cash||4|2023-08-13 12:00:00
+3|2023-07-04|-350.0|Rent payment|Cash||4|2023-08-13 12:00:00
+4|2023-06-15|-350.0|Rent payment|Cash App||4|2023-08-13 12:00:00
+5|2023-06-01|-350.0|Rent payment|Cash App||4|2023-08-13 12:00:00
+6|2023-05-19|-350.0|Rent payment|Cash App||4|2023-08-13 12:00:00
+7|2023-05-04|-350.0|Rent payment|Cash App||4|2023-08-13 12:00:00
+8|2023-08-07|-500.0|Rent payment|Other (specify)|Zelle|27|2023-08-13 12:00:00
+9|2023-07-24|-300.0|Rent payment|Cash||27|2023-08-13 12:00:00
+10|2023-07-24|-290.0|Rent payment|Cash||27|2023-08-13 12:00:00
+11|2023-06-08|-723.0|Rent payment|Other (specify)|Paypal|27|2023-08-13 12:00:00
+12|2023-08-07|-520.0|Rent payment|Cash||18|2023-08-13 12:00:00
+13|2023-07-11|-150.0|Rent payment|Cash||18|2023-08-13 12:00:00
+14|2023-07-07|-160.0|Rent payment|Cash||18|2023-08-13 12:00:00
+15|2023-07-07|-400.0|Rent payment|Cash||18|2023-08-13 12:00:00
+16|2023-06-19|-225.0|Rent payment|Cash||18|2023-08-13 12:00:00
+17|2023-06-05|-400.0|Rent payment|Cash||18|2023-08-13 12:00:00
+18|2023-05-30|-700.0|Other (specify)||Removing extra month charged|18|2023-08-13 12:00:00
+19|2023-05-16|-423.0|Rent payment|Money Order|19-504627288|18|2023-08-13 12:00:00
+20|2023-05-05|-500.0|Rent payment|Money Order||18|2023-08-13 12:00:00
+21|2023-05-03|-6838.0|Other (specify)||Readmission|18|2023-08-13 12:00:00
+22|2023-08-07|-350.0|Rent payment|Cash||25|2023-08-13 12:00:00
+23|2023-07-07|-350.0|Rent payment|Cash||25|2023-08-13 12:00:00
+24|2023-06-26|-350.0|Rent payment|Cash||25|2023-08-13 12:00:00
+25|2023-06-05|-677.0|Rent payment|Cash||25|2023-08-13 12:00:00
+26|2023-05-05|-800.0|Rent payment|Cash||25|2023-08-13 12:00:00
+27|2023-08-07|-450.0|Rent payment|Cash||14|2023-08-13 12:00:00
+28|2023-07-03|-450.0|Rent payment|Cash||14|2023-08-13 12:00:00
+29|2023-06-05|-450.0|Rent payment|Cash||14|2023-08-13 12:00:00
+30|2023-05-06|450.0|Other (specify)||Fix|14|2023-08-13 12:00:00
+31|2023-08-04|-900.0|Rent payment|Venmo||19|2023-08-13 12:00:00
+32|2023-07-25|-720.0|Rent payment|Venmo||19|2023-08-13 12:00:00
+33|2023-07-06|-900.0|Other (specify)||Fixed the double rent charge for July|19|2023-08-13 12:00:00
+34|2023-06-22|-3290.0|Other (specify)||Readmission|19|2023-08-13 12:00:00
+35|2023-06-23|-650.0|Rent payment|Venmo||19|2023-08-13 12:00:00
+36|2023-08-04|-500.0|Rent payment|Other (specify)|Zelle|9|2023-08-13 12:00:00
+37|2023-08-02|-350.0|Rent payment|Cash||9|2023-08-13 12:00:00
+38|2023-07-04|-220.0|Rent payment|Cash||9|2023-08-13 12:00:00
+39|2023-07-04|-130.0|Rent payment|Other (specify)|Incentive |9|2023-08-13 12:00:00
+40|2023-06-16|-450.0|Rent payment|Check|101|9|2023-08-13 12:00:00
+41|2023-06-02|-450.0|Rent payment|Check|abcd|9|2023-08-13 12:00:00
+42|2023-05-15|-450.0|Rent payment|Venmo||9|2023-08-13 12:00:00
+43|2023-08-04|-700.0|Rent payment|Other (specify)|Zelle|8|2023-08-13 12:00:00
+44|2023-07-05|-700.0|Rent payment|Other (specify)|Zelle|8|2023-08-13 12:00:00
+45|2023-06-03|-570.0|Rent payment|Other (specify)|Zelle|8|2023-08-13 12:00:00
+46|2023-05-17|-130.0|Other (specify)|||8|2023-08-13 12:00:00
+47|2023-05-03|-700.0|Rent payment|Other (specify)|Zelle|8|2023-08-13 12:00:00
+48|2023-08-03|-180.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+49|2023-07-23|-200.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+50|2023-07-17|-150.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+51|2023-07-06|-150.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+52|2023-07-02|-200.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+53|2023-06-22|-250.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+54|2023-06-16|-100.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+55|2023-06-08|-150.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+56|2023-06-07|-200.0|Rent payment|Venmo||28|2023-08-13 12:00:00
+57|2023-06-05|-300.0|Rent payment|Check|Elizabeth Stewart check no.1107|28|2023-08-13 12:00:00
+58|2023-05-07|-400.0|Rent payment|Check|Elizabeth Stewart check no.1104|28|2023-08-13 12:00:00
+59|2023-08-03|-900.0|Rent payment|Venmo||23|2023-08-13 12:00:00
+60|2023-07-01|-900.0|Rent payment|Venmo||23|2023-08-13 12:00:00
+61|2023-06-01|-900.0|Rent payment|Venmo||23|2023-08-13 12:00:00
+62|2023-08-01|-950.0|Other (specify)||Move out balance|5|2023-08-13 12:00:00
+63|2023-07-11|-350.0|Rent payment|Other (specify)|Quickbooks|5|2023-08-13 12:00:00
+64|2023-06-26|-350.0|Rent payment|Venmo|Murphy|5|2023-08-13 12:00:00
+65|2023-06-08|-350.0|Rent payment|Venmo|Murphy|5|2023-08-13 12:00:00
+66|2023-08-01|-300.0|Rent payment|Venmo||24|2023-08-13 12:00:00
+67|2023-07-14|-300.0|Rent payment|Venmo||24|2023-08-13 12:00:00
+68|2023-07-06|-300.0|Rent payment|Venmo||24|2023-08-13 12:00:00
+69|2023-07-04|-300.0|Rent payment|Venmo||24|2023-08-13 12:00:00
+70|2023-06-02|-900.0|Rent payment|Venmo||24|2023-08-13 12:00:00
+71|2023-07-31|-800.0|Rent payment|Venmo||10|2023-08-13 12:00:00
+72|2023-07-03|-220.0|Rent payment|Venmo||10|2023-08-13 12:00:00
+73|2023-07-01|-450.0|Rent payment|Venmo||10|2023-08-13 12:00:00
+74|2023-07-01|-130.0|Other (specify)||6 months|10|2023-08-13 12:00:00
+75|2023-05-31|-800.0|Rent payment|Venmo||10|2023-08-13 12:00:00
+76|2023-07-30|-700.0|Rent payment|Venmo||6|2023-08-13 12:00:00
+77|2023-07-30|-150.0|Rent payment|Venmo||6|2023-08-13 12:00:00
+78|2023-07-30|-150.0|Other (specify)|||6|2023-08-13 12:00:00
+79|2023-07-04|-400.0|Rent payment|Venmo||6|2023-08-13 12:00:00
+80|2023-06-06|-700.0|Rent payment|Venmo||6|2023-08-13 12:00:00
+81|2023-05-19|-250.0|Rent payment|Venmo||6|2023-08-13 12:00:00
+82|2023-05-06|-450.0|Rent payment|Venmo||6|2023-08-13 12:00:00
+83|2023-07-29|-450.0|Rent payment|Venmo||7|2023-08-13 12:00:00
+84|2023-07-06|-225.0|Rent payment|Venmo||7|2023-08-13 12:00:00
+85|2023-06-29|-225.0|Rent payment|Venmo||7|2023-08-13 12:00:00
+86|2023-06-07|-250.0|Rent payment|Venmo||7|2023-08-13 12:00:00
+87|2023-06-01|-200.0|Rent payment|Venmo||7|2023-08-13 12:00:00
+88|2023-05-11|-150.0|Rent payment|Venmo||7|2023-08-13 12:00:00
+89|2023-05-03|-300.0|Rent payment|Venmo||7|2023-08-13 12:00:00
+90|2023-07-29|-900.0|Rent payment|Other (specify)|Zelle|21|2023-08-13 12:00:00
+91|2023-07-05|-770.0|Rent payment|Other (specify)|Zelle|21|2023-08-13 12:00:00
+92|2023-07-04|-130.0|Other (specify)|||21|2023-08-13 12:00:00
+93|2023-06-01|-900.0|Rent payment|Venmo||21|2023-08-13 12:00:00
+94|2023-07-25|40.0|Other (specify)|||22|2023-08-13 12:00:00
+95|2023-07-12|-800.0|Rent payment|Venmo|Annette|22|2023-08-13 12:00:00
+96|2023-07-23|-175.0|Rent payment|Cash App||3|2023-08-13 12:00:00
+97|2023-07-01|-175.0|Rent payment|Cash App||3|2023-08-13 12:00:00
+98|2023-06-16|-180.0|Rent payment|Cash App||3|2023-08-13 12:00:00
+99|2023-06-06|-170.0|Rent payment|Cash App||3|2023-08-13 12:00:00
+100|2023-05-10|-200.0|Other (specify)|||3|2023-08-13 12:00:00
+101|2023-05-10|-50.0|Rent payment|Cash App||3|2023-08-13 12:00:00
+102|2023-05-04|-200.0|Rent payment|Cash App||3|2023-08-13 12:00:00
+103|2023-07-07|-1000.0|Other (specify)||Moved out zero balance|1|2023-08-13 12:00:00
+104|2023-07-07|-1166.67|Other (specify)||Moved out zero balance|12|2023-08-13 12:00:00
+105|2023-06-05|-233.33|Rent payment|Cash||12|2023-08-13 12:00:00
+106|2023-05-07|-700.0|Rent payment|Cash||12|2023-08-13 12:00:00
+107|2023-07-04|-60.0|Rent payment|Other (specify)|Zelle|26|2023-08-13 12:00:00
+108|2023-07-04|-290.0|Rent payment|Cash App||26|2023-08-13 12:00:00
+109|2023-06-16|-293.0|Rent payment|Money Order||26|2023-08-13 12:00:00
+110|2023-05-23|-800.0|Rent payment|Check|Journey check #516|26|2023-08-13 12:00:00
+111|2023-06-22|-240.0|Other (specify)||Moved out zero balance|16|2023-08-13 12:00:00
+112|2023-06-05|-570.0|Rent payment|Check|Check# 0102|16|2023-08-13 12:00:00
+113|2023-05-05|-1000.0|Rent payment|Check|0101 4664|16|2023-08-13 12:00:00
+114|2023-06-10|-350.0|Other (specify)||Moved out zero balance|15|2023-08-13 12:00:00
+115|2023-06-01|-350.0|Rent payment|Venmo||15|2023-08-13 12:00:00
+116|2023-05-16|-350.0|Rent payment|Venmo||15|2023-08-13 12:00:00
+117|2023-05-02|-350.0|Rent payment|Venmo||15|2023-08-13 12:00:00
+118|2023-06-11|-52.0|Other (specify)||Move out balance|13|2023-08-13 12:00:00
+119|2023-06-09|-785.0|Rent payment|Venmo|Lenore|13|2023-08-13 12:00:00
+120|2023-05-12|-324.5|Other (specify)||Moved out zero balance|2|2023-08-13 12:00:00
+121|2023-05-12|-699.69|Other (specify)||Moved out zero balance|20|2023-08-13 12:00:00
+122|2023-05-06|-575.0|Other (specify)||Move out balance $300|11|2023-08-13 12:00:00
+123|2023-05-03|25.0|Other (specify)|||11|2023-08-13 12:00:00
+124|2023-05-03|-633.0|Other (specify)||Moved out $283 credit|17|2023-08-13 12:00:00
+125|2023-05-01|700.0|Rent charge||May Rent|2|2023-08-13 12:00:00
+126|2023-05-01|350.0|Rent charge||May Rent|3|2023-08-13 12:00:00
+127|2023-05-01|700.0|Rent charge||May Rent|4|2023-08-13 12:00:00
+128|2023-05-01|700.0|Rent charge||May Rent|6|2023-08-13 12:00:00
+129|2023-05-01|450.0|Rent charge||May Rent|7|2023-08-13 12:00:00
+130|2023-05-01|700.0|Rent charge||May Rent|8|2023-08-13 12:00:00
+131|2023-05-01|900.0|Rent charge||May Rent|9|2023-08-13 12:00:00
+132|2023-05-01|800.0|Rent charge||May Rent|10|2023-08-13 12:00:00
+133|2023-05-01|700.0|Rent charge||May Rent|11|2023-08-13 12:00:00
+134|2023-05-01|700.0|Rent charge||May Rent|12|2023-08-13 12:00:00
+135|2023-05-01|450.0|Rent charge||May Rent|14|2023-08-13 12:00:00
+136|2023-05-01|700.0|Rent charge||May Rent|15|2023-08-13 12:00:00
+137|2023-05-01|700.0|Rent charge||May Rent|18|2023-08-13 12:00:00
+138|2023-05-01|900.0|Rent charge||May Rent|19|2023-08-13 12:00:00
+139|2023-05-01|700.0|Rent charge||May Rent|20|2023-08-13 12:00:00
+140|2023-05-01|900.0|Rent charge||May Rent|21|2023-08-13 12:00:00
+141|2023-05-01|900.0|Rent charge||May Rent|23|2023-08-13 12:00:00
+142|2023-05-01|700.0|Rent charge||May Rent|28|2023-08-13 12:00:00
+143|2023-06-01|350.0|Rent charge||June Rent|3|2023-08-13 12:00:00
+144|2023-06-01|700.0|Rent charge||June Rent|4|2023-08-13 12:00:00
+145|2023-06-01|700.0|Rent charge||June Rent|5|2023-08-13 12:00:00
+146|2023-06-01|700.0|Rent charge||June Rent|6|2023-08-13 12:00:00
+147|2023-06-01|450.0|Rent charge||June Rent|7|2023-08-13 12:00:00
+148|2023-06-01|700.0|Rent charge||June Rent|8|2023-08-13 12:00:00
+149|2023-06-01|900.0|Rent charge||June Rent|9|2023-08-13 12:00:00
+150|2023-06-01|800.0|Rent charge||June Rent|10|2023-08-13 12:00:00
+151|2023-06-01|700.0|Rent charge||June Rent|12|2023-08-13 12:00:00
+152|2023-06-01|450.0|Rent charge||June Rent|14|2023-08-13 12:00:00
+153|2023-06-01|700.0|Rent charge||June Rent|15|2023-08-13 12:00:00
+154|2023-06-01|700.0|Rent charge||June Rent|18|2023-08-13 12:00:00
+155|2023-06-01|900.0|Rent charge||June Rent|19|2023-08-13 12:00:00
+156|2023-06-01|900.0|Rent charge||June Rent|21|2023-08-13 12:00:00
+157|2023-06-01|900.0|Rent charge||June Rent|23|2023-08-13 12:00:00
+158|2023-06-01|900.0|Rent charge||June Rent|24|2023-08-13 12:00:00
+159|2023-06-01|700.0|Rent charge||June Rent|28|2023-08-13 12:00:00
+160|2023-07-01|350.0|Rent charge||July Rent|3|2023-08-13 12:00:00
+161|2023-07-01|700.0|Rent charge||July Rent|4|2023-08-13 12:00:00
+162|2023-07-01|700.0|Rent charge||July Rent|5|2023-08-13 12:00:00
+163|2023-07-01|700.0|Rent charge||July Rent|6|2023-08-13 12:00:00
+164|2023-07-01|450.0|Rent charge||July Rent|7|2023-08-13 12:00:00
+165|2023-07-01|700.0|Rent charge||July Rent|8|2023-08-13 12:00:00
+166|2023-07-01|900.0|Rent charge||July Rent|9|2023-08-13 12:00:00
+167|2023-07-01|800.0|Rent charge||July Rent|10|2023-08-13 12:00:00
+168|2023-07-01|700.0|Rent charge||July Rent|12|2023-08-13 12:00:00
+169|2023-07-01|450.0|Rent charge||July Rent|14|2023-08-13 12:00:00
+170|2023-07-01|700.0|Rent charge||July Rent|18|2023-08-13 12:00:00
+171|2023-07-01|900.0|Rent charge||July Rent|19|2023-08-13 12:00:00
+172|2023-07-01|900.0|Rent charge||July Rent|21|2023-08-13 12:00:00
+173|2023-07-01|900.0|Rent charge||July Rent|23|2023-08-13 12:00:00
+174|2023-07-01|900.0|Rent charge||July Rent|24|2023-08-13 12:00:00
+175|2023-07-01|700.0|Rent charge||July Rent|25|2023-08-13 12:00:00
+176|2023-07-01|700.0|Rent charge||July Rent|26|2023-08-13 12:00:00
+177|2023-07-01|700.0|Rent charge||July Rent|28|2023-08-13 12:00:00
+178|2023-08-01|350.0|Rent charge||August Rent|3|2023-08-13 12:00:00
+179|2023-08-01|700.0|Rent charge||August Rent|4|2023-08-13 12:00:00
+180|2023-08-01|700.0|Rent charge||August Rent|6|2023-08-13 12:00:00
+181|2023-08-01|450.0|Rent charge||August Rent|7|2023-08-13 12:00:00
+182|2023-08-01|700.0|Rent charge||August Rent|8|2023-08-13 12:00:00
+183|2023-08-01|900.0|Rent charge||August Rent|9|2023-08-13 12:00:00
+184|2023-08-01|800.0|Rent charge||August Rent|10|2023-08-13 12:00:00
+185|2023-08-01|450.0|Rent charge||August Rent|14|2023-08-13 12:00:00
+186|2023-08-01|700.0|Rent charge||August Rent|18|2023-08-13 12:00:00
+187|2023-08-01|900.0|Rent charge||August Rent|19|2023-08-13 12:00:00
+188|2023-08-01|900.0|Rent charge||August Rent|21|2023-08-13 12:00:00
+189|2023-08-01|900.0|Rent charge||August Rent|23|2023-08-13 12:00:00
+190|2023-08-01|900.0|Rent charge||August Rent|24|2023-08-13 12:00:00
+191|2023-08-01|700.0|Rent charge||August Rent|25|2023-08-13 12:00:00
+192|2023-08-01|700.0|Rent charge||August Rent|26|2023-08-13 12:00:00
+193|2023-08-01|900.0|Rent charge||August Rent|27|2023-08-13 12:00:00
+194|2023-08-01|700.0|Rent charge||August Rent|28|2023-08-13 12:00:00
+195|2023-05-01|1000.0|Other (specify)||Beginning balance|1|2023-08-13 12:00:00
+196|2023-05-01|-375.5|Other (specify)||Beginning balance|2|2023-08-13 12:00:00
+197|2023-05-01|-100.0|Other (specify)||Beginning balance|3|2023-08-13 12:00:00
+198|2023-05-01|-350.0|Other (specify)||Beginning balance|4|2023-08-13 12:00:00
+199|2023-05-01|700.0|Other (specify)||Beginning balance|5|2023-08-13 12:00:00
+200|2023-05-01|-1000.0|Other (specify)||Beginning balance|9|2023-08-13 12:00:00
+201|2023-05-01|-800.0|Other (specify)||Beginning balance|10|2023-08-13 12:00:00
+202|2023-05-01|150.0|Other (specify)||Beginning balance|11|2023-08-13 12:00:00
+203|2023-05-01|1337.0|Other (specify)||Beginning balance|13|2023-08-13 12:00:00
+204|2023-05-01|-900.0|Other (specify)||Beginning balance|14|2023-08-13 12:00:00
+205|2023-05-01|1810.0|Other (specify)||Beginning balance|16|2023-08-13 12:00:00
+206|2023-05-01|350.0|Other (specify)||Beginning balance|17|2023-08-13 12:00:00
+207|2023-05-01|7700.0|Other (specify)||Beginning balance|18|2023-08-13 12:00:00
+208|2023-05-01|2860.0|Other (specify)||Beginning balance|19|2023-08-13 12:00:00
+209|2023-05-01|-0.31|Other (specify)||Beginning balance|20|2023-08-13 12:00:00
+210|2023-05-01|-900.0|Other (specify)||Beginning balance|21|2023-08-13 12:00:00
+211|2023-05-01|1221.0|Other (specify)||Beginning balance|22|2023-08-13 12:00:00
+212|2023-05-01|-900.0|Other (specify)||Beginning balance|23|2023-08-13 12:00:00
+213|2023-05-01|-600.0|Other (specify)||Beginning balance|24|2023-08-13 12:00:00
+214|2023-05-01|1477.0|Other (specify)||Beginning balance|25|2023-08-13 12:00:00
+215|2023-05-01|43.0|Other (specify)||Beginning balance|26|2023-08-13 12:00:00
+216|2023-05-01|906.0|Other (specify)||Beginning balance|27|2023-08-13 12:00:00
+217|2023-05-01|-5.0|Other (specify)||Beginning balance|28|2023-08-13 12:00:00
