@@ -228,40 +228,32 @@ def edit_house_meeting(request, hm_id):
             return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
-# New Supply Request
+
 def new_supply_request(request):
     page = 'Add New Supply Request'
     fullname = username(request)
 
     if request.method == 'GET':
         rdr = request.META.get('HTTP_REFERER')
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
         if user_is_hm(request):
             sidebar = hm_sidebar
-            form = SupplyRequestForm(initial={'house': House.objects.get(manager=mngr), 'fulfilled': False})
+            mngr = User.objects.get(pk=request.user.pk).assoc_resident
+            form = SupplyRequestForm(initial={'house': House.objects.get(manager=mngr)})
             form.fields['house'].widget = forms.HiddenInput()
         else:
             sidebar = admin_sidebar
-            form = SupplyRequestForm(initial={'fulfilled': False})
+            form = SupplyRequestForm()
 
     else:
         rdr = request.POST.get('rdr')
-        sub = SupplyRequestForm(request.POST)
+        house = int(request.POST.get('house'))
         products = request.POST.getlist('products')
-        # TODO going to the previous page after submitting the first part creates an unfinished duplicate
-        if sub.is_valid():
-            sr = sub.save()
-            sr_id = sr.pk
-        else:
-            sr_id = 0
 
-        form = ProductForm(initial={'temp1': sr_id}, products=products)
+        form = ProductForm(initial={'house': house, 'products': products}, products=products)
         sub = ProductForm(request.POST, products=products)
         if sub.is_valid():
-            sr = Supply_request.objects.get(pk=int(request.POST['temp1']))
-            products = list(eval(sr.products))
-
+            products = request.POST.getlist('products')
             replace_products = []
             other_note = ''
             for item in products:
@@ -271,9 +263,9 @@ def new_supply_request(request):
                     x = (item, int(request.POST[item]))
                     replace_products.append(x)
 
-            sr.products = replace_products
-            sr.other = other_note
-            sr.trip = Shopping_trip.objects.get(date__isnull=True)
+            sr = Supply_request(products=replace_products,
+                                other=other_note,
+                                house_id=house)
             sr.save()
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
@@ -291,6 +283,7 @@ def new_supply_request(request):
 def edit_supply_request(request, sr_id):
     page = 'Edit Supply_Request'
     fullname = username(request)
+    sidebar = admin_sidebar
     supply_request = Supply_request.objects.get(id=sr_id)
 
     old_products = [ele[0] for ele in list(eval(supply_request.products))]
@@ -302,44 +295,25 @@ def edit_supply_request(request, sr_id):
 
     if request.method == 'GET':
         rdr = request.META.get('HTTP_REFERER')
-        sidebar = admin_sidebar
         form = SupplyRequestForm(instance=supply_request, initial={'products': old_products})
 
     else:
         rdr = request.POST.get('rdr')
-        sub = SupplyRequestForm(request.POST)
-        if sub.is_valid():
-            new_products = sub.cleaned_data['products']
-            new_quantities = []
-            pqdict = dict(list(eval(supply_request.products)))
-            for item in new_products:
-                if item == 'Other':
-                    x = old_other_note
-                elif item in old_products:
-                    x = pqdict[item]
-                else:
-                    x = 1
-                new_quantities.append(x)
+        house = int(request.POST.get('house'))
+        new_products = request.POST.getlist('products')
 
-            supply_request.products = new_products
-            supply_request.save()
-        else:
-            new_quantities = list(eval(request.POST['temp2']))
-            new_products = list(eval(supply_request.products))
-        form = ProductForm(initial={'temp2': new_quantities}, products=new_products, quants=new_quantities)
-        sub = ProductForm(request.POST, products=new_products, quants=new_quantities)
+        sub = ProductForm(request.POST, products=new_products)
         if sub.is_valid():
-            products = list(eval(supply_request.products))
-
             replace_products = []
             other_note = ''
-            for item in products:
+            for item in new_products:
                 if item == 'Other':
                     other_note = request.POST['other']
                 else:
                     x = (item, int(request.POST[item]))
                     replace_products.append(x)
 
+            supply_request.house_id = house
             supply_request.products = replace_products
             supply_request.other = other_note
             supply_request.last_update = timezone.now()
@@ -348,8 +322,19 @@ def edit_supply_request(request, sr_id):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+
         else:
-            sidebar = admin_sidebar
+            new_quants = []
+            pqdict = dict(list(eval(supply_request.products)))
+            for item in new_products:
+                if item == 'Other':
+                    x = old_other_note
+                elif item in old_products:
+                    x = pqdict[item]
+                else:
+                    x = 1
+                new_quants.append(x)
 
+            form = ProductForm(initial={'house': house, 'products': new_products, 'quants': new_quants},
+                               products=new_products, quants=new_quants)
     return render(request, 'admin/forms.html', locals())
-

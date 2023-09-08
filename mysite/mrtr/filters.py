@@ -184,8 +184,11 @@ class ManagerMeetingFilter(MasterFilter):
         fields = ['search', 'date']
 
 
-# TODO add boolean filter for fulfilled
 class SupplyRequestFilter(MasterFilter):
+    status = filters.ChoiceFilter(method='status_filter',
+                                  choices=((1, 'Fulfilled'), (0, 'Unfulfilled')),
+                                  empty_label='All',
+                                  label='Filter by fulfillment status')
     field_list = [
         'house__name',
         'products',
@@ -197,14 +200,18 @@ class SupplyRequestFilter(MasterFilter):
         model = Supply_request
         fields = ['search', 'date']
 
+    @staticmethod
+    def status_filter(queryset, name, value):
+        return queryset.filter(fulfilled=bool(int(value)))
+
 
 class ShoppingTripFilter(MasterFilter):
     product = filters
     field_list = [
-          'id',
-          'date',
-          'amount',
-        ]
+        'date',
+        'amount',
+        'notes',
+    ]
 
     class Meta:
         model = Supply_request

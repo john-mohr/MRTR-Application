@@ -145,14 +145,16 @@ def supply_requests(request):
     return table_view(request, 'supply_requests', 'View All Supply Requests', table_filter, table, 'Add New Supply Request', 'new_supply_request')
 
 
+@groups_only('Admin')
 def shopping_trips(request):
     qs = Shopping_trip.objects.all()
 
     table_filter = ShoppingTripFilter(request.GET, queryset=qs)
 
     table = ShoppingTripTable(table_filter.qs, order_by='-date', orderable=True)
-    return table_view(request, 'shopping_trips', 'View All Shopping Trips', table_filter, table, 'Add New Shopping Trip', 'new_shopping_trip')
+    return table_view(request, 'shopping_trips', 'View All Shopping Trips', table_filter, table)
 
+@groups_only('Admin')
 def meetings(request):
     qs = Manager_meeting.objects.all()
 

@@ -1,7 +1,7 @@
 import django_tables2 as tables
 from .models import *
 from django.db.models.functions import Concat
-from django.db.models import Value, Sum
+from django.db.models import Value
 
 # TODO change datetime format to .strftime('%m/%d/%Y %I:%M %p')
 
@@ -148,7 +148,7 @@ class DrugTestTable(tables.Table):
         return f"Edit"
 
 
-def get_url(record):
+def get_manager_url(record):
     if record.manager is None:
         return None
     else:
@@ -157,7 +157,7 @@ def get_url(record):
 class CheckInTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     resident = tables.Column(linkify=True)
-    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_url(record), empty_values=[])
+    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_manager_url(record), empty_values=[])
     notes = tables.Column(attrs={'td': {'style': 'min-width: 200px; white-space: pre-wrap'}})
 
 
@@ -178,7 +178,7 @@ class CheckInTable(tables.Table):
 class SiteVisitTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
-    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_url(record), empty_values=[])
+    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_manager_url(record), empty_values=[])
     issues = tables.Column(attrs={'td': {'style': 'min-width: 300px; white-space: pre-wrap'}})
     explanation = tables.Column(attrs={'td': {'style': 'min-width: 300px; white-space: pre-wrap; text-align: left'}})
 
@@ -199,7 +199,7 @@ class SiteVisitTable(tables.Table):
 class HouseMeetingTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
-    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_url(record), empty_values=[])
+    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_manager_url(record), empty_values=[])
     absentees = tables.Column(empty_values=(), orderable=False, attrs={'td': {'style': 'min-width: 200px; white-space: pre-wrap'}})
     issues = tables.Column(attrs={'td': {'style': 'min-width: 600px; white-space: pre-wrap; text-align: left;'}})
 
@@ -223,13 +223,20 @@ class HouseMeetingTable(tables.Table):
         return value
 
 
+def get_trip_url(record):
+    if record.trip is None:
+        return '/portal/current_shopping_trip'
+    else:
+        return record.trip.get_absolute_url()
+
+
 class SupplyRequestTable(tables.Table):
     id = tables.Column(verbose_name='', linkify=True)
     house = tables.Column(linkify=True)
-    products = tables.Column(verbose_name='Products requested')
+    products = tables.Column(verbose_name='Products requested',
+                             attrs={'td': {'style': 'min-width: 300px; white-space: pre-wrap; text-align: left'}})
     other = tables.Column(verbose_name='Other requests')
-    # TODO linkify trip column
-    trip = tables.Column(verbose_name='Shopping trip')
+    trip = tables.Column(verbose_name='Shopping trip', linkify=lambda record: get_trip_url(record), empty_values=[])
 
     class Meta:
         model = Supply_request
@@ -242,8 +249,26 @@ class SupplyRequestTable(tables.Table):
         return f"Edit"
 
     def render_products(self, value):
-        value = value[2:-1].replace("', ", " (Qty: ").replace(", (", ", ").replace("'", "")
+        value = value[2:-1].replace("', ", " (Qty: ").replace(", (", ", \n").replace("'", "")
         return value
+
+    def render_trip(self, value, record):
+        if value is None:
+            value = 'Current'
+        else:
+            value = record.trip.date.strftime('%m/%d/%Y')
+        return value
+
+
+class SpecialRequestTable(tables.Table):
+    house = tables.Column(linkify=True)
+    other = tables.Column(verbose_name='Request')
+
+    class Meta:
+        model = Supply_request
+        fields = ('house',
+                  'other',
+                  )
 
 
 class ShoppingListTable(tables.Table):
@@ -252,7 +277,8 @@ class ShoppingListTable(tables.Table):
 
 
 class ShoppingTripTable(tables.Table):
-    id = tables.Column(linkify=True)
+    id = tables.Column(verbose_name='', linkify=True)
+    notes = tables.Column(attrs={'td': {'style': 'min-width: 300px; white-space: pre-wrap; text-align: left'}})
 
     class Meta:
         model = Shopping_trip
@@ -260,6 +286,13 @@ class ShoppingTripTable(tables.Table):
                     'date',
                     'amount',
                     )
+
+    def render_id(self, value):
+        return f"View"
+
+    def render_amount(self, value):
+        return f"${value}"
+
 
 def RowTableLink(value):
     if str(value)[1:7] == 'portal':

@@ -63,13 +63,14 @@ def resident(request, res_id):
     res_details_data = [{'name': 'Admit date', 'value': res.admit_date.strftime('%m/%d/%Y')},
                         {'name': 'Discharge date', 'value': dd},
                         {'name': 'Rent', 'value': '$' + str(res.rent)},
-                        {'name': 'House', 'value': res.bed.house},
-                        {'name': 'Bed', 'value': res.bed.name},
                         {'name': 'Door code', 'value': res.door_code},
                         {'name': 'Referral info', 'value': res.referral_info},
                         {'name': 'Notes', 'value': res.notes}]
-    if hm:
-        res_details_data[3]['value'] = res_details_data[3].get('value').name
+    if res.bed is not None:
+        res_details_data.insert(3, {'name': 'House', 'value': res.bed.house})
+        res_details_data.insert(4, {'name': 'Bed', 'value': res.bed.name})
+        if hm:
+            res_details_data[3]['value'] = res_details_data[3].get('value').name
     res_details = RowTable(res_details_data, show_header=False)
     RequestConfig(request).configure(res_details)
 
@@ -126,6 +127,8 @@ def house(request, house_id):
             ('Add new check in', '/portal/new_check_in'),
             ('Add new site visit', '/portal/new_site_visit'),
             ('Add new house meeting', '/portal/new_house_meeting'),
+            ('Make supply request', '/portal/new_supply_request')
+
         ]
         hm_exc = ('id', )
     else:
@@ -252,43 +255,77 @@ def house(request, house_id):
 
     return render(request, 'admin/singles.html', locals())
 
-# TODO finish implementing
-def single_shopping_trip(request):
-    latest_st = Shopping_trip.objects.get(date__isnull=True)
 
-    name = 'Upcoming Shopping Trip'
+def single_shopping_trip(request, trip_id=None):
+
+    def format_for_table(product_list):
+        if len(product_list) > 0:
+            prod_totals = dict(functools.reduce(operator.add, map(collections.Counter, product_list)))
+            data = []
+            keys = list(prod_totals.keys())
+            values = list(prod_totals.values())
+            for i in range(len(prod_totals)):
+                ele = {'product': keys[i], 'quantity': values[i]}
+                data.append(ele)
+            return data
+        else:
+            return [{'product': None, 'quantity': None}]
+
+    if trip_id is None:
+        name = 'Upcoming Shopping Trip'
+        buttons = [('Complete shopping trip', '/portal/new_shopping_trip')]
+        assoc_reqs = Supply_request.objects.filter(trip_id__isnull=True).order_by('house')
+    else:
+        trip = Shopping_trip.objects.get(pk=trip_id)
+        name = 'Past Shopping Trip'
+        headers = ['Date completed: ' + trip.date.strftime('%m/%d/%Y'),
+                   'Amount spent: $' + str(trip.amount)]
+        if trip.notes != '':
+            headers.append('Notes: ' + trip.notes)
+        buttons = [('Edit shopping trip', '/portal/edit_shopping_trip/' + str(trip_id))]
+        assoc_reqs = Supply_request.objects.filter(trip_id=trip_id).order_by('house')
+
     page = 'View Single Shopping Trip'
     fullname = username(request)
     sidebar = admin_sidebar
 
-    buttons = [('Complete shopping trip', '/portal/complete_shopping_trip')]
+    if len(assoc_reqs) > 0:
+        sr_detail = []
+        for s_request in assoc_reqs:
+            for prod_and_amount in list(eval(s_request.products)):
+                indiv_prod_detail = (s_request.house.name, {prod_and_amount[0]: prod_and_amount[1]})
+                sr_detail.append(indiv_prod_detail)
 
-    re_qs = Supply_request.objects.filter(trip=latest_st)
-
-    # TODO collect request house to create a delivery list (sum quantity group by product and house)
-    if len(re_qs) > 0:
-        sr_data = []
-        for i in Supply_request.objects.filter(trip=latest_st):
-            for j in list(eval(i.products)):
-                ele = {j[0]: j[1]}
-                sr_data.append(ele)
-        prod_quant = dict(functools.reduce(operator.add, map(collections.Counter, sr_data)))
-
-        table_data = []
-        keys = list(prod_quant.keys())
-        values = list(prod_quant.values())
-        for i in range(len(prod_quant)):
-            ele = {'product': keys[i], 'quantity': values[i]}
-            table_data.append(ele)
+        house_prods = {}
+        for key, group in groupby(sr_detail, lambda x: x[0]):
+            temp = []
+            for indiv_prod_detail in group:
+                temp.append(indiv_prod_detail[1])
+            house_prods[key] = temp
     else:
-        table_data = [{'product': None, 'quantity': None}]
+        house_prods = {}
 
-    sl_table = ShoppingListTable(table_data)
-
-    sr_table = SupplyRequestTable(re_qs, exclude=['trip', 'fulfilled'])
+    shopping_list_data = format_for_table(sum(list(house_prods.values()), []))
+    shopping_list = ShoppingListTable(shopping_list_data)
+    RequestConfig(request).configure(shopping_list)
 
     sections = [
-        ('Shopping list', sl_table),
-        ('Supply requests', sr_table)
+        ('Shopping list', shopping_list),
     ]
+
+    if len(assoc_reqs.exclude(other__exact='')) > 0:
+        special_requests = SpecialRequestTable(assoc_reqs.exclude(other__exact=''))
+        RequestConfig(request).configure(special_requests)
+        sections.append(('Special requests', special_requests))
+
+    for house_key in house_prods.keys():
+        delivery_data = format_for_table(house_prods[house_key])
+        delivery_list = ShoppingListTable(delivery_data)
+        RequestConfig(request).configure(delivery_list)
+        sections.append(('Delivery list - ' + house_key, delivery_list))
+
+    supply_requests = SupplyRequestTable(assoc_reqs, exclude=['trip', 'fulfilled'])
+    RequestConfig(request).configure(supply_requests)
+    sections.append(('Supply requests', supply_requests))
+
     return render(request, 'admin/singles.html', locals())

@@ -274,7 +274,6 @@ class HouseSelectForm(forms.Form):
 class HouseMeetingForm(forms.ModelForm):
     name = 'house meeting'
     absentees = AbsenteeField(widget=forms.CheckboxSelectMultiple,
-                              # queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'),
                               queryset=Resident.objects.all(),
                               required=False)
     issues = forms.CharField(widget=forms.Textarea, required=False, label='Issues discussed')
@@ -301,6 +300,8 @@ class HouseMeetingForm(forms.ModelForm):
 
 
 class ShoppingTripForm(forms.ModelForm):
+    amount = forms.FloatField(label='Amount spent')
+
     class Meta:
         model = Shopping_trip
         fields = ['date',
@@ -320,21 +321,18 @@ class SupplyRequestForm(forms.ModelForm):
     class Meta:
         model = Supply_request
         fields = ['house',
-                  'products',
-                  'fulfilled',
-                  'trip'
+                  'products'
                   ]
-        widgets = {
-            'fulfilled': forms.HiddenInput,
-            'trip': forms.HiddenInput
-        }
 
 
 class ProductForm(forms.Form):
-    temp1 = forms.IntegerField(widget=forms.HiddenInput,
+    quants = forms.CharField(widget=forms.HiddenInput,
+                             required=False)
+    house = forms.IntegerField(widget=forms.HiddenInput,
                                required=False)
-    temp2 = forms.CharField(widget=forms.HiddenInput,
-                            required=False)
+    products = forms.MultipleChoiceField(widget=forms.MultipleHiddenInput(),
+                                         choices=Supply_request.PRODUCT_CHOICES,
+                                         required=False)
 
     def __init__(self, *args, **kwargs):
         products = kwargs.pop('products', None)

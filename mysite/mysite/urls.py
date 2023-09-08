@@ -87,7 +87,6 @@ urlpatterns = [
     # Shopping Trip
     path('portal/new_shopping_trip', admin_forms.new_shopping_trip),
     path('portal/edit_shopping_trip/<int:trip_id>', admin_forms.edit_shopping_trip),
-    path('portal/complete_shopping_trip', admin_forms.complete_shopping_trip),
     path('portal/shopping_trips', tables.shopping_trips),
     path('portal/current_shopping_trip', singles.single_shopping_trip),
     path('portal/shopping_trip/<int:trip_id>', singles.single_shopping_trip),

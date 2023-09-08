@@ -144,8 +144,8 @@ class Check_in(models.Model):
 
 
 class Shopping_trip(models.Model):
-    date = models.DateTimeField(null=True)  # automatic
-    amount = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+    date = models.DateField(default=timezone.now)
+    amount = models.DecimalField(max_digits=6, decimal_places=2)
     notes = models.TextField(blank=True)
     last_update = models.DateTimeField(blank=True, null=True)  # automatic
     
@@ -176,15 +176,16 @@ class Supply_request(models.Model):
         ('Pillow', 'Pillow'),
         ('Sign-out logs', 'Sign-out logs'),
         ('Visitor logs', 'Visitor logs'),
-        ('Itinerary/leave request forms', 'Itinerary/leave request forms'),
-        ('B Mod Forms', 'B Mod Forms'),
-        ('Meds/emergency contact sheets', 'Meds/emergency contact sheets'),
+        ('Itinerary sheets', 'Itinerary sheets'),
+        ('Leave request forms', 'Leave request forms'),
+        ('B mod forms', 'B mod forms'),
+        ('Emergency contact forms', 'Emergency contact forms'),
         ('UA kits', 'UA kits'),
         ('Other', 'Other')
     ]
     products = models.TextField(blank=True)
     other = models.CharField(max_length=50, blank=True)
-    fulfilled = models.BooleanField()  # automatic
+    fulfilled = models.BooleanField(default=False)  # automatic
     house = models.ForeignKey('House', on_delete=models.CASCADE)
     trip = models.ForeignKey('Shopping_trip', on_delete=models.CASCADE, blank=True, null=True)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
@@ -220,7 +221,7 @@ class House_meeting(models.Model):
 
 
 class Absentee(models.Model):
-    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)  # automatic
     meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  # automatic
 
 
@@ -237,23 +238,4 @@ class Manager_meeting(models.Model):
 
     def get_absolute_url(self):
         return '/portal/meeting/%i' % self.id
-
-
-# class Attendee(models.Model):
-#     meeting = models.ForeignKey('Manager_meeting', on_delete=models.CASCADE)  #, blank=True, null=True)
-#     manager = models.ForeignKey('Resident', on_delete=models.CASCADE)  #, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
-
-
-# class Manager_issue(models.Model):
-#     description = models.CharField(max_length=200)
-#     STATUS_CHOICES = [
-#         ('n', 'New'),
-#         ('o', 'Ongoing')
-#     ]
-#     status = models.CharField(max_length=1, choices=STATUS_CHOICES, null=True)
-#     expected_completion = models.DateField()  #blank=True, null=True)
-#     meeting = models.ForeignKey('Manager_meeting', on_delete=models.CASCADE)  #, blank=True, null=True)  # automatic
-#     submission_date = models.DateTimeField(default=timezone.now)  #blank=True, null=True)  # automatic
-#     last_update = models.DateTimeField(null=True)  # automatic
-
 
