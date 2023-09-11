@@ -6,87 +6,88 @@
 {% block content %}
 <!doctype html>
 <html>
-    {% if buttons %}
-        <section class="edit-box">
-            <form action="{{ button_link }}">
-                <button type="submit">{{ button_name }}</button>
-            </form>
-        </section>
-    {% endif %}
-
     <div style="overflow-x:auto;">
-        <style>
-            table{
-                margin-left: auto;
-                margin-right: auto;
-            }
-            table, th, td {
-                text-align: center;
-                border:1px solid black;
-                border-collapse: collapse;
-            }
-            input[type=checkbox] {
-                width: auto;
-            }
-            .form-group {
-                padding-bottom: 10px;
-            }
-            .form-check, .checkbox {
-                padding-top: 5px;
-                padding-left: 20px;
-            }
-            .flex-container{
-                padding-top: 25px;
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                gap: 15px;
-            }
-            .container{
-                padding: 16px 16px 16px 16px;
-                width: 100%;
-                border-style: solid;
-                background-color: white;
-                border-color: white;
-                border-radius: 5px;
-                overflow-y: auto;
-            }
-            .container h2{
-                text-align: left;
-            }
+    <style>
+        table{
+            margin-left: auto;
+            margin-right: auto;
+        }
+        table, th, td {
+            text-align: center;
+            border:1px solid black;
+            border-collapse: collapse;
+        }
+        input[type=checkbox] {
+            width: auto;
+        }
+        .form-group {
+            padding-bottom: 10px;
+        }
+        .form-check, .checkbox {
+            padding-top: 5px;
+            padding-left: 20px;
+        }
+        .flex-container{
+            padding-top: 25px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .container{
+            padding: 16px 16px 16px 16px;
+            width: 100%;
+            border-style: solid;
+            background-color: white;
+            border-color: white;
+            border-radius: 5px;
+            overflow-y: auto;
+        }
+        .container h2{
+            text-align: left;
+        }
+        .edit-box{
+            padding: 16px 16px 16px 16px;
+            border-style: solid;
+            border-radius: 5px;
+            background-color: white;
+            border-color: white;
+            text-align: left;
+            justify-content: left;
+            overflow-y: auto;
+        }
+        @media screen and (max-width: 1500px) {
             .edit-box{
-                padding: 16px 16px 16px 16px;
-                border-style: solid;
-                border-radius: 5px;
-                background-color: white;
-                border-color: white;
-                text-align: left;
-                justify-content: left;
-                overflow-y: auto;
+            margin-top: 50px;
             }
-            @media screen and (max-width: 1500px) {
-                .edit-box{
-                margin-top: 50px;
-                }
-            }
-        </style>
-        <body>
-            <div class="flex-container">
-                <section class="container">
-                    <form method="get">
-                        {{ table_filter.form | crispy }}
-                        <input type="submit" id="button1" />
-                    </form>
-                    <form action="/portal/{{ link }}">
-                        <button type="submit" style="width: 100%">Clear Filters </button>
-                    </form>
-                </section>
-                <section class="container">
-                    {% render_table table %}
-                </section>
-            </div>
-        </body>
+        }
+    </style>
+    <body>
+        {% if add_buttons %}
+            <section class="edit-box">
+                <form>
+                    {% for x in buttons %}
+                        <button type="submit" formaction="{{ x.1 }}">{{ x.0 }}</button>
+                    {% endfor %}
+                </form>
+            </section>
+        {% endif %}
+        <div class="flex-container">
+            <section class="container">
+                <form method="get">
+                    {{ table_filter.form | crispy }}
+                    <input type="submit" id="button1" />
+                </form>
+                <form action="/portal/{{ link }}">
+                    <button type="submit" style="width: 100%">Clear Filters </button>
+                </form>
+            </section>
+            <section class="container">
+                {% render_table table %}
+            </section>
+        </div>
+    </body>
     </div>
 </html>
 {% endblock content %}

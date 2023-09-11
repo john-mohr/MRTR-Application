@@ -23,6 +23,16 @@
         h2 {
             margin-bottom: 10px;
         }
+        .edit-box{
+            padding: 16px 16px 16px 16px;
+            border-style: solid;
+            border-radius: 5px;
+            background-color: white;
+            border-color: white;
+            text-align: left;
+            justify-content: left;
+            overflow-y: auto;
+        }
     </style>
     <body>
         <section>
@@ -31,7 +41,7 @@
                 <h2>{{ x }}</h2>
             {% endfor %}
         </section>
-        <section>
+        <section class="edit-box">
             <form>
                 {% for x in buttons %}
                     <button type="submit" formaction="{{ x.1 }}">{{ x.0 }}</button>

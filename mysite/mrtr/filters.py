@@ -12,6 +12,7 @@ class MasterFilter(filters.FilterSet):
     field_list = []
     search = filters.CharFilter(method='search_fields',
                                 label='Search')
+    # TODO add 'since' and 'to' as tooltips for date filter
     date = filters.DateFromToRangeFilter(method='date_filter',
                                          widget=RangeWidget(attrs={'type': 'date'}),
                                          label='Filter by date')
@@ -185,20 +186,35 @@ class ManagerMeetingFilter(MasterFilter):
 
 
 class SupplyRequestFilter(MasterFilter):
-    status = filters.ChoiceFilter(method='status_filter',
-                                  choices=((1, 'Fulfilled'), (0, 'Unfulfilled')),
-                                  empty_label='All',
-                                  label='Filter by fulfillment status')
     field_list = [
         'house__name',
         'products',
         'other',
         'trip',
         ]
+    status = filters.ChoiceFilter(method='status_filter',
+                                  choices=((1, 'Fulfilled'), (0, 'Unfulfilled')),
+                                  empty_label='All',
+                                  label='Filter by fulfillment status')
+    date = filters.DateFromToRangeFilter(method='date_filter',
+                                         widget=RangeWidget(attrs={'type': 'date'}),
+                                         label='Filter by submission date')
 
     class Meta:
         model = Supply_request
         fields = ['search', 'date']
+
+    @staticmethod
+    def date_filter(queryset, name, value):
+        start = value.start
+        if start is None:
+            start = datetime.datetime(1970, 1, 1)
+
+        stop = value.stop
+        if stop is None:
+            stop = datetime.datetime.now()
+
+        return queryset.filter(submission_date__range=[start, stop])
 
     @staticmethod
     def status_filter(queryset, name, value):
@@ -231,6 +247,46 @@ class HouseMeetingFilter(MasterFilter):
     class Meta:
         model = House_meeting
         fields = ['search', 'date']
+
+
+class MaintenanceRequestFilter(MasterFilter):
+    field_list = [
+        'issue',
+        'manager__first_name',
+        'manager__last_name',
+        'house__name',
+        'fulfillment_date',
+        'fulfillment_notes',
+        'fulfillment_cost'
+    ]
+
+    date = filters.DateFromToRangeFilter(method='date_filter',
+                                         widget=RangeWidget(attrs={'type': 'date'}),
+                                         label='Filter by submission date')
+    status = filters.ChoiceFilter(method='status_filter',
+                                  choices=((1, 'Fulfilled'), (0, 'Unfulfilled')),
+                                  empty_label='All',
+                                  label='Filter by fulfillment status')
+
+    class Meta:
+        model = Maintenance_request
+        fields = ['search', 'date']
+
+    @staticmethod
+    def date_filter(queryset, name, value):
+        start = value.start
+        if start is None:
+            start = datetime.datetime(1970, 1, 1)
+
+        stop = value.stop
+        if stop is None:
+            stop = datetime.datetime.now()
+
+        return queryset.filter(submission_date__range=[start, stop])
+
+    @staticmethod
+    def status_filter(queryset, name, value):
+        return queryset.filter(fulfilled=bool(int(value)))
 
 
 class HouseFilter(MasterFilter):

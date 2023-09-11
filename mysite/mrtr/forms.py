@@ -6,9 +6,9 @@ from django.contrib.auth.forms import UserCreationForm
 
 class ContactForm(forms.Form):
     email = forms.EmailField()
-    first_name = forms.CharField(label= 'First Name', max_length = 20)
-    last_name = forms.CharField(label= 'Last Name', max_length = 20)
-    message = forms.CharField(widget = forms.Textarea, max_length = 2000)
+    first_name = forms.CharField(label='First Name', max_length=20)
+    last_name = forms.CharField(label='Last Name', max_length=20)
+    message = forms.CharField(widget=forms.Textarea, max_length=2000)
 
 
 class DateInput(forms.DateInput):
@@ -271,6 +271,7 @@ class HouseSelectForm(forms.Form):
     name = 'house select'
     house = HouseField(queryset=House.objects.all())
 
+
 class HouseMeetingForm(forms.ModelForm):
     name = 'house meeting'
     absentees = AbsenteeField(widget=forms.CheckboxSelectMultiple,
@@ -300,7 +301,7 @@ class HouseMeetingForm(forms.ModelForm):
 
 
 class ShoppingTripForm(forms.ModelForm):
-    amount = forms.FloatField(label='Amount spent')
+    amount = forms.DecimalField(decimal_places=2, label='Amount spent')
 
     class Meta:
         model = Shopping_trip
@@ -363,6 +364,40 @@ class ProductForm(forms.Form):
                                                                  choices=amounts)
 
 
+class MaintenanceRequestForm(forms.ModelForm):
+    house = HouseField(queryset=House.objects.all())
+    issue = forms.CharField(widget=forms.Textarea, label='Describe the issue')
+    fulfillment_date = forms.DateField(widget=DateInput(), required=False)
+    fulfillment_cost = forms.DecimalField(decimal_places=2, required=False)
+
+    class Meta:
+        model = Maintenance_request
+        fields = [
+            'house',
+            'manager',
+            'issue',
+            'fulfillment_date',
+            'fulfillment_cost',
+            'fulfillment_notes'
+        ]
+        widgets = {
+            'manager': forms.HiddenInput,
+        }
+
+
+class MaintReqField(forms.ModelChoiceField):
+    def label_from_instance(self, maint_req):
+        label = maint_req.house.name + ': ' + maint_req.issue
+        return label
+
+
+class FulfillMaintReqForm(forms.Form):
+    request = MaintReqField(queryset=Maintenance_request.objects.filter(fulfilled=False))
+    fulfillment_date = forms.DateField(widget=DateInput(), initial=timezone.now, label='Date fulfilled')
+    fulfillment_notes = forms.CharField(widget=forms.Textarea, label='Notes', required=False)
+    fulfillment_cost = forms.DecimalField(decimal_places=2, label='Amount spent')
+
+
 class ManagerMeetingForm(forms.ModelForm):
     class Meta:
         model = Manager_meeting
@@ -372,8 +407,7 @@ class ManagerMeetingForm(forms.ModelForm):
                   'location',
                   'attendee',
                   'issues',
-                 ]
+                  ]
         widgets = {
             'date': DateInput(),
         }
-

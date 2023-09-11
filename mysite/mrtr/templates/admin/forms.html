@@ -43,7 +43,12 @@
    
 </style>
 <div class="container">
+
     <form class= "form" action="" method="post">
+        {% for button in buttons %}
+            <input style="width: auto; margin-bottom: 20px" type="submit" value="{{ button.0 }}" name="{{ button.1 }}">
+        {% endfor %}
+
         {%  csrf_token %}
         {{ form | crispy}}
         <input type="hidden" name="rdr" value="{{ rdr }}">

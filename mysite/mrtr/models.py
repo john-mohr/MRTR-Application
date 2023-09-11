@@ -1,8 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator
 from django.utils import timezone
-from django.db.models import Sum
-from django.db.models import CharField, Model
 
 # TODO add validations (ex. phone number is 10 digits long)
 class Resident(models.Model):
@@ -27,7 +25,7 @@ class Resident(models.Model):
         return self.first_name + ' ' + self.last_name
 
     def balance(self):
-        return Transaction.objects.filter(resident=self.id).aggregate(Sum('amount'))['amount__sum']
+        return Transaction.objects.filter(resident=self.id).aggregate(models.Sum('amount'))['amount__sum']
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
@@ -225,6 +223,21 @@ class Absentee(models.Model):
     meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  # automatic
 
 
+class Maintenance_request(models.Model):
+    issue = models.TextField()
+    manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', blank=True, null=True)  # maybe add limit_to() argument
+    house = models.ForeignKey('House', on_delete=models.CASCADE)
+    fulfilled = models.BooleanField(default=False)  # automatic
+    fulfillment_date = models.DateField(null=True)
+    fulfillment_notes = models.TextField(blank=True)
+    fulfillment_cost = models.DecimalField(max_digits=8, decimal_places=2, null=True)
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/edit_maintenance_request/%i' % self.id
+
+
 # TODO (wait) ask TC if the app needs a section for manager meetings
 class Manager_meeting(models.Model):
     title = models.CharField(max_length=150)
@@ -238,4 +251,3 @@ class Manager_meeting(models.Model):
 
     def get_absolute_url(self):
         return '/portal/meeting/%i' % self.id
-

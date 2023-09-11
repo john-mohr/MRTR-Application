@@ -338,3 +338,98 @@ def edit_supply_request(request, sr_id):
             form = ProductForm(initial={'house': house, 'products': new_products, 'quants': new_quants},
                                products=new_products, quants=new_quants)
     return render(request, 'admin/forms.html', locals())
+
+
+def new_maintenance_request(request):
+    page = 'New Maintenance Request'
+    fullname = username(request)
+    rdr = request.META.get('HTTP_REFERER')
+
+    mngr = User.objects.get(pk=request.user.pk).assoc_resident
+
+    if user_is_hm(request):
+        sidebar = hm_sidebar
+        form = MaintenanceRequestForm(initial={'manager': mngr, 'house': House.objects.get(manager=mngr)})
+        form.fields['house'].widget = forms.HiddenInput()
+    else:
+        sidebar = admin_sidebar
+        form = MaintenanceRequestForm(initial={'manager': mngr})
+
+    form.fields['fulfillment_date'].widget = forms.HiddenInput()
+    form.fields['fulfillment_notes'].widget = forms.HiddenInput()
+    # print(form.fields['fulfillment_cost'].decimal_places)
+    form.fields['fulfillment_cost'].widget = forms.HiddenInput()
+
+    if request.method == 'POST':
+        sub = MaintenanceRequestForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
+    return render(request, 'admin/forms.html', locals())
+
+
+@groups_only('Admin')
+def fulfill_maintenance_request(request):
+    page = 'Fulfill Maintenance Request'
+    fullname = username(request)
+    sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
+
+    form = FulfillMaintReqForm()
+    if request.method == 'POST':
+        mr = Maintenance_request.objects.get(pk=request.POST.get('request'))
+        mr.fulfilled = 1
+        mr.fulfillment_date = request.POST.get('fulfillment_date')
+        mr.fulfillment_notes = request.POST.get('fulfillment_notes')
+        mr.fulfillment_cost = request.POST.get('fulfillment_cost')
+        mr.last_update = timezone.now()
+        mr.save()
+
+        rdr = request.POST.get('rdr')
+        if rdr == 'None':
+            rdr = 'http://127.0.0.1:8000/portal'
+        return render(request, 'admin/confirmation.html', locals())
+    return render(request, 'admin/forms.html', locals())
+
+
+@groups_only('Admin')
+def edit_maintenance_request(request, mr_id):
+    page = 'Edit Maintenance Request'
+    fullname = username(request)
+    sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
+
+    mr = Maintenance_request.objects.get(id=mr_id)
+    fulfilled = mr.fulfilled
+
+    form = MaintenanceRequestForm(instance=mr)
+
+    if fulfilled:
+        buttons = [('Mark Request as Unfulfilled', 'unfulfill'), ]
+        form.fields['fulfillment_date'].required = True
+        form.fields['fulfillment_cost'].required = True
+
+    else:
+        form.fields['fulfillment_date'].widget = forms.HiddenInput()
+        form.fields['fulfillment_notes'].widget = forms.HiddenInput()
+        form.fields['fulfillment_cost'].widget = forms.HiddenInput()
+
+    if request.method == 'POST':
+        sub = MaintenanceRequestForm(request.POST, instance=mr)
+        if sub.is_valid():
+            sub.save()
+            mr.last_update = timezone.now()
+            if 'unfulfill' in request.POST:
+                mr.fulfilled = False
+                mr.fulfillment_cost = None
+                mr.fulfillment_date = None
+                mr.fulfillment_notes = ''
+            mr.save()
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
+    return render(request, 'admin/forms.html', locals())

@@ -91,6 +91,12 @@ urlpatterns = [
     path('portal/current_shopping_trip', singles.single_shopping_trip),
     path('portal/shopping_trip/<int:trip_id>', singles.single_shopping_trip),
 
+    # Maintenance Requests
+    path('portal/new_maintenance_request', hm_forms.new_maintenance_request),
+    path('portal/fulfill_maintenance_request', hm_forms.fulfill_maintenance_request),
+    path('portal/edit_maintenance_request/<int:mr_id>', hm_forms.edit_maintenance_request),
+    path('portal/maintenance_requests', tables.maintenance_requests),
+
     # # House Manager Page
     # path('portal/house_manager/', o_views.house_manager),
 

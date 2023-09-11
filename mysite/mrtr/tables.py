@@ -212,7 +212,10 @@ class HouseMeetingTable(tables.Table):
     def render_absentees(record):
         absentees = list(Absentee.objects.all().filter(meeting_id=record.pk).select_related('resident').annotate(
             full_name=Concat('resident__first_name', Value(' '), 'resident__last_name')).values_list('full_name', flat=True))
-        return ', '.join(absentees)
+        if len(absentees) != 0:
+            return ', '.join(absentees)
+        else:
+            return '—'
 
     def render_id(self, value):
         return f"Edit"
@@ -292,6 +295,30 @@ class ShoppingTripTable(tables.Table):
 
     def render_amount(self, value):
         return f"${value}"
+
+
+class MaintenanceRequestTable(tables.Table):
+    id = tables.Column(verbose_name='', linkify=True)
+    manager = tables.Column(verbose_name='Submitter', linkify=lambda record: get_manager_url(record), empty_values=[])
+    house = tables.Column(linkify=True)
+
+    class Meta:
+        model = Maintenance_request
+        sequence = ('id',
+                    'fulfilled',
+                    'house'
+                    )
+
+    def render_id(self, value):
+        return f"Edit"
+
+    def render_fulfillment_cost(self, value):
+        return f"${value}"
+
+    def render_manager(self, value):
+        if value is None:
+            value = 'Admin'
+        return value
 
 
 def RowTableLink(value):
