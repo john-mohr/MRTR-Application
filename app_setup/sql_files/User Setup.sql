@@ -5,7 +5,7 @@ VALUES
 ;
 
 UPDATE custom_user_user
-SET first_name = 'Erik', last_name = 'Gray', assoc_resident_id = 7
+SET first_name = 'Erik', last_name = 'Gray', assoc_resident_id = 7, timezone = 'America/Denver'
 WHERE email = 'e.gray@mrtr.com';
 
 UPDATE mrtr_house
@@ -13,15 +13,15 @@ SET manager_id = 7
 WHERE name = '277';
 
 UPDATE custom_user_user
-SET first_name = 'Fritz', last_name = 'Schuppe', assoc_resident_id = 3
-WHERE email = 'test@gmail.com';
+SET first_name = 'Tracy', last_name = 'DeHaas', assoc_resident_id = 3, timezone = 'America/Denver'
+WHERE email = 't.dehaas@mrtr.com';
 
 UPDATE mrtr_house
 SET manager_id = 3
 WHERE name = '278';
 
 UPDATE custom_user_user
-SET first_name = 'Brian', last_name = 'Chesley', assoc_resident_id = 14
+SET first_name = 'Brian', last_name = 'Chesley', assoc_resident_id = 14, timezone = 'America/Denver'
 WHERE email = 'b.chesley@mrtr.com';
 
 UPDATE mrtr_house
