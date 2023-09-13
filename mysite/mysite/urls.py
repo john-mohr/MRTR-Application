@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from mrtr.views import admin_forms, tables, hm_forms, o_views, singles
 from custom_user import views as user_view
-from django.contrib.auth import views as auth
+# from django.contrib.auth import views as auth
 
 urlpatterns = [
     path('forbidden', o_views.forbidden),
@@ -54,11 +54,6 @@ urlpatterns = [
     path('portal/houses', tables.houses),
     path('portal/house/<str:house_id>', singles.house),
     path('portal/beds', tables.beds),
-
-    # Meetings
-    path('portal/new_meeting', o_views.new_meeting),
-    path('portal/edit_meeting/<int:id>', o_views.edit_meeting),
-    path('portal/meetings', tables.meetings),
 
     path('portal/new_house_meeting', hm_forms.new_house_meeting),
     path('portal/edit_house_meeting/<int:hm_id>', hm_forms.edit_house_meeting),
@@ -97,9 +92,10 @@ urlpatterns = [
     path('portal/edit_maintenance_request/<int:mr_id>', hm_forms.edit_maintenance_request),
     path('portal/maintenance_requests', tables.maintenance_requests),
 
-    # # House Manager Page
-    # path('portal/house_manager/', o_views.house_manager),
-
+    # # Meetings
+    # path('portal/new_meeting', o_views.new_meeting),
+    # path('portal/edit_meeting/<int:id>', o_views.edit_meeting),
+    # path('portal/meetings', tables.meetings),
 ]
 
 urlpatterns += [

@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 
     'django_filters',
 
-    
+
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -60,6 +60,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'mrtr.utils.TimezoneMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -124,13 +126,14 @@ LANGUAGE_CODE = 'en-us'
 
 USE_I18N = True
 
-# TODO implement timezone support
+# TODO continue implementing timezone support
+# https://docs.djangoproject.com/en/4.1/topics/i18n/timezones/
+
+USE_TZ = True
 
 # TIME_ZONE = 'UTC'
-
-# USE_TZ = True
-
 TIME_ZONE = 'America/Denver'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -150,7 +153,7 @@ AUTH_USER_MODEL = 'custom_user.User'
 LOGIN_REDIRECT_URL = '/portal'
 
 
-#Email backend, AWS for production
+# Email backend, AWS for production
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_BACKEND = 'django_ses.SESBackend'
 # AWS_ACCESS_KEY_ID = 'YOUR-ACCESS-KEY-ID'

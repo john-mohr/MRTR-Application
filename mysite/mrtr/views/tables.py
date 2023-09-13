@@ -3,8 +3,7 @@ from ..tables import *
 from ..filters import *
 from custom_user.models import User
 from django.shortcuts import render
-from django.db.models.functions import Concat
-from django.db.models import Value, Sum, Q
+from django.db.models import Sum
 from django_tables2 import RequestConfig
 
 
@@ -172,18 +171,18 @@ def maintenance_requests(request):
 
     table_filter = MaintenanceRequestFilter(request.GET, queryset=qs)
 
-    table = MaintenanceRequestTable(table_filter.qs, order_by='-submission_date', orderable=True, exclude=hm_exc)
+    table = MaintenanceRequestTable(table_filter.qs, order_by=('fulfilled', '-fulfillment_date'), orderable=True, exclude=hm_exc)
     return table_view(request, 'maintenance_requests', 'View All Maintenance Requests', table_filter, table, buttons)
 
 
-@groups_only('Admin')
-def meetings(request):
-    qs = Manager_meeting.objects.all()
-
-    table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
-
-    table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True)
-    return table_view(request, 'View All Meetings', table_filter, table,
-                      (('Add New Meeting', '/portal/new_meeting'), ))
-
-
+# @groups_only('Admin')
+# def meetings(request):
+#     qs = Manager_meeting.objects.all()
+#
+#     table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
+#
+#     table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True)
+#     return table_view(request, 'View All Meetings', table_filter, table,
+#                       (('Add New Meeting', '/portal/new_meeting'), ))
+#
+#

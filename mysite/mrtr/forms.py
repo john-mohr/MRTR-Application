@@ -1,7 +1,5 @@
 from django import forms
 from .models import *
-from django.core.validators import MaxValueValidator
-from django.contrib.auth.forms import UserCreationForm
 
 
 class ContactForm(forms.Form):
@@ -176,7 +174,8 @@ class DrugTestForm(forms.ModelForm):
 
     class Meta:
         model = Drug_test
-        fields = ['resident',
+        fields = ['manager',
+                  'resident',
                   'date',
                   'result',
                   'substances',
@@ -184,12 +183,23 @@ class DrugTestForm(forms.ModelForm):
                   ]
         widgets = {
             'date': DateInput(),
+            'manager': forms.HiddenInput()
         }
 
     def clean_substances(self):
         data = self.cleaned_data['substances']
         data = ', '.join(data)
         return data
+
+    def clean(self):
+        cleaned_data = super().clean()
+        result = cleaned_data.get('result')
+        substances = cleaned_data.get('substances')
+
+        if 'Positive' in result and substances == '':
+            self.add_error('result', 'If the test is positive, please indicate which substances are present')
+        elif result == 'Negative' and substances != '':
+            self.add_error('result', 'If the test is negative, please ensure that no substances are selected')
 
     def __init__(self, *args, **kwargs):
         is_hm = kwargs.pop('is_hm', None)
@@ -322,8 +332,10 @@ class SupplyRequestForm(forms.ModelForm):
     class Meta:
         model = Supply_request
         fields = ['house',
+                  'manager',
                   'products'
                   ]
+        widgets = {'manager': forms.HiddenInput}
 
 
 class ProductForm(forms.Form):
@@ -331,6 +343,8 @@ class ProductForm(forms.Form):
                              required=False)
     house = forms.IntegerField(widget=forms.HiddenInput,
                                required=False)
+    manager = forms.IntegerField(widget=forms.HiddenInput,
+                                 required=False)
     products = forms.MultipleChoiceField(widget=forms.MultipleHiddenInput(),
                                          choices=Supply_request.PRODUCT_CHOICES,
                                          required=False)
@@ -367,7 +381,7 @@ class ProductForm(forms.Form):
 class MaintenanceRequestForm(forms.ModelForm):
     house = HouseField(queryset=House.objects.all())
     issue = forms.CharField(widget=forms.Textarea, label='Describe the issue')
-    fulfillment_date = forms.DateField(widget=DateInput(), required=False)
+    fulfillment_date = forms.DateField(widget=DateInput(), required=False, validators=[validate_date])
     fulfillment_cost = forms.DecimalField(decimal_places=2, required=False)
 
     class Meta:
@@ -393,21 +407,22 @@ class MaintReqField(forms.ModelChoiceField):
 
 class FulfillMaintReqForm(forms.Form):
     request = MaintReqField(queryset=Maintenance_request.objects.filter(fulfilled=False))
-    fulfillment_date = forms.DateField(widget=DateInput(), initial=timezone.now, label='Date fulfilled')
+    fulfillment_date = forms.DateField(widget=DateInput(), initial=timezone.now,
+                                       label='Date fulfilled', validators=[validate_date])
     fulfillment_notes = forms.CharField(widget=forms.Textarea, label='Notes', required=False)
     fulfillment_cost = forms.DecimalField(decimal_places=2, label='Amount spent')
 
 
-class ManagerMeetingForm(forms.ModelForm):
-    class Meta:
-        model = Manager_meeting
-        fields = ['title',
-                  'date',
-                  'minutes_discussed',
-                  'location',
-                  'attendee',
-                  'issues',
-                  ]
-        widgets = {
-            'date': DateInput(),
-        }
+# class ManagerMeetingForm(forms.ModelForm):
+#     class Meta:
+#         model = Manager_meeting
+#         fields = ['title',
+#                   'date',
+#                   'minutes_discussed',
+#                   'location',
+#                   'attendee',
+#                   'issues',
+#                   ]
+#         widgets = {
+#             'date': DateInput(),
+#         }

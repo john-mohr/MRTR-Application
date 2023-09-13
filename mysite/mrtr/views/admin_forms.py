@@ -49,6 +49,9 @@ def new_res(request):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = ResidentForm(request.POST)
+    print('cc')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -82,7 +85,7 @@ def edit_res(request, res_id):
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
         else:
-            form = ResidentForm(instance=resident)
+            form = ResidentForm(request.POST, instance=resident)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -147,7 +150,7 @@ def readmit_res(request, res_id):
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
         else:
-            form = ResidentForm(instance=resident)
+            form = ResidentForm(request.POST, instance=resident)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -181,6 +184,8 @@ def new_trans(request, res_id=None):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = TransactionForm(request.POST)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -208,6 +213,8 @@ def new_rent_pmt(request, res_id=None):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = RentPaymentForm(request.POST)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -250,7 +257,7 @@ def edit_trans(request, trans_id):
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
         else:
-            form = TransactionForm(instance=trans)
+            form = TransactionForm(request.POST, instance=trans)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -349,6 +356,8 @@ def new_shopping_trip(request):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = ShoppingTripForm(request.POST)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -371,5 +380,6 @@ def edit_shopping_trip(request, trip_id):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = ShoppingTripForm(request.POST, instance=trip)
     return render(request, 'admin/forms.html', locals())
-

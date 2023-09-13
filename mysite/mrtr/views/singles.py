@@ -4,13 +4,12 @@ from custom_user.models import User
 from django.shortcuts import render
 from django.db.models.functions import Concat
 from django.db.models import Value, Sum
-from ..filters import *
 from django_tables2 import RequestConfig
-
-import collections, functools, operator
-
-from collections import Counter
 from itertools import groupby
+from collections import Counter
+from functools import reduce
+from operator import add
+
 
 def resident(request, res_id):
     res = Resident.objects.get(id=res_id)
@@ -47,7 +46,7 @@ def resident(request, res_id):
     if hm:
         sidebar = hm_sidebar
         buttons = []
-        hm_exc = ('id', )
+        hm_exc = ('id', 'manager')
     else:
         hm_exc = ()
 
@@ -90,9 +89,6 @@ def resident(request, res_id):
                              exclude=('resident', ) + hm_exc)
     RequestConfig(request).configure(check_ins)
 
-    if hm:
-        check_ins.columns[0].link = None
-
     sections = [
         ('Contact Info', contact_info),
         ('Resident Details', res_details),
@@ -127,8 +123,8 @@ def house(request, house_id):
             ('Add new check in', '/portal/new_check_in'),
             ('Add new site visit', '/portal/new_site_visit'),
             ('Add new house meeting', '/portal/new_house_meeting'),
-            ('Make supply request', '/portal/new_supply_request')
-
+            ('Make supply request', '/portal/new_supply_request'),
+            ('Make maintenance request', '/portal/new_maintenance_request')
         ]
         hm_exc = ('id', )
     else:
@@ -158,7 +154,7 @@ def house(request, house_id):
         if latest_dtest.exists():
             latest_dtests.append(latest_dtest.latest('date').pk)
     recent_dtests = DrugTestTable(Drug_test.objects.filter(pk__in=latest_dtests),
-                                  order_by='-date', orderable=True, exclude=hm_exc)
+                                  order_by='-date', orderable=True, exclude=('manager', ) + hm_exc)
     RequestConfig(request).configure(recent_dtests)
 
     # Most recent check in for each resident table
@@ -167,7 +163,6 @@ def house(request, house_id):
         latest_check_in = Check_in.objects.filter(resident=res)
         if latest_check_in.exists():
             latest_check_ins.append(latest_check_in.latest('date').pk)
-
     recent_check_ins = CheckInTable(Check_in.objects.filter(pk__in=latest_check_ins),
                                     order_by='-date', orderable=True, exclude=('manager', ) + hm_exc)
     RequestConfig(request).configure(recent_check_ins)
@@ -260,7 +255,7 @@ def single_shopping_trip(request, trip_id=None):
 
     def format_for_table(product_list):
         if len(product_list) > 0:
-            prod_totals = dict(functools.reduce(operator.add, map(collections.Counter, product_list)))
+            prod_totals = dict(reduce(add, map(Counter, product_list)))
             data = []
             keys = list(prod_totals.keys())
             values = list(prod_totals.values())

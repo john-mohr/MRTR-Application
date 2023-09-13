@@ -32,6 +32,12 @@
         margin: 15px;
         justify-content: left;
     }
+    .invalid-feedback{
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 20px;
+        color: red;
+    }
     @media screen and (max-width: 1500px) {
         .container{
             margin-top: 50px;
@@ -54,13 +60,13 @@
         <input type="hidden" name="rdr" value="{{ rdr }}">
         <input type="submit">
     </form>
-    {% if messages %}
-        <ul class="messages">
-    {% for message in messages %}
-        <li  {% if message.tags %} class=" {{ message.tags }} " {% endif %}> {{ message }} </li>
-    {% endfor %}
-        </ul>
-    {% endif %}
+{#    {% if messages %}#}
+{#        <ul class="messages">#}
+{#    {% for message in messages %}#}
+{#        <li  {% if message.tags %} class=" {{ message.tags }} " {% endif %}> {{ message }} </li>#}
+{#    {% endfor %}#}
+{#        </ul>#}
+{#    {% endif %}#}
 </div>
 
 {% endblock content %}

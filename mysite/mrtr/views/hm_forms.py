@@ -9,15 +9,14 @@ def new_dtest(request):
     page = 'New Drug Test'
     fullname = username(request)
     rdr = request.META.get('HTTP_REFERER')
-
     mngr = User.objects.get(pk=request.user.pk).assoc_resident
 
     if user_is_hm(request):
         sidebar = hm_sidebar
-        form = DrugTestForm(is_hm=True, house=House.objects.get(manager=mngr).pk)
+        form = DrugTestForm(initial={'manager': mngr}, is_hm=True, house=House.objects.get(manager=mngr).pk)
     else:
         sidebar = admin_sidebar
-        form = DrugTestForm()
+        form = DrugTestForm(initial={'manager': mngr})
     if request.method == 'POST':
         sub = DrugTestForm(request.POST)
         if sub.is_valid():
@@ -26,6 +25,8 @@ def new_dtest(request):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = DrugTestForm(request.POST)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -51,7 +52,7 @@ def edit_dtest(request, test_id):
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
         else:
-            form = DrugTestForm(instance=dtest, initial={'substances': dtest_subs})
+            form = DrugTestForm(request.POST, instance=dtest)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -69,15 +70,16 @@ def new_check_in(request):
     else:
         sidebar = admin_sidebar
         form = CheckInForm(initial={'manager': mngr})
-
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = CheckInForm(request.POST)
         if sub.is_valid():
             sub.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = CheckInForm(request.POST)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -101,7 +103,7 @@ def edit_check_in(request, ci_id):
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
         else:
-            form = CheckInForm(instance=ci)
+            form = CheckInForm(request.POST, instance=ci)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -130,6 +132,8 @@ def new_site_visit(request):
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = SiteVisitForm(request.POST)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -155,7 +159,7 @@ def edit_site_visit(request, sv_id):
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
         else:
-            form = SiteVisitForm(instance=sv, initial={'issues': sv_issues})
+            form = SiteVisitForm(request.POST, instance=sv)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -180,17 +184,20 @@ def new_house_meeting(request):
         house = House.objects.get(id=int(house_id))
         form = HouseMeetingForm(initial={'house': house},
                                 house=house)
-        sub = HouseMeetingForm(request.POST, house=house)
-        if sub.is_valid():
-            meeting_id = sub.save()
-            absentees = sub.cleaned_data['absentees']
-            for i in range(len(absentees)):
-                absentee = Absentee(resident=absentees[i],
-                                    meeting=meeting_id)
-                absentee.save()
-            if rdr == 'None':
-                rdr = 'http://127.0.0.1:8000/portal'
-            return render(request, 'admin/confirmation.html', locals())
+        if 'issues' in request.POST:
+            sub = HouseMeetingForm(request.POST, house=house)
+            if sub.is_valid():
+                meeting_id = sub.save()
+                absentees = sub.cleaned_data['absentees']
+                for i in range(len(absentees)):
+                    absentee = Absentee(resident=absentees[i],
+                                        meeting=meeting_id)
+                    absentee.save()
+                if rdr == 'None':
+                    rdr = 'http://127.0.0.1:8000/portal'
+                return render(request, 'admin/confirmation.html', locals())
+            else:
+                form = HouseMeetingForm(request.POST, house=house)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -199,33 +206,34 @@ def edit_house_meeting(request, hm_id):
     page = 'Edit House Meeting'
     fullname = username(request)
     sidebar = admin_sidebar
-    rdr = request.META.get('HTTP_REFERER')
 
     hm = House_meeting.objects.get(id=hm_id)
     hm_absentees_list = Absentee.objects.all().filter(meeting_id=hm_id).values_list('resident_id', flat=True)
     hm_absentees = Resident.objects.filter(id__in=hm_absentees_list)
 
-    form = HouseMeetingForm(instance=hm, initial={'absentees': hm_absentees}, house=hm.house)
-    if request.method == 'POST':
+    if request.method == 'GET':
+        rdr = request.META.get('HTTP_REFERER')
+        form = HouseMeetingForm(instance=hm, initial={'absentees': hm_absentees}, house=hm.house)
+    else:
+        rdr = request.POST.get('rdr')
         sub = HouseMeetingForm(request.POST, instance=hm, initial={'absentees': hm_absentees}, house=hm.house)
         if sub.is_valid():
-            x = sub.save()
-
+            sub.save()
             new_absentees = sub.cleaned_data['absentees']
 
             if list(hm_absentees) != list(new_absentees):  # Check if Absentee table needs to be changed
                 Absentee.objects.filter(meeting_id=hm_id).delete()  # Delete old Absentees
                 for i in range(len(new_absentees)):  # Add new Absentees
-                    absentee = Absentee(resident=new_absentees[i],
-                                        meeting=hm)
+                    absentee = Absentee(resident=new_absentees[i], meeting=hm)
                     absentee.save()
 
             hm.last_update = timezone.now()
             hm.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = HouseMeetingForm(request.POST, instance=hm, house=hm.house)
     return render(request, 'admin/forms.html', locals())
 
 
@@ -239,7 +247,7 @@ def new_supply_request(request):
         if user_is_hm(request):
             sidebar = hm_sidebar
             mngr = User.objects.get(pk=request.user.pk).assoc_resident
-            form = SupplyRequestForm(initial={'house': House.objects.get(manager=mngr)})
+            form = SupplyRequestForm(initial={'house': House.objects.get(manager=mngr), 'manager': mngr})
             form.fields['house'].widget = forms.HiddenInput()
         else:
             sidebar = admin_sidebar
@@ -247,10 +255,12 @@ def new_supply_request(request):
 
     else:
         rdr = request.POST.get('rdr')
-        house = int(request.POST.get('house'))
+
+        house = request.POST.get('house')
+        manager = request.POST.get('manager')
         products = request.POST.getlist('products')
 
-        form = ProductForm(initial={'house': house, 'products': products}, products=products)
+        form = ProductForm(initial={'house': house, 'products': products, 'manager': manager}, products=products)
         sub = ProductForm(request.POST, products=products)
         if sub.is_valid():
             products = request.POST.getlist('products')
@@ -265,7 +275,8 @@ def new_supply_request(request):
 
             sr = Supply_request(products=replace_products,
                                 other=other_note,
-                                house_id=house)
+                                house_id=house,
+                                manager_id=manager)
             sr.save()
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
@@ -357,7 +368,6 @@ def new_maintenance_request(request):
 
     form.fields['fulfillment_date'].widget = forms.HiddenInput()
     form.fields['fulfillment_notes'].widget = forms.HiddenInput()
-    # print(form.fields['fulfillment_cost'].decimal_places)
     form.fields['fulfillment_cost'].widget = forms.HiddenInput()
 
     if request.method == 'POST':
@@ -377,21 +387,24 @@ def fulfill_maintenance_request(request):
     fullname = username(request)
     sidebar = admin_sidebar
     rdr = request.META.get('HTTP_REFERER')
-
     form = FulfillMaintReqForm()
-    if request.method == 'POST':
-        mr = Maintenance_request.objects.get(pk=request.POST.get('request'))
-        mr.fulfilled = 1
-        mr.fulfillment_date = request.POST.get('fulfillment_date')
-        mr.fulfillment_notes = request.POST.get('fulfillment_notes')
-        mr.fulfillment_cost = request.POST.get('fulfillment_cost')
-        mr.last_update = timezone.now()
-        mr.save()
 
+    if request.method == 'POST':
         rdr = request.POST.get('rdr')
-        if rdr == 'None':
-            rdr = 'http://127.0.0.1:8000/portal'
-        return render(request, 'admin/confirmation.html', locals())
+        form = FulfillMaintReqForm(request.POST)
+        if len(form.errors) == 0:
+            mr = Maintenance_request.objects.get(pk=request.POST.get('request'))
+            mr.fulfilled = 1
+            mr.fulfillment_date = request.POST.get('fulfillment_date')
+            mr.fulfillment_notes = request.POST.get('fulfillment_notes')
+            mr.fulfillment_cost = request.POST.get('fulfillment_cost')
+            mr.last_update = timezone.now()
+            mr.save()
+
+            rdr = request.POST.get('rdr')
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
     return render(request, 'admin/forms.html', locals())
 
 
@@ -400,24 +413,21 @@ def edit_maintenance_request(request, mr_id):
     page = 'Edit Maintenance Request'
     fullname = username(request)
     sidebar = admin_sidebar
-    rdr = request.META.get('HTTP_REFERER')
-
     mr = Maintenance_request.objects.get(id=mr_id)
-    fulfilled = mr.fulfilled
 
-    form = MaintenanceRequestForm(instance=mr)
-
-    if fulfilled:
-        buttons = [('Mark Request as Unfulfilled', 'unfulfill'), ]
-        form.fields['fulfillment_date'].required = True
-        form.fields['fulfillment_cost'].required = True
-
+    if request.method == 'GET':
+        rdr = request.META.get('HTTP_REFERER')
+        form = MaintenanceRequestForm(instance=mr)
+        if mr.fulfilled:
+            buttons = [('Mark Request as Unfulfilled', 'unfulfill'), ]
+            form.fields['fulfillment_date'].required = True
+            form.fields['fulfillment_cost'].required = True
+        else:
+            form.fields['fulfillment_date'].widget = forms.HiddenInput()
+            form.fields['fulfillment_notes'].widget = forms.HiddenInput()
+            form.fields['fulfillment_cost'].widget = forms.HiddenInput()
     else:
-        form.fields['fulfillment_date'].widget = forms.HiddenInput()
-        form.fields['fulfillment_notes'].widget = forms.HiddenInput()
-        form.fields['fulfillment_cost'].widget = forms.HiddenInput()
-
-    if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = MaintenanceRequestForm(request.POST, instance=mr)
         if sub.is_valid():
             sub.save()
@@ -428,8 +438,10 @@ def edit_maintenance_request(request, mr_id):
                 mr.fulfillment_date = None
                 mr.fulfillment_notes = ''
             mr.save()
-            rdr = request.POST.get('rdr')
+
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = MaintenanceRequestForm(request.POST, instance=mr)
     return render(request, 'admin/forms.html', locals())
