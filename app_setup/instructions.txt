@@ -2,15 +2,11 @@
 2: Put the initial_data files somewhere SQL can access them 
 3: Update the filepaths in the 'Load Data' SQL file and run
 4: Run createsuperuser and create an admin user
-5: Go into the Django admin page and create three users with the following login info:
+5: Go into the Django admin page and create three users with the following emails:
 
-	Email addresses:
-		e.gray@mrtr.com
-		test@gmail.com
-		b.chesley@mrtr.com
-
-	Password:
-		mrtrpass
+	e.gray@mrtr.com
+	t.dehaas@mrtr.com
+	b.chesley@mrtr.com
 
 6: Run the 'User Setup' SQL file
 7: Login as each user to verify everything worked properly
