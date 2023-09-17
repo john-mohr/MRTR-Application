@@ -126,8 +126,11 @@ LANGUAGE_CODE = 'en-us'
 
 USE_I18N = True
 
-# TODO continue implementing timezone support
 # https://docs.djangoproject.com/en/4.1/topics/i18n/timezones/
+# TODO continue implementing timezone support
+#   Figure out how to get default dates/times to show up correctly in forms (note: dates cannot be converted, only datetimes)
+#   Make sure all code involving dates/times uses aware date/time objects
+
 
 USE_TZ = True
 

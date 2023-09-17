@@ -11,6 +11,17 @@ class ContactForm(forms.Form):
 
 class DateInput(forms.DateInput):
     input_type = 'date'
+    allow_future = False
+
+    def __init__(self, *args, **kwargs):
+        future = kwargs.pop('future', False)
+        super(DateInput, self).__init__(*args, **kwargs)
+        self.allow_future = future
+
+    def get_context(self, name, value, attrs):
+        if not self.allow_future:
+            attrs.setdefault('max', timezone.localdate().strftime('%Y-%m-%d'))
+        return super().get_context(name, value, attrs)
 
 
 class BedField(forms.ModelChoiceField):
@@ -201,14 +212,6 @@ class DrugTestForm(forms.ModelForm):
         elif result == 'Negative' and substances != '':
             self.add_error('result', 'If the test is negative, please ensure that no substances are selected')
 
-    def __init__(self, *args, **kwargs):
-        is_hm = kwargs.pop('is_hm', None)
-        hm_house = kwargs.pop('house', None)
-        super(DrugTestForm, self).__init__(*args, **kwargs)
-        if is_hm:
-            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house).order_by('first_name')
-            self.fields['resident'].queryset = house_res
-
 
 class CheckInForm(forms.ModelForm):
     resident = ResidentField(queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'))
@@ -227,14 +230,6 @@ class CheckInForm(forms.ModelForm):
             'date': DateInput(),
             'manager': forms.HiddenInput()
         }
-
-    def __init__(self, *args, **kwargs):
-        is_hm = kwargs.pop('is_hm', None)
-        hm_house = kwargs.pop('house', None)
-        super(CheckInForm, self).__init__(*args, **kwargs)
-        if is_hm:
-            house_res = Resident.objects.filter(discharge_date__isnull=True, bed__house=hm_house).order_by('first_name')
-            self.fields['resident'].queryset = house_res
 
 
 class SiteVisitForm(forms.ModelForm):
@@ -285,9 +280,9 @@ class HouseSelectForm(forms.Form):
 class HouseMeetingForm(forms.ModelForm):
     name = 'house meeting'
     absentees = AbsenteeField(widget=forms.CheckboxSelectMultiple,
-                              queryset=Resident.objects.all(),
+                              queryset=Resident.objects.filter(discharge_date__isnull=True).order_by('first_name'),
                               required=False)
-    issues = forms.CharField(widget=forms.Textarea, required=False, label='Issues discussed')
+    issues = forms.CharField(widget=forms.Textarea, label='Issues discussed')
 
     class Meta:
         model = House_meeting
@@ -326,8 +321,7 @@ class ShoppingTripForm(forms.ModelForm):
 
 class SupplyRequestForm(forms.ModelForm):
     products = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
-                                         choices=Supply_request.PRODUCT_CHOICES,
-                                         required=False)
+                                         choices=Supply_request.PRODUCT_CHOICES)
 
     class Meta:
         model = Supply_request

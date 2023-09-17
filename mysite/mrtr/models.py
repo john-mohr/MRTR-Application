@@ -135,7 +135,7 @@ class Drug_test(models.Model):
 
 
 class Check_in(models.Model):
-    date = models.DateField(default=timezone.localtime(timezone.now()), validators=[validate_date])
+    date = models.DateField(default=timezone.now, validators=[validate_date])
     METHOD_CHOICES = [
         ('In person', 'In person'),
         ('Phone call', 'Phone call'),
@@ -168,7 +168,7 @@ class Site_visit(models.Model):
 
 class House_meeting(models.Model):
     date = models.DateField(default=timezone.now, validators=[validate_date])
-    issues = models.TextField(blank=True)
+    issues = models.TextField()
     house = models.ForeignKey('House', on_delete=models.CASCADE)
     manager = models.ForeignKey('Resident', on_delete=models.CASCADE, db_column='manager_id', blank=True, null=True)
     submission_date = models.DateTimeField(default=timezone.now)  # automatic
@@ -250,7 +250,7 @@ class Maintenance_request(models.Model):
         return '/portal/edit_maintenance_request/%i' % self.id
 
 
-# TODO (wait) ask TC if the app needs a section for manager meetings
+# TODO Simplify and implement
 # class Manager_meeting(models.Model):
 #     title = models.CharField(max_length=150)
 #     issues = models.TextField(blank=True)

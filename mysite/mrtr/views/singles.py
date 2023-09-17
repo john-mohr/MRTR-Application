@@ -180,13 +180,13 @@ def house(request, house_id):
         if latest_sv.last_update is None:
             lu = '—'
         else:
-            lu = latest_sv.last_update.strftime('%m/%d/%Y %I:%M %p')
+            lu = timezone.localtime(latest_sv.last_update).strftime('%m/%d/%Y %I:%M %p')
 
         visit_data = [{'name': 'Date', 'value': latest_sv.date.strftime('%m/%d/%Y')},
                       {'name': 'Issues', 'value': latest_sv.issues},
                       {'name': 'Explanation', 'value': latest_sv.explanation},
                       {'name': 'Submitter', 'value': mngr},
-                      {'name': 'Submission date', 'value': latest_sv.submission_date.strftime('%m/%d/%Y %I:%M %p')},
+                      {'name': 'Submission date', 'value': timezone.localtime(latest_sv.submission_date).strftime('%m/%d/%Y %I:%M %p')},
                       {'name': 'Last update', 'value': lu},
                       {'name': 'Edit', 'value': latest_sv.get_absolute_url()}]
 
@@ -213,7 +213,7 @@ def house(request, house_id):
         if latest_m.last_update is None:
             lu = '—'
         else:
-            lu = latest_m.last_update.strftime('%m/%d/%Y %I:%M %p')
+            lu = timezone.localtime(latest_m.last_update).strftime('%m/%d/%Y %I:%M %p')
 
         absentees = ', '.join(list(Absentee.objects.all()
                                    .filter(meeting_id=latest_m.pk)
@@ -225,7 +225,7 @@ def house(request, house_id):
                         {'name': 'Issues', 'value': latest_m.issues},
                         {'name': 'Absentees', 'value': absentees},
                         {'name': 'Submitter', 'value': mngr},
-                        {'name': 'Submission date', 'value': latest_m.submission_date.strftime('%m/%d/%Y %I:%M %p')},
+                        {'name': 'Submission date', 'value': timezone.localtime(latest_m.submission_date).strftime('%m/%d/%Y %I:%M %p')},
                         {'name': 'Last update', 'value': lu},
                         {'name': 'Edit', 'value': latest_m.get_absolute_url()}]
 

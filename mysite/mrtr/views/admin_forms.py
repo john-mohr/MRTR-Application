@@ -15,6 +15,7 @@ def new_res(request):
     rdr = request.META.get('HTTP_REFERER')
 
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = ResidentForm(request.POST)
         if sub.is_valid():
             sub.save()
@@ -45,13 +46,11 @@ def new_res(request):
                                     )
             second_mo.save()
 
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
         else:
             form = ResidentForm(request.POST)
-    print('cc')
     return render(request, 'admin/forms.html', locals())
 
 
@@ -66,6 +65,7 @@ def edit_res(request, res_id):
     old_rent = resident.rent
     form = ResidentForm(instance=resident)
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = ResidentForm(request.POST, instance=resident)
         if sub.is_valid():
             new_rent = int(request.POST['rent'])
@@ -80,7 +80,6 @@ def edit_res(request, res_id):
             sub.save()
             resident.last_update = timezone.now()
             resident.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -99,6 +98,7 @@ def discharge_res(request, res_id):
     resident = Resident.objects.get(id=res_id)
     form = DischargeResForm()
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = DischargeResForm(request.POST)
         if sub.is_valid():
             resident.discharge_date = sub.cleaned_data['date']
@@ -108,7 +108,6 @@ def discharge_res(request, res_id):
                 resident.notes = str(resident.notes) + '\nReason Discharged (' + str(sub.cleaned_data['date']) + '): ' + sub.cleaned_data['reason']
             # TODO (wait) Figure out if TC wants an option to refund rent
             resident.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -126,6 +125,7 @@ def readmit_res(request, res_id):
     resident = Resident.objects.get(id=res_id)
     form = ResidentForm(instance=resident)
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = ResidentForm(request.POST, instance=resident)
         if sub.is_valid():
             resident.notes = resident.notes + '\n Previous residency: ' + \
@@ -145,7 +145,6 @@ def readmit_res(request, res_id):
                                         )
             current_month.save()
 
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -169,6 +168,7 @@ def new_trans(request, res_id=None):
         form = TransactionForm()
 
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = TransactionForm(request.POST)
         if sub.is_valid():
             if sub.instance.type != 'Fix' and sub.instance.type != 'Other (specify)':
@@ -180,7 +180,6 @@ def new_trans(request, res_id=None):
                 sub.instance.amount *= -1
             sub.save()
 
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -203,13 +202,13 @@ def new_rent_pmt(request, res_id=None):
         form = RentPaymentForm()
 
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = RentPaymentForm(request.POST)
         if sub.is_valid():
             sub.instance.amount = abs(sub.instance.amount)
             sub.instance.amount *= -1
             sub.instance.type = 'Rent payment'
             sub.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -237,6 +236,7 @@ def edit_trans(request, trans_id):
         form = TransactionForm(instance=trans)
 
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         if trans.type == 'Rent payment':
             sub = RentPaymentForm(request.POST, instance=trans)
         else:
@@ -252,7 +252,6 @@ def edit_trans(request, trans_id):
 
             trans.last_update = timezone.now()
             sub.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -271,10 +270,10 @@ def new_house(request):
 
     form = HouseForm()
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = HouseForm(request.POST)
         if sub.is_valid():
             sub.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -292,6 +291,7 @@ def edit_house(request, house_id):
     prev_mngr = house.manager
     form = HouseForm(instance=house, house=house)
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = HouseForm(request.POST, instance=house, house=house)
         if sub.is_valid():
             sub.save()
@@ -328,7 +328,6 @@ def edit_house(request, house_id):
                     house.manager.rent = house.manager.rent / 2
                     house.manager.save()
 
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -344,6 +343,7 @@ def new_shopping_trip(request):
 
     form = ShoppingTripForm(initial={'date': timezone.now()})
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = ShoppingTripForm(request.POST)
         if sub.is_valid():
             trip_id = sub.save()
@@ -352,7 +352,6 @@ def new_shopping_trip(request):
                 assoc_reqs[i].trip = trip_id
                 assoc_reqs[i].fulfilled = 1
                 assoc_reqs[i].save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
@@ -371,12 +370,12 @@ def edit_shopping_trip(request, trip_id):
     trip = Shopping_trip.objects.get(id=trip_id)
     form = ShoppingTripForm(instance=trip)
     if request.method == 'POST':
+        rdr = request.POST.get('rdr')
         sub = ShoppingTripForm(request.POST, instance=trip)
         if sub.is_valid():
             sub.save()
             trip.last_update = timezone.now()
             trip.save()
-            rdr = request.POST.get('rdr')
             if rdr == 'None':
                 rdr = 'http://127.0.0.1:8000/portal'
             return render(request, 'admin/confirmation.html', locals())
