@@ -175,14 +175,17 @@ def maintenance_requests(request):
     return table_view(request, 'maintenance_requests', 'View All Maintenance Requests', table_filter, table, buttons)
 
 
-# @groups_only('Admin')
-# def meetings(request):
-#     qs = Manager_meeting.objects.all()
-#
-#     table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
-#
-#     table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True)
-#     return table_view(request, 'View All Meetings', table_filter, table,
-#                       (('Add New Meeting', '/portal/new_meeting'), ))
-#
-#
+def mngr_meetings(request):
+    qs = Manager_meeting.objects.all()
+
+    if user_is_hm(request):
+        hm_exc = ('id', )
+        buttons = None
+    else:
+        hm_exc = ''
+        buttons = [('Add New Meeting', '/portal/new_mngr_meeting'), ]
+
+    table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
+
+    table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    return table_view(request, 'mngr_meetings', 'View All Manager Meetings', table_filter, table, buttons)

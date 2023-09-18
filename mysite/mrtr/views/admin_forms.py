@@ -382,3 +382,50 @@ def edit_shopping_trip(request, trip_id):
         else:
             form = ShoppingTripForm(request.POST, instance=trip)
     return render(request, 'admin/forms.html', locals())
+
+
+@groups_only('Admin')
+def new_mngr_meeting(request):
+    page = 'Add New Meeting'
+    fullname = username(request)
+    sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
+
+    form = ManagerMeetingForm()
+    if request.method == 'POST':
+        rdr = request.POST.get('rdr')
+        sub = ManagerMeetingForm(request.POST)
+        if sub.is_valid():
+            sub.save()
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = ManagerMeetingForm(request.POST)
+    return render(request, 'admin/forms.html', locals())
+
+
+@groups_only('Admin')
+def edit_mngr_meeting(request, mm_id):
+    page = 'Edit Manager Meeting'
+    fullname = username(request)
+    sidebar = admin_sidebar
+    rdr = request.META.get('HTTP_REFERER')
+
+    meeting = Manager_meeting.objects.get(id=mm_id)
+    attendees = Resident.objects.filter(id__in=list(eval(meeting.attendees)))
+
+    form = ManagerMeetingForm(instance=meeting, initial={'attendees': attendees})
+    if request.method == 'POST':
+        rdr = request.POST.get('rdr')
+        sub = ManagerMeetingForm(request.POST, instance=meeting)
+        if sub.is_valid():
+            sub.save()
+            meeting.last_update = timezone.now()
+            meeting.save()
+            if rdr == 'None':
+                rdr = 'http://127.0.0.1:8000/portal'
+            return render(request, 'admin/confirmation.html', locals())
+        else:
+            form = ManagerMeetingForm(request.POST, instance=meeting)
+    return render(request, 'admin/forms.html', locals())

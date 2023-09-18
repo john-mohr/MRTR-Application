@@ -178,6 +178,7 @@ class House_meeting(models.Model):
         return '/portal/edit_house_meeting/%i' % self.id
 
 
+# TODO decide if this model is actually useful/necessary (see manager meetings)
 class Absentee(models.Model):
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)  # automatic
     meeting = models.ForeignKey('House_meeting', on_delete=models.CASCADE)  # automatic
@@ -250,16 +251,15 @@ class Maintenance_request(models.Model):
         return '/portal/edit_maintenance_request/%i' % self.id
 
 
-# TODO Simplify and implement
-# class Manager_meeting(models.Model):
-#     title = models.CharField(max_length=150)
-#     issues = models.TextField(blank=True)
-#     date = models.DateField(default=timezone.now)
-#     location = models.CharField(max_length=50)
-#     attendee = models.TextField(blank=True)
-#     minutes_discussed = models.BooleanField()
-#     submission_date = models.DateTimeField(default=timezone.now)  # automatic
-#     last_update = models.DateTimeField(blank=True, null=True)  # automatic
-#
-#     def get_absolute_url(self):
-#         return '/portal/meeting/%i' % self.id
+class Manager_meeting(models.Model):
+    date = models.DateField(default=timezone.now, validators=[validate_date])
+    location = models.CharField(max_length=50)
+    attendees = models.TextField(blank=True)
+    ongoing_issues = models.TextField(blank=True)
+    new_issues = models.TextField(blank=True)
+    minutes_discussed = models.BooleanField()
+    submission_date = models.DateTimeField(default=timezone.now)  # automatic
+    last_update = models.DateTimeField(blank=True, null=True)  # automatic
+
+    def get_absolute_url(self):
+        return '/portal/edit_mngr_meeting/%i' % self.id

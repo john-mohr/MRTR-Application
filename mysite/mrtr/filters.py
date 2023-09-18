@@ -225,16 +225,11 @@ class BedFilter(MasterFilter):
         return queryset.filter(resident__isnull=bool(int(value)))
 
 
-# class ManagerMeetingFilter(MasterFilter):
-#     field_list = [
-#             'title',
-#             'date',
-#             'location',
-#             'submission_date',
-#             'last_update',
-#             'attendee',
-#         ]
-#
-#     class Meta:
-#         model = Manager_meeting
-#         fields = ['search', 'date']
+class ManagerMeetingFilter(MasterFilter):
+    field_list = [
+        'date',
+        'location',
+        'attendees',
+        'ongoing_issues',
+        'new_issues'
+    ]

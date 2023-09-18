@@ -55,6 +55,7 @@ urlpatterns = [
     path('portal/house/<str:house_id>', singles.house),
     path('portal/beds', tables.beds),
 
+    # House meetings
     path('portal/new_house_meeting', hm_forms.new_house_meeting),
     path('portal/edit_house_meeting/<int:hm_id>', hm_forms.edit_house_meeting),
     path('portal/house_meetings', tables.house_meetings),
@@ -92,10 +93,10 @@ urlpatterns = [
     path('portal/edit_maintenance_request/<int:mr_id>', hm_forms.edit_maintenance_request),
     path('portal/maintenance_requests', tables.maintenance_requests),
 
-    # # Meetings
-    # path('portal/new_meeting', o_views.new_meeting),
-    # path('portal/edit_meeting/<int:id>', o_views.edit_meeting),
-    # path('portal/meetings', tables.meetings),
+    # Manager meetings
+    path('portal/new_mngr_meeting', admin_forms.new_mngr_meeting),
+    path('portal/edit_mngr_meeting/<int:mm_id>', admin_forms.edit_mngr_meeting),
+    path('portal/mngr_meetings', tables.mngr_meetings),
 ]
 
 urlpatterns += [

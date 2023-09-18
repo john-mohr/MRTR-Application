@@ -1,14 +1,6 @@
 from django import forms
 from .models import *
 
-
-class ContactForm(forms.Form):
-    email = forms.EmailField()
-    first_name = forms.CharField(label='First Name', max_length=20)
-    last_name = forms.CharField(label='Last Name', max_length=20)
-    message = forms.CharField(widget=forms.Textarea, max_length=2000)
-
-
 class DateInput(forms.DateInput):
     input_type = 'date'
     allow_future = False
@@ -28,6 +20,19 @@ class BedField(forms.ModelChoiceField):
     def label_from_instance(self, bed):
         label = f"{bed.name}"
         return label
+
+
+# TODO use this for all form dates
+class CurrentDateField(forms.DateField):
+    def __init__(self):
+        super().__init__(widget=DateInput, initial=timezone.localdate())
+
+
+class ContactForm(forms.Form):
+    email = forms.EmailField()
+    first_name = forms.CharField(label='First Name', max_length=20)
+    last_name = forms.CharField(label='Last Name', max_length=20)
+    message = forms.CharField(widget=forms.Textarea, max_length=2000)
 
 
 class ResidentForm(forms.ModelForm):
@@ -407,16 +412,26 @@ class FulfillMaintReqForm(forms.Form):
     fulfillment_cost = forms.DecimalField(decimal_places=2, label='Amount spent')
 
 
-# class ManagerMeetingForm(forms.ModelForm):
-#     class Meta:
-#         model = Manager_meeting
-#         fields = ['title',
-#                   'date',
-#                   'minutes_discussed',
-#                   'location',
-#                   'attendee',
-#                   'issues',
-#                   ]
-#         widgets = {
-#             'date': DateInput(),
-#         }
+class ManagerMeetingForm(forms.ModelForm):
+    attendees = AbsenteeField(widget=forms.CheckboxSelectMultiple,
+                              queryset=Resident.objects.filter(
+                                  id__in=House.objects.all().values_list('manager', flat=True)),
+                              required=False)
+    ongoing_issues = forms.CharField(widget=forms.Textarea, label='List ongoing issues and expected completion dates')
+    new_issues = forms.CharField(widget=forms.Textarea, label='List new issues and expected completion dates')
+    date = CurrentDateField()
+
+    class Meta:
+        model = Manager_meeting
+        fields = ['date',
+                  'location',
+                  'attendees',
+                  'ongoing_issues',
+                  'new_issues',
+                  'minutes_discussed',
+                  ]
+
+    def clean_attendees(self):
+        attendees = self.cleaned_data['attendees']
+        return list(attendees.values_list('id', flat=True))
+

@@ -15,8 +15,7 @@ admin_sidebar = [
     ('/portal/current_shopping_trip', 'gear', 'Current Shopping Trip'),
     ('/portal/shopping_trips', 'gear', 'View Past Shopping Trip'),
     ('/portal/maintenance_requests', 'gear', 'View Maintenance Requests'),
-
-    # ('/portal/meetings', 'handshake', 'View Manager Meetings'),
+    ('/portal/mngr_meetings', 'handshake', 'View Manager Meetings'),
 ]
 
 hm_sidebar = [
@@ -27,8 +26,7 @@ hm_sidebar = [
     ('/portal/house_meetings', 'gear', 'View House Meetings'),
     ('/portal/supply_requests', 'gear', 'View Supply Requests'),
     ('/portal/maintenance_requests', 'gear', 'View Maintenance Requests'),
-
-    # ('/portal/house_manager//meetings', 'gear', 'View Manager Meetings'),
+    ('/portal/mngr_meetings', 'handshake', 'View Manager Meetings'),
 ]
 
 def user_is_hm(request):

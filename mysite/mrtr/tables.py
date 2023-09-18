@@ -36,6 +36,15 @@ class EditColumn(tables.Column):
         return 'Edit'
 
 
+# TODO make the other custom columns like this one
+class EditColumn2(tables.Column):
+    def render(self, value):
+        return 'Edit'
+
+    def __init__(self):
+        super().__init__(verbose_name='', linkify=True)
+
+
 class ManagerColumn(tables.Column):
     def render(self, value):
         if value is None:
@@ -216,7 +225,7 @@ class HouseMeetingTable(tables.Table):
 
 
 class SupplyRequestTable(tables.Table):
-    id = EditColumn(verbose_name='', linkify=True)
+    id = EditColumn2()
     house = tables.Column(linkify=True)
     manager = ManagerColumn(verbose_name='Submitter', linkify=lambda record: get_manager_url(record), empty_values=[])
     products = tables.Column(verbose_name='Products requested',
@@ -315,16 +324,25 @@ class RowTable(tables.Table):
         return value
 
 
-# class ManagerMeetingTable(tables.Table):
-#     title = tables.Column(linkify=True)
-#
-#     class Meta:
-#         model = Manager_meeting
-#         sequence = ('title',
-#                     'date',
-#                     'location',
-#                     'submission_date',
-#                     'last_update',
-#                     'attendee',
-#                     )
-#         exclude = ('issues', 'id')
+class ManagerMeetingTable(tables.Table):
+    id = EditColumn2()
+    submission_date = DateTimeColumn()
+    last_update = DateTimeColumn()
+
+    class Meta:
+        model = Manager_meeting
+        sequence = ('id',
+                    'date',
+                    'location',
+                    'attendees',
+                    'ongoing_issues',
+                    'new_issues',
+                    'minutes_discussed')
+
+    @staticmethod
+    def render_attendees(value):
+        attendees = Resident.objects.filter(id__in=list(eval(value)))
+        attendee_list = list(attendees.annotate(
+            full_name=Concat('first_name', Value(' '), 'last_name')
+        ).values_list('full_name', flat=True))
+        return ', '.join(attendee_list)
