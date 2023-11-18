@@ -1,3 +1,4 @@
+from .models import *
 from django_filters.widgets import SuffixedMultiWidget
 from django import forms
 from django.db.models import Q
@@ -12,8 +13,12 @@ class CustomWidget(SuffixedMultiWidget):
 
 class MasterFilter(filters.FilterSet):
     field_list = []
+    house_access = True
     search = filters.CharFilter(method='search_fields',
                                 label='Search')
+    house = filters.ModelChoiceFilter(method='house_filter',
+                                      label='Filter by house',
+                                      queryset=House.objects.all())
     date = filters.DateFromToRangeFilter(label='Filter by date',
                                          widget=CustomWidget(widgets=[
                                              forms.TextInput(attrs={'type': 'text',
@@ -32,6 +37,12 @@ class MasterFilter(filters.FilterSet):
     def search_fields(self, queryset, name, value):
         q = reduce(or_, [Q(**{f'{f}__icontains': value}) for f in self.field_list], Q())
         return queryset.filter(q)
+
+    def house_filter(self, queryset, name, value):
+        if self.house_access:
+            return queryset.filter(house=value)
+        else:
+            return queryset.filter(resident__bed__house=value)
 
     @staticmethod
     def res_status_filter(queryset, name, value):
@@ -56,9 +67,13 @@ class ResidentFilter(MasterFilter):
                                   empty_label='All',
                                   label='Filter by residency status')
 
+    def house_filter(self, queryset, name, value):
+        return queryset.filter(bed__house=value)
+
 
 class ResidentBalanceFilter(MasterFilter):
     search = None
+    house = None
     date = None
 
     balance = filters.RangeFilter(label='Filter by amount',
@@ -90,6 +105,7 @@ class TransactionFilter(MasterFilter):
         'method',
         'notes'
         ]
+    house_access = False
 
 
 class DrugTestFilter(MasterFilter):
@@ -102,6 +118,7 @@ class DrugTestFilter(MasterFilter):
         'substances',
         'notes'
     ]
+    house_access = False
 
 
 class CheckInFilter(MasterFilter):
@@ -113,6 +130,7 @@ class CheckInFilter(MasterFilter):
         'method',
         'notes'
     ]
+    house_access = False
 
 
 class SiteVisitFilter(MasterFilter):
@@ -157,6 +175,7 @@ class ShoppingTripFilter(MasterFilter):
         'amount',
         'notes',
     ]
+    house = None
 
 
 class HouseMeetingFilter(MasterFilter):
@@ -206,6 +225,7 @@ class HouseFilter(MasterFilter):
         'city',
         'state'
     ]
+    house = None
     date = None
 
 
@@ -233,3 +253,4 @@ class ManagerMeetingFilter(MasterFilter):
         'ongoing_issues',
         'new_issues'
     ]
+    house = None

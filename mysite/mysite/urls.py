@@ -30,6 +30,7 @@ urlpatterns = [
     path('sobriety-support', o_views.sobriety_support),
     path('contact', o_views.contact),
     path('payment-options', o_views.payment),
+    path('intake', o_views.intake),
     path('portal', o_views.portal),
 
     # Resident

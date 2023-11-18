@@ -24,7 +24,6 @@
                         </a>
                     </li>
                 {% endfor %}
-
 {#                <li>#}
 {#                    <a href="#">#}
 {#                        <i class="fa-solid fa-gear"></i>#}
@@ -32,25 +31,33 @@
 {#                    </a>#}
 {#                </li>#}
                 <li>
+                    <a href="/">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="form_name">Return to homepage</span>
+                    </a>
+                </li>
+                <li>
                     <a href="/accounts/logout">
                         <i class="fa-solid fa-right-from-bracket"></i>
                         <span class="form_name">Log out</span>
                     </a>
                 </li>
-
-
             </ul>
         </div>
         <!-- admin-section-->
         <section class="admin-section">
             <nav>
+                <style>
+                    .admin-section nav {
+                        position: static;
+                        width: 100%;
+                    }
+                </style>
                 <div class="sidebar-button">
                     <i class="fa-solid fa-bars sidebarButton"></i>
                     <span class="page-name">{{ page }}</span>
                 </div>
                 <div class="profile-details">
-
-
                     <style>
                         .dropbtn {
                           background-color: white;
@@ -80,6 +87,7 @@
                         .dropdown-content a {
                           color: black;
                           padding: 12px 16px;
+                          margin-right: 10px;
                           text-decoration: none;
                           display: block;
                         }

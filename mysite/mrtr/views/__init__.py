@@ -13,7 +13,7 @@ admin_sidebar = [
     ('/portal/house_meetings', 'gear', 'View House Meetings'),
     ('/portal/supply_requests', 'gear', 'View Supply Requests'),
     ('/portal/current_shopping_trip', 'gear', 'Current Shopping Trip'),
-    ('/portal/shopping_trips', 'gear', 'View Past Shopping Trip'),
+    ('/portal/shopping_trips', 'gear', 'View Past Shopping Trips'),
     ('/portal/maintenance_requests', 'gear', 'View Maintenance Requests'),
     ('/portal/mngr_meetings', 'handshake', 'View Manager Meetings'),
 ]

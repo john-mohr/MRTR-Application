@@ -110,3 +110,7 @@ def portal(request):
         RequestConfig(request, paginate=False).configure(res_balances)
 
         return render(request, 'admin/admin_portal.html', locals())
+
+
+def intake(request):
+    return render(request, 'mrtr/intake.html', locals())

@@ -426,10 +426,13 @@ class ManagerMeetingForm(forms.ModelForm):
         fields = ['date',
                   'location',
                   'attendees',
+                  'minutes_discussed',
                   'ongoing_issues',
                   'new_issues',
-                  'minutes_discussed',
                   ]
+        widgets = {
+            'minutes_discussed': forms.Select(choices=((0, 'No'), (1, 'Yes')))
+        }
 
     def clean_attendees(self):
         attendees = self.cleaned_data['attendees']

@@ -7,18 +7,21 @@ from django.db.models import Sum
 from django_tables2 import RequestConfig
 
 
-def table_view(request, page_link, page_name, table_filter, table, buttons=None):
+def get_mngr_house(request):
+    mngr = User.objects.get(pk=request.user.pk).assoc_resident
+    return House.objects.get(manager=mngr)
+
+
+def table_view(request, link, page, table_filter, table, buttons=None):
     fullname = username(request)
-    link = page_link
-    page = page_name
+    sidebar = admin_sidebar
+
     if user_is_hm(request):
         sidebar = hm_sidebar
         if 'manager' in table.columns:
             table.columns['manager'].link = None
-    else:
-        sidebar = admin_sidebar
-    table_filter = table_filter
-    table = table
+        table.exclude = table.exclude + ('id', 'house')
+
     RequestConfig(request, paginate=False).configure(table)
     if buttons is not None:
         add_buttons = True
@@ -32,7 +35,7 @@ def residents(request):
         balance=Sum('transaction__amount'))
 
     table_filter = ResidentFilter(request.GET, queryset=qs)
-    
+
     table = ResidentsTable(table_filter.qs, order_by='-admit_date', orderable=True, exclude='full_name')
     return table_view(request, 'residents', 'View All Residents', table_filter, table, buttons)
 
@@ -70,81 +73,65 @@ def beds(request):
 
 def dtests(request):
     buttons = [('Add New Drug Test', '/portal/new_dtest'), ]
+    table_filter = DrugTestFilter(request.GET, queryset=Drug_test.objects.all())
+
     if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = Drug_test.objects.filter(resident__bed__house=House.objects.get(manager=mngr))
-        hm_exc = ('id', )
-    else:
-        qs = Drug_test.objects.all()
-        hm_exc = ''
+        table_filter.queryset = Drug_test.objects.filter(resident__bed__house=get_mngr_house(request))
+        del table_filter.filters['house']
 
-    table_filter = DrugTestFilter(request.GET, queryset=qs)
-
-    table = DrugTestTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    table = DrugTestTable(table_filter.qs, order_by='-date', orderable=True)
     return table_view(request, 'dtests', 'View All Drug Tests', table_filter, table, buttons)
 
 
 def check_ins(request):
     buttons = [('Add New Check In', '/portal/new_check_in'), ]
+    table_filter = CheckInFilter(request.GET, queryset=Check_in.objects.all())
+
     if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = Check_in.objects.filter(resident__bed__house=House.objects.get(manager=mngr))
-        hm_exc = ('id', )
-    else:
-        qs = Check_in.objects.all()
-        hm_exc = ''
+        table_filter.queryset = Check_in.objects.filter(resident__bed__house=get_mngr_house(request))
+        del table_filter.filters['house']
 
-    table_filter = CheckInFilter(request.GET, queryset=qs)
-
-    table = CheckInTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    table = CheckInTable(table_filter.qs, order_by='-date', orderable=True)
     return table_view(request, 'check_ins', 'View All Check Ins', table_filter, table, buttons)
 
 
 def site_visits(request):
     buttons = [('Add New Site Visit', '/portal/new_site_visit'), ]
+    table_filter = SiteVisitFilter(request.GET, queryset=Site_visit.objects.all())
+
     if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = Site_visit.objects.filter(house=House.objects.get(manager=mngr))
-        hm_exc = ('id', 'house')
-    else:
-        qs = Site_visit.objects.all()
-        hm_exc = ''
+        table_filter.queryset = Site_visit.objects.filter(house=get_mngr_house(request))
+        del table_filter.filters['house']
 
-    table_filter = SiteVisitFilter(request.GET, queryset=qs)
-
-    table = SiteVisitTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    table = SiteVisitTable(table_filter.qs, order_by='-date', orderable=True)
     return table_view(request, 'site_visits', 'View All Site Visits', table_filter, table, buttons)
 
 
 def house_meetings(request):
     buttons = [('Add New House Meeting', '/portal/new_house_meeting'), ]
+    table_filter = HouseMeetingFilter(request.GET, queryset=House_meeting.objects.all())
+
     if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = House_meeting.objects.filter(house=House.objects.get(manager=mngr))
-        hm_exc = ('id', 'house')
-    else:
-        qs = House_meeting.objects.all()
-        hm_exc = ''
+        table_filter.queryset = House_meeting.objects.filter(house=get_mngr_house(request))
+        del table_filter.filters['house']
 
-    table_filter = HouseMeetingFilter(request.GET, queryset=qs)
-
-    table = HouseMeetingTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    table = HouseMeetingTable(table_filter.qs, order_by='-date', orderable=True)
     return table_view(request, 'house_meetings', 'View All House Meetings', table_filter, table, buttons)
 
 
 def supply_requests(request):
     buttons = [('Add New Supply Request', '/portal/new_supply_request'), ]
+    table_filter = SupplyRequestFilter(request.GET, queryset=Supply_request.objects.all())
+
     if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = Supply_request.objects.filter(house=House.objects.get(manager=mngr))
-        hm_exc = ('id', 'house', 'trip')
-    else:
-        qs = Supply_request.objects.all()
-        hm_exc = ''
+        table_filter.queryset = Supply_request.objects.filter(house=get_mngr_house(request))
+        del table_filter.filters['house']
 
-    table_filter = SupplyRequestFilter(request.GET, queryset=qs)
+    table = SupplyRequestTable(table_filter.qs, order_by='-submission_date', orderable=True)
 
-    table = SupplyRequestTable(table_filter.qs, order_by='-submission_date', orderable=True, exclude=hm_exc)
+    if user_is_hm(request):
+        table.columns['trip'].link = None
+
     return table_view(request, 'supply_requests', 'View All Supply Requests', table_filter, table, buttons)
 
 
@@ -159,33 +146,25 @@ def shopping_trips(request):
 
 
 def maintenance_requests(request):
-    buttons = [('Add New Maintenance Request', '/portal/new_maintenance_request'), ]
+    buttons = [('Add New Maintenance Request', '/portal/new_maintenance_request'),
+               ('Fulfill Maintenance Request', '/portal/fulfill_maintenance_request')]
+    table_filter = MaintenanceRequestFilter(request.GET, queryset=Maintenance_request.objects.all())
+
     if user_is_hm(request):
-        mngr = User.objects.get(pk=request.user.pk).assoc_resident
-        qs = Maintenance_request.objects.filter(house=House.objects.get(manager=mngr))
-        hm_exc = ('id', 'house')
-    else:
-        qs = Maintenance_request.objects.all()
-        hm_exc = ''
-        buttons.append(('Fulfill Maintenance Request', '/portal/fulfill_maintenance_request'))
+        table_filter.queryset = Maintenance_request.objects.filter(house=get_mngr_house(request))
+        del table_filter.filters['house']
+        del buttons[1]
 
-    table_filter = MaintenanceRequestFilter(request.GET, queryset=qs)
-
-    table = MaintenanceRequestTable(table_filter.qs, order_by=('fulfilled', '-fulfillment_date'), orderable=True, exclude=hm_exc)
+    table = MaintenanceRequestTable(table_filter.qs, order_by=('fulfilled', '-fulfillment_date'), orderable=True)
     return table_view(request, 'maintenance_requests', 'View All Maintenance Requests', table_filter, table, buttons)
 
 
 def mngr_meetings(request):
-    qs = Manager_meeting.objects.all()
+    buttons = [('Add New Meeting', '/portal/new_mngr_meeting'), ]
+    table_filter = ManagerMeetingFilter(request.GET, queryset=Manager_meeting.objects.all())
 
     if user_is_hm(request):
-        hm_exc = ('id', )
         buttons = None
-    else:
-        hm_exc = ''
-        buttons = [('Add New Meeting', '/portal/new_mngr_meeting'), ]
 
-    table_filter = ManagerMeetingFilter(request.GET, queryset=qs)
-
-    table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True, exclude=hm_exc)
+    table = ManagerMeetingTable(table_filter.qs, order_by='-date', orderable=True)
     return table_view(request, 'mngr_meetings', 'View All Manager Meetings', table_filter, table, buttons)
