@@ -1,0 +1,137 @@
+|First Name|Last Name|Phone Number|Email|Admission Date|Monthly Rent|Referral Info|Notes|Door Code|Discharge Date|bed_id|submission_date
+1|Benjamin|Begaye|4244279165|benjaminsmob@gmail.com|2023-11-04|700.0||Last bed: 620-U2|0526|2023-11-04 00:00:00|\N|2023-08-13 12:00:00
+2|Chris|Calton|3855203739|ccalton101@gmail.com|2023-10-14|800.0||11/1/23 rent $700 > $800|1021|\N|18.0|2023-08-13 12:00:00
+3|Francis|Thompson|3852225972|Francisooli13@gmail.com|2023-10-23|700.0|Clay|Last bed: 277-D2|0913|2023-11-18 00:00:00|\N|2023-08-13 12:00:00
+4|Ryan|Pearson|5096019256|ryan_f.pearson92@icloud.com|2023-10-13|700.0|Turning Point|Last bed: 620-U1|1289|2023-10-19 00:00:00|\N|2023-08-13 12:00:00
+5|Andrew|Shutt|3852389046|Ashutt386@gmail.com|2023-09-20|700.0|||3211|\N|4.0|2023-08-13 12:00:00
+6|Erick|Coffey|3086602015|erick.j.coffey1974@outlook.com|2023-10-03|700.0||Last bed: 620-U2|5219|2023-11-08 00:00:00|\N|2023-08-13 12:00:00
+7|Zach|Wood||katalyst820@gmail.com|2023-10-03|900.0|||9421|\N|1.0|2023-08-13 12:00:00
+8|Ruth|Haskay|8015772752|annettehaskay@gmail.com|2023-09-22|700.0|||0128|\N|14.0|2023-08-13 12:00:00
+9|Chris|Ostrom|7138707251|chris.ostrom.it@gmail.com|2023-09-21|700.0|||1915|\N|40.0|2023-08-13 12:00:00
+10|Brad|Smith|3855440024|smith86brad@gmail.com|2023-09-21|450.0||"11/1/23 rent $900 > $450
+"|0908|\N|30.0|2023-08-13 12:00:00
+11|Sonny|Gines||sonnygines5@gmail.com|2023-10-24|700.0||Arrives 10/24; held room since 9/16|6458|\N|33.0|2023-08-13 12:00:00
+12|Jessee|Christen|8017871324|Jessee201623@gmail.com|2023-09-01|700.0|Tracy|Last bed: RED-D2|2828|2023-09-08 00:00:00|\N|2023-08-13 12:00:00
+13|Devin|Lee|8014047810|dlee8018880@gmail.com|2023-08-28|900.0|||0989|\N|38.0|2023-08-13 12:00:00
+14|Scott|James||Swjam61@gmail.com|2023-08-24|700.0|Dicklemore |"credit of 600 from Ron Noel
+Last bed: 514-DE2"|5424|2023-11-20 00:00:00|\N|2023-08-13 12:00:00
+15|Sean|Handley|8015774053|Rseanhandley@comcast.net|2023-08-14|700.0|||1776|\N|20.0|2023-08-13 12:00:00
+16|Nate|Palmer|7753887730|Natepalmer33@gmail.com|2023-08-09|700.0|Dustin||0910|\N|\N|2023-08-13 12:00:00
+17|Tyler|Chaviz|3852522356|Tylerchavis1986@gmail.com|2023-08-07|700.0||Last bed: RED-D2|1999|2023-10-04 00:00:00|\N|2023-08-13 12:00:00
+18|Lester|Shinault|3854707202|Mrlesterrubinshinaultjr@gmail.com|2023-07-23|700.0||Last bed: 514-DW2|0087|2023-09-07 00:00:00|\N|2023-08-13 12:00:00
+19|Matt|Romer|8014030331|mathewromer27@gmail.com|2023-07-12|700.0||Last bed: 620-U2|0927|2023-10-04 00:00:00|\N|2023-08-13 12:00:00
+20|Patrick|Lieberman|3854051859|plieberman@odysseyhouse.org|2023-07-01|800.0|Odyssey ||8080|\N|42.0|2023-08-13 12:00:00
+21|Zachary|Davis||daviszachary37@gmail.com|2023-06-04|700.0||"Sync Error
+Last bed: 620-UE"||2023-07-07 00:00:00|\N|2023-08-13 12:00:00
+22|JJ|Woods|8058661449|jonathan.woods1212@gmail.com|2023-06-26|900.0|Odyssey |"will be moving to Red by july 11 
+Last bed: RED-DW
+"|8931|2023-08-26 00:00:00|\N|2023-08-13 12:00:00
+23|Jeremy|Petersen|8019289264|jeremy.peterson77135@gmail.com|2023-06-23|700.0||Last bed: RED-D2|5208|2023-07-28 00:00:00|\N|2023-08-13 12:00:00
+24|Greg|Blayden|8012090138|Gregoryblayden@gmail.com|2023-06-12|900.0|Ike|Last bed: RED-DW|3793|2023-07-06 00:00:00|\N|2023-08-13 12:00:00
+25|Steve|Eirikis||seirikis@gmail.com|2023-06-08|700.0||Last bed: 620-D1|9584|2023-06-11 00:00:00|\N|2023-08-13 12:00:00
+26|Eric|Garcia|5054159291|Erikdg67@gmail.com|2023-06-08|900.0||Last bed: 620-UW|6782|2023-09-01 00:00:00|\N|2023-08-13 12:00:00
+27|Rick|Davalos|3855630636|rickdavalos06@gmail.com|2023-06-08|700.0|||2398|2023-07-08 00:00:00|\N|2023-08-13 12:00:00
+28|Collin|McCormick|8013307856|Collinadammccormick801@gmail.com|2023-05-28|700.0|Courtney |Last bed: 514-DE1|3111|2023-08-07 00:00:00|\N|2023-08-13 12:00:00
+29|Sean|Crawley|8144756636|Sean18Crawley@gmail.com|2023-05-23|700.0||Last bed: 512-DE1|4774|2023-08-04 00:00:00|\N|2023-08-13 12:00:00
+30|Ebony|Begelton|7134382137|msebonylbegelton@gmail.com|2023-05-17|700.0|Journey |Last bed: 278-D2|4554|2023-07-15 00:00:00|\N|2023-08-13 12:00:00
+31|Jesse|Willow|3854417838|jessewillow23@outlook.com|2023-04-07|700.0||Last bed: 512-DW2|8231|2023-08-15 00:00:00|\N|2023-08-13 12:00:00
+32|Brandon|Malmgren|3852282648|b4200927m@gmail.com|2023-05-03|450.0|Moroni|9/23/23: Rent $700 > $450 (HM discount)|7780|\N|7.0|2023-08-13 12:00:00
+33|Dave|Geher|8018793500|Dwgeher@gmail.com|2023-05-03|900.0||Last bed: 277-U2|4141|2023-06-22 00:00:00|\N|2023-08-13 12:00:00
+34|Nicholas|Pierson||Nicholaspierson741@gmail.com|2023-04-25|700.0|Journey|"Old bed: 620-UE
+6/7/23 rent $900 > $700
+Last bed: 620-D1"|1515|2023-08-01 00:00:00|\N|2023-08-13 12:00:00
+35|Jared|Marsh|3854277095|Jaredmarsh8@gmail.com|2023-04-25|900.0|Journey|Last bed: 620-UE|0210|2023-09-29 00:00:00|\N|2023-08-13 12:00:00
+36|Darrin|Rasmussen|3857759863|darinrsmssn5@gmail.com|2023-04-21|700.0||Last bed: 512-DE2|1080|2023-05-26 00:00:00|\N|2023-08-13 12:00:00
+37|Brandon|Gibbons||bgibbons623@gmail.com|2023-04-20|800.0||"Old bed: 620-U2
+Rent $700 > $800 as of 8/1/23
+Last bed: 512-DE2"|8899|2023-11-01 00:00:00|\N|2023-08-13 12:00:00
+38|Jeff|Johnson|3857720933|jtjohnson1385@gmail.com|2023-04-16|700.0||Last bed: 277-U2|1313|2023-05-03 00:00:00|\N|2023-08-13 12:00:00
+39|Blake|Gee|3853017288|blakeis5150@gmail.com|2023-03-30|900.0|||5150|\N|5.0|2023-08-13 12:00:00
+40|James|McLaughlin|7135622199|James92wolf@yahoo.com|2023-03-29|700.0|DBH - Meia|Last bed: 620-D3|7750|2023-09-29 00:00:00|\N|2023-08-13 12:00:00
+41|Dan|Wooden|3857270457|danwooden574@gmail.com|2023-02-22|700.0|Dicklemore|"Last bed: 514-DW1
+"|0954|2023-05-12 00:00:00|\N|2023-08-13 12:00:00
+42|Georgia|Gregerson||U0392839@umail.utah.edu|2023-03-02|700.0|Journey |"SF 800
+S2H 120 
+Last bed: 278-D2"|8490|2023-05-12 00:00:00|\N|2023-08-13 12:00:00
+43|Kenneth|Russell|4352245424|kcrtlc381@gmail.com|2023-02-19|450.0||"Old bed: 620-U1
+Became HM for 514 on 9/6/23 (Rent $700 > $450)"|9092|\N|21.0|2023-08-13 12:00:00
+44|Ike|Blackmon|3854906097|Ikeblackmon1234@gmail.com|2023-02-16|900.0||Last bed: RED-DW|5565|2023-07-07 00:00:00|\N|2023-08-13 12:00:00
+45|Janet|Cecil|8018033929|janet_cecil@hotmail.com|2023-02-14|700.0|Cirque|Last bed: 278-D1||2023-06-10 00:00:00|\N|2023-08-13 12:00:00
+46|Clay|Call|8015738875|Toothsntoothbrushs@gmail.com|2023-02-10|700.0|Phoenix Rising - Ryan |"Last bed: 514-DW2
+Discharged 2/27/23
+Readmitted 3/1/23
+Discharged 3/17/23
+Readmitted 3/25/23
+Discharged 6/22/23
+Readmitted 8/22/23"|8949|\N|3.0|2023-08-13 12:00:00
+47|Randy|Dean|8016511453|dean1011972@gmail.com|2023-01-23|700.0||"Bishop McDougal
+Last bed: 620-D1"|0453|2023-05-12 00:00:00|\N|2023-08-13 12:00:00
+48|Zach|Moore||Zacharytmoore8875@gmail.com|2023-01-29|700.0||Last bed: 620-D2|8605|2023-07-07 00:00:00|\N|2023-08-13 12:00:00
+49|John|Brady|3854053641|bradyvalues@gmail.com|2023-01-24|700.0|Journey |Last bed: 514-DE2|2112|2023-08-03 00:00:00|\N|2023-08-13 12:00:00
+50|James|Nelson|8017837125|jamesnelson206@gmail.com|2023-01-20|800.0|Odyssey |"2/1/23 rent $700 > $800
+Old bed: 512-DW2"|9809|\N|16.0|2023-08-13 12:00:00
+51|Jerome|Brooks||jerome.brooks1213@gmail.com|2022-11-25|700.0||Old bed: 277-U2|1213|2023-05-06 00:00:00|\N|2023-08-13 12:00:00
+52|Ashley|Coy|8014148816|ashley.coy121@gmail.com|2022-12-06|800.0|Journey|Old bed: 278-D2|6215|\N|9.0|2023-08-13 12:00:00
+53|Aaron|Hughes|3854130047|hughes981@yahoo.com|2022-12-06|800.0||"Old bed: 514-W
+Discharged 8/15/23, readmitted 9/5/23
+"|1628|\N|27.0|2023-08-13 12:00:00
+54|Brian|Corollo|3854430828|sixoclockspider@gmail.com|2022-11-22|700.0||Last bed: 512-DW1|0828|2023-05-28 00:00:00|\N|2023-08-13 12:00:00
+55|Andrew|Bieneman|9168682865|acbieneman@gmail.com|2022-11-17|700.0||Last bed: 512-DE1|7395|2023-06-29 00:00:00|\N|2023-08-13 12:00:00
+56|Cisco|Noriega|3854231626|fcisco.noriega@gmail.com|2022-11-15|450.0|Kegan|"Rent $900 > $650 not sure when
+Rent $650 > $900 on 3/1/23
+Rent $900 > $450 on 3/31/23
+Last bed: 512-U"|0808|2023-09-23 00:00:00|\N|2023-08-13 12:00:00
+57|Gordon|Smith|3854345755|ritchiegordon011@gmail.com|2022-10-06|900.0||129||\N|41.0|2023-08-13 12:00:00
+58|Eric|Mellender||ericmellender@gmail.com|2022-10-14|700.0|SLBH|Old bed: 277-U1|0720|2023-09-28 00:00:00|\N|2023-08-13 12:00:00
+59|Erin|Sanchez||erinsanchez331@gmail.com|2022-09-17|900.0|Tina|Old bed: 278-US|1288|\N|8.0|2023-08-13 12:00:00
+60|Erik|Gray|8014149911|egray4x4@gmail.com|2022-08-07|450.0||"Old bed: 512-U
+Rent $700 > $450 not sure when
+Old door code(?): 5432"|3475|\N|2.0|2023-08-13 12:00:00
+61|Kalee|Kennedy|3854331649|soberangel333@gmail.com|2022-08-25|700.0|Courtney|Old phone number: (385) 454-0267|0267|\N|11.0|2023-08-13 12:00:00
+62|Mateo|Garza|8015849818|mateogarza1977@gmail.com|2022-08-01|800.0||"129
+Last bed: DST-SM"|8080|2023-06-30 00:00:00|\N|2023-08-13 12:00:00
+63|Brian|Chesley|3852107805|avatar4.bc@gmail.com|2022-06-13|450.0|Dustin W|"Last bed: 514-DW2
+Discharged 8/6/22, readmitted 11/23/22
+Rent $700 > $450 not sure when
+Last bed: 620-D"|2264|2023-09-01 00:00:00|\N|2023-08-13 12:00:00
+64|Ricky|Steed|8015749129|Steedrj7@gmail.com|2022-05-25|700.0||"Old bed: RED-D2
+"|3400|\N|23.0|2023-08-13 12:00:00
+65|Markus|Ellis|3852895900|markusellis32@gmail.com|2022-05-03|700.0|Scotty|"Discharged 5/3/22
+Readmitted 1/23/23
+Last bed: 514-DE1"|3549|2023-08-01 00:00:00|\N|2023-08-13 12:00:00
+66|Jordan|Pahl|3852469630|jordanpahl4@gmail.com|2022-04-24|700.0|FSH|Discharged 6/8/22, readmitted 5/3/23|2432|\N|6.0|2023-08-13 12:00:00
+67|Jory|Ellington|3852661320|joryellington69@gmail.com|2022-03-26|900.0|Kegan|"9/1/22 rent $700 -> $800
+Old bed: 512-W
+December (?) rent $800 > $900
+Old bed: 512-W"|9575|\N|44.0|2023-08-13 12:00:00
+68|Timothy|Dorrell|3853548163|dorrelltim352@gmail.com|2022-02-25|700.0||"Discharged 8/1/22
+Readmitted 11/8/23"|1723|\N|32.0|2023-08-13 12:00:00
+69|Jeanette|Learned|8016782334|jenna.learned@gmail.com|2022-01-01|900.0|Turning Point|"12/13/22:
+New bed 278-D2 > 278-D
+New rent $700 > $900"|2334|\N|12.0|2023-08-13 12:00:00
+70|Chris|Brennan|8016376614|Brennan84105@gmail.com|2021-10-27|700.0|Courtney|"8/3/22 - rent $650 -> $450
+9/2/23 - rent $450 -> $700
+Last bed: 512-DE1"||2023-09-29 00:00:00|\N|2023-08-13 12:00:00
+71|Ronald|Yeager|3855226321|Ronaldleeyeager@gmail.com|2021-10-27|800.0||Last bed: DST-NM||2023-08-01 00:00:00|\N|2023-08-13 12:00:00
+72|Tracy|DeHaas|3858677374|tracydeedehaas@gmail.com|2021-09-19|350.0||rent $650 > $350 not sure when|7374|\N|10.0|2023-08-13 12:00:00
+73|Jose|Bernal|3853436524|jlouisbernal21@gmail.com|2021-02-20|600.0||||\N|39.0|2023-08-13 12:00:00
+74|Dana|Hare|4352878615|dana.e.hare1981@gmail.com|2021-01-26|900.0||"Discharged 7/5/22, readmitted 1/13/23; rent $600 > $700
+New admit balance: $1,120
+
+2/23/23 rent $700 > $900"|1981|\N|37.0|2023-08-13 12:00:00
+75|Kurt|Smith|3855203694|forgedbyyears4506@icloud.com|2021-08-17|850.0||"Discharge date unknown (used 8/31/22); balance $900
+Readmitted 10/3/23
+Rent $850 > $450 (HM discount)
+Readmission balance: $1,335
+Last bed: 620-D"|1915|2023-10-30 00:00:00|\N|2023-08-13 12:00:00
+76|Steve|Trells|3854649934|Stevent.mmr@gmail.com|2021-08-20|900.0||"Discharged 12-31-21 w/ rent = $750
+Readmitted 1-17-23 w/ rent = $900
+Never showed
+Readmitted 6-22-23 w/ rent = $900
+Last bed: 277-U2"|0784|2023-10-20 00:00:00|\N|2023-08-13 12:00:00
+77|David|McCalmon|3852187415|mcdavid2655@gmail.com|2018-11-23|450.0||||\N|35.0|2023-08-13 12:00:00
+78|Jeff|Kightley|8015565264|jeffery.kightlinger@yahoo.com|2020-08-01|600.0||1/1/23: rent $425 > $600||\N|36.0|2023-08-13 12:00:00
+79|Bryan|Christensen|3852224255|unknown@gmail.com|2021-02-28|662.0||"Rent: $850 > $672 not sure when it changed
+9/3/23 rent $672 -> $662"||\N|43.0|2023-08-13 12:00:00
+80|Tyler|Johnson|8016377343|tylerbjohnson84@hotmail.com|2021-09-03|850.0||"Feb 2023 rent $450 > $850
+Old bed: 512-U"||\N|46.0|2023-08-13 12:00:00
