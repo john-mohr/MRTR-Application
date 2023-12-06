@@ -1,5 +1,5 @@
 1: Run makemigrations and migrate
-2: Put the initial_data files somewhere SQL can access them 
+2: Put the demo_data files somewhere SQL can access them 
 3: Update the filepaths in the 'Load Data' SQL file and run
 4: Run createsuperuser and create an admin user
 5: Go into the Django admin page and create three users with the following emails:
