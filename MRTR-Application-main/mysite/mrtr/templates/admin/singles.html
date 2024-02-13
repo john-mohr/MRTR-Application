@@ -1,0 +1,90 @@
+{% extends "admin/administrative.html" %}
+{% load render_table from django_tables2 %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+    <div style="overflow-x:auto;" >
+    <style>
+        table, th, td {
+            text-align: left;
+            border:1px solid black;
+            border-collapse: collapse;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 42px;
+            margin-bottom: 5px;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        .edit-box{
+            padding: 16px 16px 16px 16px;
+            border-style: solid;
+            border-radius: 5px;
+            background-color: white;
+            border-color: white;
+            text-align: left;
+            justify-content: left;
+            overflow-y: auto;
+        }
+        .container{
+            padding: 16px 16px 16px 16px;
+            width: 100%;
+            border-style: solid;
+            background-color: white;
+            border-color: white;
+            border-radius: 5px;
+            overflow-y: auto;
+        }
+        .container h1{
+            padding: 16px 16px 16px 16px;
+            border-bottom: 5px solid black;
+
+        }
+        .container h3{
+            padding: 16px 16px 16px 16px;
+
+        }
+        @media screen and (max-width: 1500px) {
+            .edit-box{
+            margin-top: 50px;
+            }
+        }
+    </style>
+   
+    <body>
+        <section class="edit-box">
+            <form>
+                {% for x in buttons %}
+                    <button type="submit" formaction="{{ x.1 }}">{{ x.0 }}</button>
+                {% endfor %}
+            </form>
+        </section>
+        <section class="container">
+            <h1>{{ name }}</h1>
+            {% for x in headers %}
+                <h3>{{ x }}</h3>
+            {% endfor %}
+        </section>
+       
+        {% for x in sections %}
+            <h2 class="container" style="border-bottom: 5px solid black;">{{ x.0 }}</h2>
+            <section class="container" >
+                
+                <div>
+                    {% render_table x.1 %}
+                </div>
+            </section>
+        {% endfor %}
+    </body>
+</div>
+</html>
+{% endblock content %}
